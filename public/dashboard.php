@@ -1,5 +1,5 @@
 <?php
-require_once "config.php";
+require_once "../config/db.php";
 session_start();
 
 if(!isset($_SESSION["user_id"])){
@@ -23,7 +23,7 @@ $_SESSION['login_time'] = time();
 <head>
     <meta charset="UTF-8">
     <title>Dashboard - clickNeat</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
     <div class="container">

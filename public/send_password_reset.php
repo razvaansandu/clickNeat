@@ -1,5 +1,5 @@
 <?php
-require_once "config.php";
+require_once "../config/db.php";
 
 $email = $_POST["email"];
 
@@ -24,7 +24,7 @@ if($stmt = mysqli_prepare($link, $sql)){
     
     if(mysqli_stmt_affected_rows($stmt) > 0){
         // Email trovata, invia email
-        $mail = require __DIR__ . "/mailer.php";
+        $mail = require __DIR__ . "/../src/mailer.php";
         
         try {
             $mail->setFrom("noreply@clickneat.com", "ClickNeat");
@@ -63,7 +63,7 @@ mysqli_close($link);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Email Inviata - ClickNeat</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
     <div class="container">

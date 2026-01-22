@@ -1,5 +1,5 @@
 <?php
-require_once "config.php";
+require_once "../config/db.php";
 
 $token = $_GET["token"] ?? null;
 
@@ -91,7 +91,7 @@ mysqli_close($link);
 <head>
     <meta charset="UTF-8">
     <title>Reset Password</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
     <div class="wrapper">

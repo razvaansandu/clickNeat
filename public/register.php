@@ -1,5 +1,5 @@
 <?php
-require_once "config.php";
+require_once "../config/db.php";
 
  
 function generate_csrf_token() {
@@ -135,7 +135,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                 }
                 
                 
-                $mail = require __DIR__ . "/mailer.php";
+                $mail = require __DIR__ . "/../src/mailer.php";
                 
                 try {
                     $mail->setFrom("clickneat2026@gmail.com", "ClickNeat");
@@ -180,7 +180,7 @@ $csrf_token = generate_csrf_token();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registrazione - ClickNeat</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
     <div class="container">

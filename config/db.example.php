@@ -1,4 +1,8 @@
 <?php
+// config/db.example.php
+// QUESTO È UN FILE DI ESEMPIO.
+// Istruzioni: Rinomina questo file in "db.php" e inserisci le tue credenziali reali.
+
 // Configurazione sessione sicura (DEVE essere PRIMA di session_start!)
 ini_set('session.cookie_httponly', 1);
 ini_set('session.use_only_cookies', 1);
@@ -8,11 +12,11 @@ ini_set('session.cookie_samesite', 'Strict');
 // ADESSO avvia la sessione
 session_start();
 
-// Configurazione database
-define('DB_SERVER', '192.168.5.132');
-define('DB_USERNAME', 'razvan_root');
-define('DB_PASSWORD', 'razvan123');
-define('DB_NAME', 'clickneat');
+// Configurazione database (Default per Docker)
+define('DB_SERVER', 'db');           // Usa 'db' per Docker, 'localhost' per XAMPP
+define('DB_USERNAME', 'root');       // Inserisci qui il tuo utente DB
+define('DB_PASSWORD', 'password');   // Inserisci qui la tua password DB
+define('DB_NAME', 'clickneat');      // Nome del database
 
 // Password requirements
 define('PASSWORD_MIN_LENGTH', 8);
@@ -39,7 +43,9 @@ if (isset($_SESSION['LAST_ACTIVITY']) && (time() - $_SESSION['LAST_ACTIVITY'] > 
         $redirect = 'login_ristoratore.php';
     }
     
-    header("Location: $redirect?timeout=1");
+    // Risaliamo di un livello perché config è in una sottocartella, ma i login sono in public
+    // Nota: A seconda di come includi questo file, potresti dover aggiustare il path
+    header("Location: ../public/$redirect?timeout=1");
     exit();
 }
 $_SESSION['LAST_ACTIVITY'] = time();
@@ -64,7 +70,7 @@ if(isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true){
             session_destroy();
             
             $redirect = 'login_consumatore.php';
-            header("Location: $redirect?security=1");
+            header("Location: ../public/$redirect?security=1");
             exit();
         }
     }

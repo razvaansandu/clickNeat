@@ -1,5 +1,5 @@
 <?php
-require_once "config.php";
+require_once "../config/db.php";
 
 if($link){
     echo "Connessione al database riuscita!";

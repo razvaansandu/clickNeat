@@ -1,6 +1,6 @@
 <?php
-require_once "config.php";
-require_once "rate_limiter.php";
+require_once "../config/db.php";
+require_once "../src/rate_limiter.php";
 
 $login_err = "";
 $username = "";
@@ -112,7 +112,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login Consumatore - ClickNeat</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
     <div class="container">

@@ -1,5 +1,5 @@
 <?php
-require_once "config.php";
+require_once "../config/db.php";
 session_start();
 
 // Solo consumatori possono vedere la lista
@@ -23,7 +23,7 @@ mysqli_close($link);
 <head>
     <meta charset="UTF-8">
     <title>Ristoranti disponibili</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
     <div class="container">
