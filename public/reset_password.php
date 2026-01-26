@@ -7,10 +7,8 @@ if(!$token){
     die("Token non fornito");
 }
 
-// Calcola hash del token
 $token_hash = hash("sha256", $token);
 
-// Cerca il token nel database
 $sql = "SELECT * FROM users WHERE reset_token_hash = ?";
 
 if($stmt = mysqli_prepare($link, $sql)){
@@ -24,19 +22,16 @@ if($stmt = mysqli_prepare($link, $sql)){
         die("Token non trovato");
     }
     
-    // Verifica scadenza
     if(strtotime($user["reset_token_expires_at"]) <= time()){
         die("Token scaduto");
     }
 }
 
-// Gestione form
 $password_err = $confirm_password_err = "";
 $password = $confirm_password = "";
 
 if($_SERVER["REQUEST_METHOD"] == "POST"){
     
-    // Valida password
     if(empty(trim($_POST["password"]))){
         $password_err = "Inserisci una password.";
     } elseif(strlen(trim($_POST["password"])) < PASSWORD_MIN_LENGTH){
@@ -53,7 +48,6 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
         $password = trim($_POST["password"]);
     }
     
-    // Conferma password
     if(empty(trim($_POST["confirm_password"]))){
         $confirm_password_err = "Conferma la password.";
     } else {
@@ -63,7 +57,6 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
         }
     }
     
-    // Aggiorna password
     if(empty($password_err) && empty($confirm_password_err)){
         $sql = "UPDATE users 
                 SET password = ?, 
@@ -91,7 +84,7 @@ mysqli_close($link);
 <head>
     <meta charset="UTF-8">
     <title>Reset Password</title>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css?v=1.0">
 </head>
 <body>
     <div class="wrapper">

@@ -145,7 +145,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
                         <h2 style="color: #1e3c72;">Benvenuto su ClickNeat, $username!</h2>
                         <p>Grazie per esserti registrato. Per completare la registrazione, verifica la tua email cliccando sul pulsante qui sotto:</p>
-                        <a href="http://localhost/tuoprogetto/verify_email.php?token=$verify_token" 
+                        <a href="http://localhost/verify_email.php?token=$verify_token" 
                            style="display: inline-block; padding: 15px 30px; background: linear-gradient(135deg, #1e3c72, #7e22ce); 
                            color: white; text-decoration: none; border-radius: 10px; font-weight: bold; margin: 20px 0;">
                            Verifica Email
@@ -180,12 +180,14 @@ $csrf_token = generate_csrf_token();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registrazione - ClickNeat</title>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css?v=1.0">
 </head>
 <body>
     <div class="container">
+
         <h2>Registrazione</h2>
         <p style="text-align: center; margin-bottom: 30px;">Crea il tuo account ClickNeat</p>
+        
         <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
             <input type="hidden" name="csrf_token" value="<?php echo $csrf_token; ?>">
             
@@ -289,7 +291,7 @@ $csrf_token = generate_csrf_token();
                     text = 'Media';
                     width = '66%';
                 } else {
-                    color = '#48bb78';
+                    color = '#1A4D4E'; 
                     text = 'Forte';
                     width = '100%';
                 }

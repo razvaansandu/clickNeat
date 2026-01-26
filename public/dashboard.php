@@ -7,14 +7,12 @@ if(!isset($_SESSION["user_id"])){
     exit;
 }
 
-// Controlla timeout sessione (30 minuti di inattività)
 if(isset($_SESSION['login_time']) && (time() - $_SESSION['login_time']) > 1800){
     session_destroy();
     header("location: login.php?timeout=1");
     exit;
 }
 
-// Aggiorna timestamp di attività
 $_SESSION['login_time'] = time();
 ?>
 
@@ -23,7 +21,7 @@ $_SESSION['login_time'] = time();
 <head>
     <meta charset="UTF-8">
     <title>Dashboard - clickNeat</title>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css?v=1.0">
 </head>
 <body>
     <div class="container">
