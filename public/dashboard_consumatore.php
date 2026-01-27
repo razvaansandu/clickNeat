@@ -97,7 +97,7 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true || !isset($_S
                 $result = mysqli_query($link, $sql);
                 
                 if($result && mysqli_num_rows($result) > 0):
-                ?>
+                ?> 
                 <div class="ristoranti-grid" id="ristorantiGrid">
                     <?php while($row = mysqli_fetch_assoc($result)): ?>
                     <div class="cardRistorante" data-name="<?php echo strtolower(htmlspecialchars($row['nome'])); ?>" 

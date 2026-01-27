@@ -24,8 +24,7 @@ if ($stmt = mysqli_prepare($link, $sql)) {
         $row['revenue'] = mysqli_fetch_assoc(mysqli_query($link, $sql_money))['total'] ?? 0.00;
 
         // Dati temporanei
-        $row['total_orders'] = rand(10, 100);
-        $row['revenue'] = rand(100, 1000);
+       
 
         //dati fittizzi
         $row['trend_data'] = [rand(20, 100), rand(20, 100), rand(20, 100), rand(20, 100), rand(50, 100)];
