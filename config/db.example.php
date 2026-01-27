@@ -13,10 +13,10 @@ ini_set('session.cookie_samesite', 'Strict');
 session_start();
 
 // Configurazione database (Default per Docker)
-define('DB_SERVER', 'db');           // Usa 'db' per Docker, 'localhost' per XAMPP
-define('DB_USERNAME', 'root');       // Inserisci qui il tuo utente DB
-define('DB_PASSWORD', 'password');   // Inserisci qui la tua password DB
-define('DB_NAME', 'clickneat');      // Nome del database
+define('DB_SERVER', 'db');
+define('DB_USERNAME', 'username');
+define('DB_PASSWORD', 'password');
+define('DB_NAME', 'name');
 
 // Password requirements
 define('PASSWORD_MIN_LENGTH', 8);
