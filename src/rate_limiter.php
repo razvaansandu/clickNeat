@@ -2,11 +2,9 @@
 function check_login_attempts($link, $identifier) {
     $ip = $_SERVER['REMOTE_ADDR'];
     
-    // Pulisci tentativi vecchi (oltre 15 minuti)
     $sql = "DELETE FROM login_attempts WHERE attempt_time < DATE_SUB(NOW(), INTERVAL 15 MINUTE)";
     mysqli_query($link, $sql);
     
-    // Conta tentativi ultimi 15 minuti
     $sql = "SELECT COUNT(*) as attempts FROM login_attempts 
             WHERE (email = ? OR ip_address = ?) 
             AND attempt_time > DATE_SUB(NOW(), INTERVAL 15 MINUTE)";

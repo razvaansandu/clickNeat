@@ -1,5 +1,4 @@
 <?php
-// Pagina placeholder dimentica password senza invio email
 session_start();
 $email = "";
 $email_err = "";
@@ -10,7 +9,6 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
         $email_err = "Email non valida.";
     } else {
         $email = trim($_POST["email"]);
-        // Qui normalmente verrebbe inviata l'email di reset
     }
 }
 ?>
@@ -19,7 +17,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 <head>
     <meta charset="UTF-8">
     <title>Dimentica password - clickNeat</title>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css?v=1.0">
 </head>
 <body>
     <div class="container">
