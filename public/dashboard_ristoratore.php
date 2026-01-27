@@ -1,5 +1,5 @@
 <?php
-session_start();
+//session_start();
 require_once "../config/db.php";
 
 if (!isset($_SESSION["loggedin"]) || $_SESSION["ruolo"] !== 'ristoratore') {
