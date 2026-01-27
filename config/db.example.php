@@ -6,18 +6,10 @@ ini_set('session.cookie_samesite', 'Strict');
 
 session_start();
 
-<<<<<<< HEAD
-// Configurazione database (Default per Docker)
-define('DB_SERVER', 'db');
-define('DB_USERNAME', 'username');
-define('DB_PASSWORD', 'password');
-define('DB_NAME', 'name');
-=======
 define('DB_SERVER', 'db');           
 define('DB_USERNAME', 'razvan_root');      
 define('DB_PASSWORD', 'razvan123');   
 define('DB_NAME', 'clickneat');      
->>>>>>> 2028e48c07c4d4c62e37e25fd59f24bfb479fd75
 
 define('PASSWORD_MIN_LENGTH', 8);
 
