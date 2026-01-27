@@ -1,5 +1,5 @@
 <?php
-session_start();
+// session_start();
 require_once "../config/db.php";
 
 if (!isset($_SESSION["loggedin"]) || $_SESSION["ruolo"] !== 'ristoratore') {
@@ -17,12 +17,15 @@ if ($stmt = mysqli_prepare($link, $sql)) {
     $result = mysqli_stmt_get_result($stmt);
     while ($row = $result->fetch_assoc()) {
         $rest_id = $row['id'];
-        
         $sql_orders = "SELECT COUNT(*) as count FROM orders WHERE restaurant_id = $rest_id";
         $row['total_orders'] = mysqli_fetch_assoc(mysqli_query($link, $sql_orders))['count'] ?? 0;
 
         $sql_money = "SELECT SUM(total_amount) as total FROM orders WHERE restaurant_id = $rest_id AND status = 'completed'";
         $row['revenue'] = mysqli_fetch_assoc(mysqli_query($link, $sql_money))['total'] ?? 0.00;
+
+        // Dati temporanei
+        $row['total_orders'] = rand(10, 100);
+        $row['revenue'] = rand(100, 1000);
 
         //dati fittizzi
         $row['trend_data'] = [rand(20, 100), rand(20, 100), rand(20, 100), rand(20, 100), rand(50, 100)];
@@ -225,4 +228,4 @@ if ($stmt = mysqli_prepare($link, $sql)) {
     </div>
 
 </body>
-</html>
+</html> 

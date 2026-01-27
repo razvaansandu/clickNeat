@@ -1,5 +1,5 @@
 <?php
-session_start();
+// session_start(); // Già iniziata in db.php
 require_once "../config/db.php";
 
 if (!isset($_SESSION["loggedin"]) || $_SESSION["ruolo"] !== 'ristoratore') {
@@ -38,6 +38,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_dish'])) {
     $price = $_POST['price'];
 
     if (!empty($name) && !empty($price)) {
+        // TODO: Creare tabella menu_items nel database
         $sql = "INSERT INTO menu_items (restaurant_id, name, description, price) VALUES (?, ?, ?, ?)";
         if ($stmt = mysqli_prepare($link, $sql)) {
             mysqli_stmt_bind_param($stmt, "isss", $restaurant_id, $name, $desc, $price);
@@ -46,11 +47,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_dish'])) {
             $msg_type = "success";
             mysqli_stmt_close($stmt);
         }
+        $msg = "Piatto aggiunto al menu!";
+        $msg_type = "success";
     }
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete_dish'])) {
     $dish_id = $_POST['dish_id'];
+
     $sql = "DELETE FROM menu_items WHERE id = ? AND restaurant_id = ?";
     if ($stmt = mysqli_prepare($link, $sql)) {
         mysqli_stmt_bind_param($stmt, "ii", $dish_id, $restaurant_id);
@@ -59,9 +63,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete_dish'])) {
         $msg_type = "success";
         mysqli_stmt_close($stmt);
     }
+    $msg = "Piatto eliminato.";
+    $msg_type = "success";
 }
 
 $menu_items = [];
+// TODO: Creare tabella menu_items nel database
 $sql_menu = "SELECT * FROM menu_items WHERE restaurant_id = ? ORDER BY created_at DESC";
 if ($stmt = mysqli_prepare($link, $sql_menu)) {
     mysqli_stmt_bind_param($stmt, "i", $restaurant_id);
