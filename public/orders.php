@@ -10,7 +10,7 @@ $sql = "SELECT
             orders.created_at,
             ristoranti.nome AS nome_ristorante
         FROM orders
-        INNER JOIN ristoranti 
+        INNER JOIN ristoranti   
             ON orders.restaurant_id = ristoranti.id
         ORDER BY orders.id DESC";
 

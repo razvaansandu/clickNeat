@@ -1,5 +1,5 @@
 <?php
-session_start();
+
 require_once "../config/db.php";
 
 if (!isset($_SESSION["loggedin"]) || $_SESSION["ruolo"] !== 'ristoratore') {
@@ -16,22 +16,59 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $indirizzo = trim($_POST["indirizzo"]);
     $descrizione = trim($_POST["descrizione"]);
     $proprietario_id = $_SESSION["id"];
+    $logo_path = NULL;
 
     if (empty($nome) || empty($indirizzo)) {
         $error = "Per favore, inserisci almeno il nome e l'indirizzo del locale.";
     } else {
-        $sql = "INSERT INTO ristoranti (proprietario_id, nome, indirizzo, descrizione) VALUES (?, ?, ?, ?)";
-        
-        if ($stmt = mysqli_prepare($link, $sql)) {
-            mysqli_stmt_bind_param($stmt, "isss", $proprietario_id, $nome, $indirizzo, $descrizione);
+        // Gestisci l'upload dell'immagine
+        if (isset($_FILES["logo_ristorante"]) && $_FILES["logo_ristorante"]["size"] > 0) {
+            $nome_file = basename($_FILES["logo_ristorante"]["name"]);
+            $percorso_temporaneo = $_FILES["logo_ristorante"]["tmp_name"];
             
-            if (mysqli_stmt_execute($stmt)) {
-                $success = "Ristorante creato con successo! Verrai reindirizzato...";
-                header("refresh:2;url=dashboard_ristoratore.php");
+            // Validazione del file
+            $tipi_ammessi = array("image/jpeg", "image/png", "image/gif", "image/webp");
+            $tipo_file = mime_content_type($percorso_temporaneo);
+            $dimensione_max = 5 * 1024 * 1024; // 5MB
+            
+            if (!in_array($tipo_file, $tipi_ammessi)) {
+                $error = "Solo file immagine sono ammessi (JPEG, PNG, GIF, WebP).";
+            } elseif ($_FILES["logo_ristorante"]["size"] > $dimensione_max) {
+                $error = "L'immagine è troppo grande. Massimo 5MB.";
             } else {
-                $error = "Qualcosa è andato storto. Riprova più tardi.";
+                // Crea cartella se non esiste
+                if (!is_dir("image/restaurants")) {
+                    mkdir("image/restaurants", 0755, true);
+                }
+                
+                // Salva il file con nome univoco
+                $estensione = pathinfo($nome_file, PATHINFO_EXTENSION);
+                $nome_file_univoco = time() . "_" . uniqid() . "." . $estensione;
+                $cartella_destinazione = "image/restaurants/" . $nome_file_univoco;
+                
+                if (move_uploaded_file($percorso_temporaneo, $cartella_destinazione)) {
+                    $logo_path = $cartella_destinazione;
+                } else {
+                    $error = "Errore nel caricamento dell'immagine. Riprova.";
+                }
             }
-            mysqli_stmt_close($stmt);
+        }
+        
+        // Se non c'è errore, procedi con l'inserimento nel database
+        if (empty($error)) {
+            $sql = "INSERT INTO ristoranti (proprietario_id, nome, indirizzo, descrizione, img) VALUES (?, ?, ?, ?, ?)";
+            
+            if ($stmt = mysqli_prepare($link, $sql)) {
+                mysqli_stmt_bind_param($stmt, "issss", $proprietario_id, $nome, $indirizzo, $descrizione, $logo_path);
+                
+                if (mysqli_stmt_execute($stmt)) {
+                    $success = "Ristorante creato con successo! Verrai reindirizzato...";
+                    header("refresh:2;url=dashboard_ristoratore.php");
+                } else {
+                    $error = "Qualcosa è andato storto. Riprova più tardi.";
+                }
+                mysqli_stmt_close($stmt);
+            }
         }
     }
 }
@@ -153,6 +190,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             font-size: 24px;
         }
 
+        .image-preview-container {
+            margin-top: 15px;
+            text-align: center;
+            display: none;
+        }
+
+        .image-preview-container.show {
+            display: block;
+        }
+
+        .image-preview {
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(26, 77, 78, 0.2);
+            margin: 0 auto;
+        }
+
     </style>
 </head>
 <body>
@@ -196,7 +251,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <textarea id="descrizione" name="descrizione" placeholder="Raccontaci brevemente la tua cucina... (es. Specialità pesce fresco)"></textarea>
                 </div>
 
+                <div class="form-group">
+                    <label for="logo_ristorante">Logo/Immagine Ristorante (Opzionale)</label>
+                    <input type="file" id="logo_ristorante" name="logo_ristorante" accept="image/jpeg,image/png,image/gif,image/webp">
+                    <small style="color: #A3AED0; margin-top: 5px; display: block;">Max 5MB. Formati: JPEG, PNG, GIF, WebP</small>
+                    <div class="image-preview-container" id="previewContainer">
+                        <img id="imagePreview" class="image-preview" alt="Anteprima immagine">
+                    </div>
+                </div>
+
                 <button type="submit" class="btn-submit">Crea Ristorante</button>
+                
             </form>
 
             <a href="dashboard_ristoratore.php" class="btn-back">
@@ -205,6 +270,26 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         </div>
 
     </div>
+
+    <script>
+        // Preview immagine quando viene selezionata
+        document.getElementById('logo_ristorante').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            const previewContainer = document.getElementById('previewContainer');
+            const imagePreview = document.getElementById('imagePreview');
+            
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    imagePreview.src = event.target.result;
+                    previewContainer.classList.add('show');
+                };
+                reader.readAsDataURL(file);
+            } else {
+                previewContainer.classList.remove('show');
+            }
+        });
+    </script>
 
 </body>
 </html>

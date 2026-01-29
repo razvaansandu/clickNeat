@@ -6,6 +6,14 @@ if (!isset($_SESSION["loggedin"]) || $_SESSION["ruolo"] !== 'ristoratore') {
     header("location: login_ristoratore.php");
     exit;
 }
+// $id_ristoratore = $_SESSION["id"];
+// $query= "SELECT orders.id,users.id,orders.total_amount, orders.status, orders.created_at from orders
+// join users on orders.user_id=users.id
+// where orders.restaurant_id =(select id from ristoranti where proprietario_id=$id_ristoratore)
+// order by orders.created_at DESC";
+
+// $risultato=mysqli_query($link,$query);
+
 
 $user_id = $_SESSION["id"];
 $my_restaurants = [];
@@ -195,7 +203,7 @@ if ($stmt = mysqli_prepare($link, $sql)) {
 
                     <h2><?php echo htmlspecialchars($rest['nome']); ?></h2>
                     <p class="subtitle">Ordini totali: <b><?php echo $rest['total_orders']; ?></b></p>
-
+                    <img src="<?php echo htmlspecialchars($rest['img']); ?>" alt=""> 
                     <div class="stat-row">
                         <div class="revenue">
                             € <?php echo number_format($rest['revenue'], 2); ?>
@@ -222,7 +230,6 @@ if ($stmt = mysqli_prepare($link, $sql)) {
                     <p style="color:#A3AED0; font-size:14px; margin-top:5px;">Espandi il tuo business</p>
                 </div>
             </a>
-
         </div>
     </div>
 
