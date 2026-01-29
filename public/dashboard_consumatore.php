@@ -19,39 +19,141 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true || !isset($_S
     <style>
         body {
             background-image: none !important;
-            background-color: var(--bg-cream) !important;
+            background-color: #ffffff !important;
+            padding: 0;
+        }
+
+        /* TOP MENU STYLES */
+        .top-menu {
+            background: white;
+            padding: 16px 40px;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(43, 54, 116, 0.06);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin: 20px 40px;
+            flex-wrap: wrap;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .top-menu .lead {
+            color: #1A4D4E;
+            font-weight: 700;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .top-menu .lead:hover {
+            color: #E89020;
+            transform: translateY(-2px);
+        }
+
+        .menu-links {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .menu-links a {
+            background: #F4F7FE;
+            color: #1A4D4E;
+            padding: 10px 16px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+
+        .menu-links a:hover {
+            background: #1A4D4E;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(26, 77, 78, 0.15);
+        }
+
+        .menu-links a.logout {
+            background: #E89020;
+            color: white;
+        }
+
+        .menu-links a.logout:hover {
+            background: #D67A0C;
+        }
+
+        @media (max-width: 768px) {
+            .top-menu {
+                margin: 20px;
+                padding: 12px 20px;
+            }
+
+            .top-menu .lead {
+                font-size: 18px;
+            }
+
+            .menu-links a {
+                padding: 8px 12px;
+                font-size: 12px;
+            }
         }
     </style>
 </head>
 <body>
+        <!-- TOP MENU -->
+        <div class="top-menu">
+            <a href="dashboard_consumatore.php" class="lead" style="text-decoration: none;">
+                <i class="fa-solid fa-leaf"></i> ClickNeat
+            </a>
+            <div class="menu-links">
+                <a href="ordini.php" title="I tuoi ordini">
+                    <i class="fas fa-history"></i> Ordini
+                </a>
+                <a href="profile_consumatore.php" title="Profilo">
+                    <i class="fas fa-user-cog"></i> Profilo
+                </a>
+                <a href="logout.php" class="logout" title="Esci">
+                    <i class="fas fa-sign-out-alt"></i> Esci
+                </a>
+            </div>
+        </div>
+
+        <!-- HERO SECTION -->
+        <div class="hero">
+            <div class="hero-left">
+                <div class="welcome-section">
+                        <h1><i class="fas fa-user-circle"></i> Benvenuto, <?php echo htmlspecialchars($_SESSION["username"]); ?>!</h1>
+                        <p class="subtitle">Scegli tra i migliori ristoranti della tua zona</p>
+                </div>
+                <div class="search-wrapper">
+                    <div class="search-input-group">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <input type="text" id="locationInput" placeholder="Cerca Ristorante" class="location-input">
+                        <button class="clear-input-btn">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <button class="search-submit-btn">Cerca</button>
+                </div>
+            </div>
+        </div>
 
         <div class="container">
             <!-- Header con benvenuto -->
             <div class="dashboard-header">
-                <div class="header-content">
-                    <div class="welcome-section">
-                        <h1><i class="fas fa-user-circle"></i> Benvenuto, <?php echo htmlspecialchars($_SESSION["username"]); ?>!</h1>
-                        <p class="subtitle">Scegli tra i migliori ristoranti della tua zona</p>
-                    </div>
-                    <div class="header-actions">
-                        <a href="ordini.php" class="header-btn">
-                            <i class="fas fa-history"></i>
-                            <span>Ristoranti Preferiti</span>
-                        </a>
-                        <a href="ordini.php" class="header-btn">
-                            <i class="fas fa-history"></i>
-                            <span>I tuoi ordini</span>
-                        </a>
-                        <a href="profile_consumatore.php" class="header-btn">
-                            <i class="fas fa-user-cog"></i>
-                            <span>Profilo</span>
-                        </a>
-                        <a href="logout.php" class="btn-logout">
-                            <i class="fas fa-sign-out-alt"></i>
-                            <span>Esci</span>
-                        </a>
-                    </div>
-                </div>
                 
                 <!-- Statistiche rapide -->
                 <div class="stats-cards">
@@ -75,7 +177,7 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true || !isset($_S
                             <i class="fas fa-star"></i>
                         </div>
                         <div class="stat-info">
-                            <h3>Coming Soon</h3>
+                            <h3>Ristoranti preferiti</h3>
                             <p class="stat-number">0</p>
                         </div>
                     </div>
@@ -85,15 +187,11 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true || !isset($_S
             <!-- Sezione ristoranti -->
             <div class="ristoranti-section">
                 <div class="section-title-bar">
-                    <h2><i class="fas fa-store"></i> Ristoranti Disponibili</h2>
-                    <div class="search-box">
-                        <i class="fas fa-search"></i>
-                        <input type="text" id="searchInput" placeholder="Cerca ristorante...">
-                    </div>
+                    <h2><i class="fas fa-store"></i> I Ristoranti Piu' Popolari</h2>
                 </div>
 
                 <?php
-                $sql = "SELECT id, nome, indirizzo, descrizione FROM ristoranti ORDER BY nome ASC";
+                $sql = "SELECT id, nome, indirizzo, descrizione FROM ristoranti ORDER BY nome ASC LIMIT 9";
                 $result = mysqli_query($link, $sql);
                 
                 if($result && mysqli_num_rows($result) > 0):
@@ -210,7 +308,9 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true || !isset($_S
     <!-- Script semplice per la ricerca -->
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const searchInput = document.getElementById('searchInput');
+        // Usa `locationInput` come unico campo di ricerca
+        const locationInput = document.getElementById('locationInput');
+        const searchInput = locationInput; // alias per chiarezza
         const ristorantiGrid = document.getElementById('ristorantiGrid');
         const cards = document.querySelectorAll('.cardRistorante');
         const noResults = document.getElementById('noResults');
@@ -219,17 +319,17 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true || !isset($_S
             searchInput.addEventListener('input', function() {
                 const searchTerm = this.value.toLowerCase().trim();
                 let visibleCount = 0;
-                
+
                 cards.forEach(card => {
-                    const name = card.getAttribute('data-name');
-                    const address = card.getAttribute('data-address');
-                    const desc = card.getAttribute('data-desc');
-                    
-                    const matches = name.includes(searchTerm) || 
-                                   address.includes(searchTerm) || 
-                                   desc.includes(searchTerm);
-                    
-                    if (matches) {
+                    const name = card.getAttribute('data-name') || '';
+                    const address = card.getAttribute('data-address') || '';
+                    const desc = card.getAttribute('data-desc') || '';
+
+                    const matches = name.includes(searchTerm) ||
+                                    address.includes(searchTerm) ||
+                                    desc.includes(searchTerm);
+
+                    if (matches || searchTerm === '') {
                         card.style.display = 'block';
                         visibleCount++;
                         setTimeout(() => {
@@ -244,14 +344,27 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true || !isset($_S
                         }, 300);
                     }
                 });
-                
+
                 // Mostra/Nascondi messaggio "nessun risultato"
                 if (visibleCount === 0 && searchTerm !== '') {
                     noResults.style.display = 'block';
-                    ristorantiGrid.style.display = 'none';
+                    if (ristorantiGrid) ristorantiGrid.style.display = 'none';
                 } else {
-                    noResults.style.display = 'none';
-                    ristorantiGrid.style.display = 'grid';
+                    if (noResults) noResults.style.display = 'none';
+                    if (ristorantiGrid) ristorantiGrid.style.display = 'grid';
+                }
+            });
+        }
+
+        // Bottone Cerca nella hero
+        const searchBtn = document.querySelector('.search-submit-btn');
+        if (searchBtn && locationInput) {
+            searchBtn.addEventListener('click', function() {
+                const term = locationInput.value.toLowerCase().trim();
+                if (searchInput) {
+                    searchInput.value = term;
+                    searchInput.dispatchEvent(new Event('input'));
+                    searchInput.focus();
                 }
             });
         }
