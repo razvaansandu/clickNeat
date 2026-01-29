@@ -17,7 +17,7 @@
             Non hai ricevuto l'email? Controlla la cartella spam.
         </p>
         <p style="text-align: center; margin-top: 30px;">
-            <a href="login_consumatore.php">← Torna al login consumatore</a>
+            <a href="login.php">← Torna al login consumatore</a>
     </div>
 </body>
 </html>

@@ -35,10 +35,10 @@ mysqli_close($link);
 <body>
     <div class="container">
         <?php if(isset($success)): ?>
-            <h2>✅ Email Verificata!</h2>
+            <h2>Email Verificata!</h2>
             <p style="text-align: center;">La tua email è stata verificata con successo.</p>
             <p style="text-align: center; margin-top: 30px;">
-                <a href="login_consumatore.php" style="display: inline-block; padding: 15px 30px; background: linear-gradient(135deg, #1e3c72, #7e22ce); color: white; text-decoration: none; border-radius: 10px; font-weight: bold;">
+                <a href="login.php" style="display: inline-block; padding: 15px 30px; background: linear-gradient(135deg, #1e3c72, #7e22ce); color: white; text-decoration: none; border-radius: 10px; font-weight: bold;">
                     Vai al Login
                 </a>
             </p>

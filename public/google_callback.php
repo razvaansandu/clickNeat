@@ -95,7 +95,7 @@ if (isset($_GET['code'])) {
         exit();
     }
 } else {
-    header("Location: login_consumatore.php");
+    header("Location: login.php");
     exit();
 }
 ?>

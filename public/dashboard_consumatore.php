@@ -2,7 +2,7 @@
 require_once "../config/db.php";
 
 if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true || !isset($_SESSION["ruolo"]) || $_SESSION["ruolo"] !== "consumatore"){
-    header("Location: login_consumatore.php");
+    header("Location: login.php");
     exit;
 }
 ?>

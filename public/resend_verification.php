@@ -2,7 +2,7 @@
 require_once "../config/db.php";
 
 if (!isset($_GET['email'])) {
-    header("Location: login_consumatore.php");
+    header("Location: login.php");
     exit();
 }
 
@@ -41,6 +41,6 @@ if ($stmt = mysqli_prepare($link, $sql)) {
     mysqli_stmt_close($stmt);
 }
 
-header("Location: login_consumatore.php?resent=1");
+header("Location: login.php?resent=1");
 exit();}
 ?>
