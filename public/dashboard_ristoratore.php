@@ -50,9 +50,26 @@ if ($stmt = mysqli_prepare($link, $sql)) {
         }
 
         .main-content { 
-            margin-left: 260px;
+            margin-left: 0;
             padding: 40px; 
         }
+
+        .top-menu {
+            background: white;
+            padding: 16px 20px;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(43,54,116,0.06);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .top-menu .lead { color: #2B3674; font-weight: 600; }
+        .menu-links { display: flex; gap: 10px; align-items: center; }
+        .menu-links a { background: #F4F7FE; color: #1A4D4E; padding: 8px 14px; border-radius: 10px; text-decoration: none; font-weight: 600; }
+        .menu-links a.logout { background: #E89020; color: white; }
 
         .page-header {
             display: flex;
@@ -210,8 +227,9 @@ if ($stmt = mysqli_prepare($link, $sql)) {
                     </div>
 
                     <a href="manage_restaurant.php?id=<?php echo $rest['id']; ?>" class="btn-manage">
-                        Gestisci Menu <i class="fa-solid fa-arrow-right"></i>
-                    </a>
+                        Gestisci ristorante <i class="fa-solid fa-arrow-right"></i> 
+
+                    </a>  
                 </div>
             <?php endforeach; ?>
 

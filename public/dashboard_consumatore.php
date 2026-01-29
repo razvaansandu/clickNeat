@@ -16,9 +16,15 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true || !isset($_S
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/consumatore.css?v=1.2">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-image: none !important;
+            background-color: var(--bg-cream) !important;
+        }
+    </style>
 </head>
 <body>
-    <div class="main-container">
+
         <div class="container">
             <!-- Header con benvenuto -->
             <div class="dashboard-header">
@@ -28,6 +34,10 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true || !isset($_S
                         <p class="subtitle">Scegli tra i migliori ristoranti della tua zona</p>
                     </div>
                     <div class="header-actions">
+                        <a href="ordini.php" class="header-btn">
+                            <i class="fas fa-history"></i>
+                            <span>Ristoranti Preferiti</span>
+                        </a>
                         <a href="ordini.php" class="header-btn">
                             <i class="fas fa-history"></i>
                             <span>I tuoi ordini</span>
@@ -62,21 +72,11 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true || !isset($_S
                     
                     <div class="stat-card">
                         <div class="stat-icon">
-                            <i class="fas fa-shipping-fast"></i>
-                        </div>
-                        <div class="stat-info">
-                            <h3>Consegna media</h3>
-                            <p class="stat-number">30-40 min</p>
-                        </div>
-                    </div>
-                    
-                    <div class="stat-card">
-                        <div class="stat-icon">
                             <i class="fas fa-star"></i>
                         </div>
                         <div class="stat-info">
-                            <h3>Ristoranti top</h3>
-                            <p class="stat-number">15+</p>
+                            <h3>Coming Soon</h3>
+                            <p class="stat-number">0</p>
                         </div>
                     </div>
                 </div>
@@ -129,7 +129,7 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true || !isset($_S
                             
                             <div class="restaurant-tags">
                                 <span class="tag">Ristorante</span>
-                                <span class="tag">Consegna</span>
+                                <span class="tag">Pasticceria</span>
                                 <?php if(strlen($row['descrizione']) < 50): ?>
                                 <span class="tag tag-popular">Popolare</span>
                                 <?php endif; ?>
@@ -139,7 +139,7 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true || !isset($_S
                         <div class="card-footer">
                             <a href="menu.php?ristorante_id=<?php echo $row['id']; ?>" class="btn-menu">
                                 <i class="fas fa-book-open"></i>
-                                Visualizza Menu 
+                                Visualizza Menu' 
                             </a>
                             <button class="btn-favorite" title="Aggiungi ai preferiti">
                                 <i class="far fa-heart"></i>
@@ -181,7 +181,7 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true || !isset($_S
                             </div>
                             <div class="step">
                                 <span class="step-number">3</span>
-                                <p>Ricevi a domicilio</p>
+                                <p>Ritira</p>
                             </div>
                         </div>
                     </div>
@@ -200,7 +200,7 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true || !isset($_S
                 </div>
                 
                 <div class="copyright">
-                    <p>&copy; 2024 ClickNeat. Tutti i diritti riservati.</p>
+                    <p>&copy; 2026 ClickNeat. Tutti i diritti riservati.</p>
                     <p class="version">v1.0</p>
                 </div>
             </div>

@@ -80,10 +80,7 @@
             <i class="fa-solid fa-chart-pie"></i> Statistiche
 
         </a>
-        <a href="orders.php">
-            <i class="fa-solid fa-chart-pie"></i> ordini
-
-        </a>
+     
 
     </div>
 
