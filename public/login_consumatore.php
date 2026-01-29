@@ -1,6 +1,8 @@
 <?php
 require_once "../config/db.php";
 require_once "../src/rate_limiter.php";
+require_once "../config/google_config.php"; 
+$login_url = getGoogleLoginUrl(); 
 
 $login_err = "";
 $username = "";
@@ -136,6 +138,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             <button type="submit">Accedi</button>
         </form>
+
+        <a href="<?php echo $login_url; ?>" ... >Accedi con Google</a>
 
         <div class="extra-links" style="text-align: center; margin-top: 20px;">
             <a href="forgot_password.php">Password dimenticata?</a><br><br>
