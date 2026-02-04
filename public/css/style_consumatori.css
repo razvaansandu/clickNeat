@@ -1,655 +1,394 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
-
 /* ==========================================================================
-   1. GLOBALI & RESET
-   (Variabili colori, reset margini, impostazioni body e link)
+   0. CONFIGURAZIONE & VARIABILI
    ========================================================================== */
 :root {
-    --primary-dark: #2B3674;
-    --primary-brand: #1A4D4E;
-    --accent-orange: #FF9F43;
-    --accent-red: #FF6B6B;
-    --text-grey: #A3AED0;
-    --bg-light: #F9FAFB;
-    --white: #ffffff;
-    --success: #05CD99;
+    /* Palette Consumatore (Più vivace e appetitosa) */
+    --primary: #FF5A5F;       /* Rosso "Food" appetitoso (tipo Airbnb/Foodora) */
+    --primary-hover: #E0484D;
+    --secondary: #2B3674;     /* Blu scuro elegante per i testi */
+    --accent: #FFB02E;        /* Giallo/Arancio per i dettagli */
+    
+    /* Sfondi */
+    --bg-body: #F8FAFC;       /* Grigio chiarissimo, pulito */
+    --bg-card: #FFFFFF;
+    --bg-input: #F1F5F9;
+
+    /* Testi */
+    --text-dark: #1E293B;
+    --text-muted: #64748B;
+    --text-light: #94A3B8;
+
+    /* Stati */
+    --success: #10B981;
+    --warning: #F59E0B;
+    --danger: #EF4444;
+    --info: #3B82F6;
+
+    /* Ombre Moderne */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --shadow-float: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
 }
 
+/* ==========================================================================
+   1. RESET & BASE
+   ========================================================================== */
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
 
 body { 
-    background-color: var(--bg-light); 
-    color: #333;
+    background-color: var(--bg-body); 
+    color: var(--text-dark);
     min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
 }
 
-a { text-decoration: none; color: inherit; }
+a { text-decoration: none; color: inherit; transition: 0.2s; }
+ul { list-style: none; }
+button { font-family: 'Poppins', sans-serif; cursor: pointer; }
 
 /* ==========================================================================
    2. TOP NAVBAR
-   (Presente in tutte le pagine)
    ========================================================================== */
 .top-navbar {
-    background: var(--white);
-    padding: 15px 50px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.03);
-    position: sticky;
-    top: 0;
-    z-index: 1000;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    padding: 15px 40px;
+    display: flex; justify-content: space-between; align-items: center;
+    box-shadow: var(--shadow-sm);
+    position: sticky; top: 0; z-index: 1000;
+    border-bottom: 1px solid #E2E8F0;
 }
 
 .brand-logo {
-    font-size: 24px; font-weight: 800; color: var(--primary-brand);
-    display: flex; align-items: center; gap: 10px;
+    font-size: 26px; font-weight: 800; color: var(--primary);
+    display: flex; align-items: center; gap: 10px; letter-spacing: -0.5px;
 }
+.brand-logo i { color: var(--secondary); }
 
-.nav-links { display: flex; gap: 25px; align-items: center; }
+.nav-links { display: flex; gap: 30px; align-items: center; }
 
 .nav-item {
-    color: #707EAE; font-weight: 500; font-size: 15px; transition: 0.3s;
-    display: flex; align-items: center; gap: 8px;
+    color: var(--text-muted); font-weight: 600; font-size: 15px; 
+    transition: 0.2s; display: flex; align-items: center; gap: 8px;
+    padding: 8px 12px; border-radius: 10px;
 }
-.nav-item:hover, .nav-item.active { color: var(--accent-orange); }
+.nav-item:hover, .nav-item.active { 
+    color: var(--primary); background: #FFF1F2; 
+}
 
 .btn-logout-nav {
-    padding: 8px 20px; border: 1px solid var(--accent-red); color: var(--accent-red);
-    border-radius: 20px; font-weight: 600; font-size: 14px; transition: 0.3s;
+    padding: 10px 24px; border: 2px solid var(--primary); color: var(--primary);
+    border-radius: 50px; font-weight: 700; font-size: 14px; transition: 0.3s;
+    background: transparent;
 }
-.btn-logout-nav:hover { background: var(--accent-red); color: var(--white); }
+.btn-logout-nav:hover { background: var(--primary); color: white; transform: translateY(-2px); }
 
 /* ==========================================================================
-   3. HERO SECTION
-   (Intestazione colorata presente in tutte le pagine)
+   3. HERO SECTION (Più moderna)
    ========================================================================== */
 .hero-section {
-    background: linear-gradient(100deg, var(--accent-orange) 0%, var(--accent-red) 100%);
-    padding: 60px 50px 80px 50px;
+    background: linear-gradient(135deg, #FF5A5F 0%, #FF8A65 100%);
+    padding: 80px 50px 100px 50px;
     color: var(--white);
     position: relative;
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
+    border-radius: 0 0 40px 40px; /* Curva in basso */
+    box-shadow: var(--shadow-md);
 }
 
-.hero-content {
-    max-width: 1200px; margin: 0 auto; position: relative; z-index: 2;
-}
+.hero-content { max-width: 1200px; margin: 0 auto; position: relative; z-index: 2; text-align: center; }
 
-.hero-title h1 { font-size: 36px; font-weight: 800; margin-bottom: 10px; }
-.hero-title p { font-size: 18px; opacity: 0.9; }
+.hero-title h1 { 
+    font-size: 42px; font-weight: 800; margin-bottom: 15px; 
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.hero-title p { font-size: 18px; opacity: 0.95; font-weight: 500; }
 
 .btn-back-hero {
     display: inline-flex; align-items: center; gap: 8px;
-    background: rgba(255,255,255,0.2); backdrop-filter: blur(5px);
-    padding: 8px 16px; border-radius: 20px; color: white;
-    font-weight: 600; font-size: 14px; margin-bottom: 20px; transition: 0.3s;
+    background: rgba(255,255,255,0.25); backdrop-filter: blur(5px);
+    padding: 10px 20px; border-radius: 30px; color: white;
+    font-weight: 600; font-size: 14px; margin-bottom: 25px; transition: 0.3s;
+    border: 1px solid rgba(255,255,255,0.4);
 }
-.btn-back-hero:hover { background: white; color: var(--accent-red); }
+.btn-back-hero:hover { background: white; color: var(--primary); }
 
 /* ==========================================================================
-   4. DASHBOARD CONSUMATORE
-   (Pillole categorie, Griglia ristoranti, Card Ristorante)
+   4. DASHBOARD & CATEGORIE
    ========================================================================== */
-/* Categorie */
+/* Categorie Fluttuanti */
 .categories-wrapper {
-    max-width: 1200px; margin: -35px auto 40px auto; padding: 0 20px;
+    max-width: 1000px; margin: -45px auto 50px auto; padding: 0 20px;
     position: relative; z-index: 10;
 }
 
 .categories-container {
-    display: flex; gap: 15px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: none;
+    display: flex; gap: 15px; overflow-x: auto; padding: 10px 5px; 
+    scrollbar-width: none; justify-content: center;
 }
 .categories-container::-webkit-scrollbar { display: none; }
 
 .category-pill {
-    background: white; padding: 12px 25px; border-radius: 50px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    background: white; padding: 12px 28px; border-radius: 50px;
+    box-shadow: var(--shadow-md);
     display: flex; align-items: center; gap: 10px;
-    font-weight: 600; color: #2B3674; cursor: pointer; transition: 0.3s;
-    white-space: nowrap; border: 2px solid white;
+    font-weight: 700; color: var(--text-dark); cursor: pointer; transition: 0.3s;
+    white-space: nowrap; border: 2px solid transparent;
 }
-.category-pill:hover, .category-pill.active {
-    border-color: var(--accent-orange); color: var(--accent-orange); transform: translateY(-5px);
+.category-pill i { color: var(--primary); font-size: 18px; }
+
+.category-pill:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+.category-pill.active {
+    border-color: var(--primary); color: var(--primary); background: #FFF1F2;
 }
 
-.main-container {
-    max-width: 1200px; margin: 0 auto; padding: 0 20px 60px 20px;
+/* Griglia Ristoranti */
+.main-container { max-width: 1200px; margin: 0 auto; padding: 0 30px 60px 30px; }
+.section-title { 
+    font-size: 26px; font-weight: 800; color: var(--secondary); 
+    margin-bottom: 30px; position: relative; display: inline-block;
 }
-.section-title {
-    font-size: 24px; font-weight: 700; color: var(--primary-dark); margin-bottom: 25px;
+.section-title::after {
+    content: ''; position: absolute; bottom: -5px; left: 0; 
+    width: 40%; height: 4px; background: var(--primary); border-radius: 2px;
 }
+
 .grid-container {
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 30px;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 35px;
 }
 
 .restaurant-card {
-    background: var(--white); border-radius: 20px; overflow: hidden;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.05); transition: all 0.3s ease;
-    text-decoration: none; color: inherit; display: flex; flex-direction: column; border: 1px solid #eee;
+    background: var(--bg-card); border-radius: 24px; overflow: hidden;
+    box-shadow: var(--shadow-sm); transition: all 0.3s ease;
+    border: 1px solid #F1F5F9; display: flex; flex-direction: column;
 }
-.restaurant-card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(112, 144, 176, 0.15); }
-.card-img-top { height: 200px; width: 100%; object-fit: cover; }
-.card-body { padding: 20px; display: flex; flex-direction: column; flex-grow: 1; }
-.badge-cat { font-size: 11px; text-transform: uppercase; font-weight: 700; color: var(--accent-orange); letter-spacing: 1px; margin-bottom: 5px; }
-.card-title { font-size: 18px; font-weight: 700; color: var(--primary-dark); margin-bottom: 8px; }
-.card-info { font-size: 13px; color: var(--text-grey); margin-bottom: 15px; display: flex; align-items: center; gap: 6px; }
+.restaurant-card:hover { 
+    transform: translateY(-8px); box-shadow: var(--shadow-lg); border-color: #E2E8F0;
+}
+
+.card-img-top { height: 220px; width: 100%; object-fit: cover; }
+
+.card-body { padding: 25px; display: flex; flex-direction: column; flex-grow: 1; }
+
+.badge-cat { 
+    font-size: 11px; text-transform: uppercase; font-weight: 800; 
+    color: var(--accent); letter-spacing: 1px; margin-bottom: 8px; 
+    display: inline-block; background: #FFF7ED; padding: 4px 10px; border-radius: 8px;
+}
+
+.card-title { font-size: 20px; font-weight: 800; color: var(--secondary); margin-bottom: 8px; line-height: 1.3; }
+
+.card-info { 
+    font-size: 14px; color: var(--text-muted); margin-bottom: 20px; 
+    display: flex; align-items: center; gap: 8px; 
+}
+.card-info i { color: var(--primary); }
+
 .btn-go {
-    margin-top: auto; background: #F4F7FE; color: var(--primary-brand);
-    text-align: center; padding: 10px; border-radius: 12px; font-weight: 600; transition: 0.3s;
+    margin-top: auto; background: var(--bg-input); color: var(--secondary);
+    text-align: center; padding: 14px; border-radius: 14px; font-weight: 700; transition: 0.3s;
 }
-.restaurant-card:hover .btn-go { background: var(--primary-brand); color: white; }
+.restaurant-card:hover .btn-go { background: var(--primary); color: white; shadow: var(--shadow-md); }
 
 /* ==========================================================================
    5. MENU RISTORANTE (PAGINA MENU)
-   (Stili per le card dei piatti)
    ========================================================================== */
 .card-style {
-    background: var(--white); border-radius: 20px; overflow: hidden;
-    box-shadow: 0 10px 25px rgba(112, 144, 176, 0.08); transition: all 0.3s ease;
-    border: 1px solid #eee; display: flex; flex-direction: column;
+    background: var(--bg-card); border-radius: 20px; overflow: hidden;
+    box-shadow: var(--shadow-sm); transition: all 0.3s ease;
+    border: 1px solid #F1F5F9; display: flex; flex-direction: column;
 }
+.card-style:hover { box-shadow: var(--shadow-md); transform: translateY(-3px); }
 
-.dish-image { height: 160px; width: 100%; object-fit: cover; }
+.dish-image { height: 180px; width: 100%; object-fit: cover; }
 .dish-body { padding: 20px; flex-grow: 1; display: flex; flex-direction: column; }
-.dish-title { font-size: 18px; font-weight: 700; color: var(--primary-dark); margin-bottom: 5px; }
-.dish-desc { font-size: 13px; color: #707EAE; margin-bottom: 15px; line-height: 1.4; flex-grow: 1; }
+
+.dish-title { font-size: 18px; font-weight: 700; color: var(--secondary); margin-bottom: 6px; }
+.dish-desc { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.5; flex-grow: 1; }
+
 .dish-footer { display: flex; justify-content: space-between; align-items: center; margin-top: auto; }
-.price-tag { font-size: 18px; font-weight: 700; color: var(--success); }
+.price-tag { font-size: 20px; font-weight: 800; color: var(--primary); }
+
 .btn-add {
-    background: var(--bg-light); color: var(--primary-brand);
-    padding: 8px 16px; border-radius: 12px; font-weight: 600; border: none; cursor: pointer; transition: 0.3s;
-    display: flex; align-items: center; gap: 5px;
+    background: var(--bg-body); color: var(--primary);
+    padding: 10px 18px; border-radius: 12px; font-weight: 700; 
+    border: 1px solid transparent; cursor: pointer; transition: 0.3s;
+    display: flex; align-items: center; gap: 6px; font-size: 13px;
 }
-.btn-add:hover { background: var(--primary-brand); color: white; }
+.btn-add:hover { background: var(--primary); color: white; transform: scale(1.05); }
 
 /* ==========================================================================
-   6. STORICO ORDINI (PAGINA HISTORY)
-   (Card riepilogo ordini passati)
+   6. STORICO ORDINI
    ========================================================================== */
-.order-card { padding: 25px; display: flex; flex-direction: column; justify-content: space-between; }
-.order-header { display: flex; justify-content: space-between; margin-bottom: 15px; }
-.order-id { font-size: 13px; color: var(--text-grey); font-weight: 500; }
-.order-rest-name { font-size: 18px; font-weight: 700; color: var(--primary-dark); margin-bottom: 5px; }
-.order-date { font-size: 13px; color: var(--text-grey); display: flex; gap: 5px; align-items: center; }
-.order-footer { margin-top: 20px; border-top: 1px solid #f0f0f0; padding-top: 15px; display: flex; justify-content: space-between; align-items: center; }
+.order-card { 
+    background: white; border-radius: 16px; box-shadow: var(--shadow-sm);
+    padding: 25px; display: flex; flex-direction: column; 
+    border-left: 5px solid var(--primary); margin-bottom: 20px;
+    transition: 0.3s;
+}
+.order-card:hover { box-shadow: var(--shadow-md); }
+
+.order-header { display: flex; justify-content: space-between; margin-bottom: 15px; border-bottom: 1px solid #F1F5F9; padding-bottom: 15px; }
+.order-id { font-size: 14px; color: var(--text-light); font-weight: 600; }
+.order-rest-name { font-size: 18px; font-weight: 700; color: var(--secondary); }
+
+.order-date { font-size: 13px; color: var(--text-muted); display: flex; gap: 6px; align-items: center; }
+.order-footer { margin-top: 15px; padding-top: 15px; display: flex; justify-content: space-between; align-items: center; }
+
+/* Status Badges */
+.status-badge { padding: 6px 14px; border-radius: 30px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+.status-badge.completed { background: #DCFCE7; color: #15803D; }
+.status-badge.pending { background: #FEF3C7; color: #B45309; }
+.status-badge.cancelled { background: #FEE2E2; color: #B91C1C; }
+.status-badge.accepted { background: #E0F2FE; color: #0369A1; }
 
 /* ==========================================================================
    7. PROFILO UTENTE
-   (Layout griglia profilo, Avatar, Lista informazioni)
    ========================================================================== */
-.profile-wrapper { display: grid; grid-template-columns: 350px 1fr; gap: 30px; margin-top: -40px; position: relative; z-index: 10;}
-.avatar-box { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 40px 20px; }
+.profile-wrapper { 
+    display: grid; grid-template-columns: 350px 1fr; gap: 40px; 
+    margin-top: -60px; position: relative; z-index: 10;
+}
+
+.avatar-box { 
+    background: white; border-radius: 24px; padding: 40px 30px; 
+    box-shadow: var(--shadow-lg); text-align: center;
+}
 .avatar-circle {
-    width: 100px; height: 100px; background: linear-gradient(135deg, #FF9F43 0%, #FF6B6B 100%);
+    width: 120px; height: 120px; 
+    background: linear-gradient(135deg, var(--primary) 0%, #FF8A65 100%);
     color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-    font-size: 36px; font-weight: 700; margin-bottom: 15px;
-    box-shadow: 0 10px 20px rgba(255, 107, 107, 0.3); border: 4px solid white;
+    font-size: 42px; font-weight: 700; margin: 0 auto 20px auto;
+    box-shadow: 0 10px 20px rgba(255, 90, 95, 0.3); border: 5px solid white;
 }
-.info-list { width: 100%; margin-top: 20px; text-align: left; }
-.info-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f0f0f0; font-size: 14px; color: #707EAE; }
-.info-row b { color: var(--primary-dark); }
+
+.info-list { width: 100%; margin-top: 30px; text-align: left; }
+.info-row { 
+    display: flex; justify-content: space-between; padding: 15px 0; 
+    border-bottom: 1px solid #F1F5F9; font-size: 14px; color: var(--text-muted); 
+}
+.info-row:last-child { border-bottom: none; }
+.info-row b { color: var(--secondary); font-weight: 600; }
+
+.form-box { 
+    background: white; border-radius: 24px; padding: 40px; 
+    box-shadow: var(--shadow-md);
+}
+.form-title { 
+    font-size: 20px; font-weight: 700; color: var(--secondary); 
+    margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid #F1F5F9; 
+}
 
 /* ==========================================================================
-   8. FORM E INPUT (CONDIVISI)
-   (Usati in Profilo, Help, Checkout)
+   8. INPUT & CHECKOUT
    ========================================================================== */
-.form-box { padding: 30px; }
-.form-title { font-size: 18px; font-weight: 700; color: var(--primary-dark); margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #f0f0f0; }
-.input-group { margin-bottom: 20px; }
-.input-group label { display: block; font-size: 13px; font-weight: 600; color: var(--primary-dark); margin-bottom: 8px; }
-.input-group input {
-    width: 100%; padding: 12px; border: 1px solid #E0E5F2; border-radius: 12px;
-    font-size: 14px; background: #F9FAFB; transition: 0.3s;
+.input-group { margin-bottom: 25px; }
+.input-group label { display: block; font-size: 14px; font-weight: 600; color: var(--secondary); margin-bottom: 8px; }
+.input-group input, .checkout-select, textarea {
+    width: 100%; padding: 14px 16px; border: 2px solid #E2E8F0; border-radius: 12px;
+    font-size: 15px; background: white; transition: 0.2s; color: var(--text-dark);
 }
-.input-group input:focus { background: white; border-color: var(--accent-orange); outline: none; }
-.btn-save {
-    background: var(--primary-brand); color: white; border: none; padding: 12px 24px;
-    border-radius: 12px; font-weight: 600; cursor: pointer; transition: 0.3s;
+.input-group input:focus, .checkout-select:focus, textarea:focus { 
+    border-color: var(--primary); outline: none; box-shadow: 0 0 0 4px rgba(255, 90, 95, 0.1); 
 }
-.btn-save:hover { background: var(--accent-orange); transform: translateY(-2px); }
+
+.btn-save, .btn-confirm {
+    background: var(--primary); color: white; border: none; padding: 14px 28px;
+    border-radius: 12px; font-weight: 700; cursor: pointer; transition: 0.3s;
+    width: 100%; font-size: 16px; box-shadow: var(--shadow-sm);
+}
+.btn-save:hover, .btn-confirm:hover { 
+    background: var(--primary-hover); transform: translateY(-2px); 
+    box-shadow: 0 10px 15px -3px rgba(255, 90, 95, 0.3);
+}
 
 /* ==========================================================================
-   9. UTILITÀ, BADGE E ALERT
-   (Elementi grafici condivisi)
+   9. CARRELLO & CHECKOUT UI
    ========================================================================== */
-/* Badge Stato Ordine */
-.status-badge { padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
-.status-badge.completed, .status-badge.active { background: #E6FAF5; color: var(--success); }
-.status-badge.pending { background: #FFF8E6; color: var(--accent-orange); }
-.status-badge.cancelled { background: #FFEEED; color: var(--accent-red); }
+.checkout-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
 
-.msg-box { padding: 15px; border-radius: 12px; margin-bottom: 25px; font-size: 14px; font-weight: 500; }
-.msg-box.success { background: #E6FAF5; color: var(--success); border: 1px solid var(--success); }
-.msg-box.error { background: #FFEEED; color: var(--accent-red); border: 1px solid var(--accent-red); }
-
-.empty-state {
-    grid-column: 1 / -1; text-align: center; padding: 50px; background: white; border-radius: 20px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+.checkout-summary {
+    background: #F8FAFC; padding: 35px; border-radius: 24px;
+    border: 1px solid #E2E8F0;
 }
-.empty-icon { font-size: 40px; color: #ddd; margin-bottom: 15px; }
-.empty-title { color: var(--primary-dark); font-size: 20px; margin-bottom: 5px; font-weight: 700; }
-.empty-text { color: var(--text-grey); }
 
-.btn-support-float {
+.summary-row {
+    display: flex; justify-content: space-between; padding: 15px 0;
+    border-bottom: 1px dashed #CBD5E1; font-size: 15px; color: var(--text-muted);
+}
+.qty-highlight { color: var(--primary); font-weight: 700; margin-right: 8px; }
+
+.summary-total {
+    display: flex; justify-content: space-between; margin-top: 30px;
+    font-size: 22px; font-weight: 800; color: var(--secondary);
+    border-top: 2px solid #E2E8F0; padding-top: 20px;
+}
+
+/* Tasto Carrello Galleggiante */
+.floating-cart-btn {
     position: fixed; bottom: 30px; right: 30px;
-    background: var(--primary-dark); color: white; width: 60px; height: 60px;
+    width: 70px; height: 70px;
+    background: var(--primary); color: white;
     border-radius: 50%; display: flex; align-items: center; justify-content: center;
-    font-size: 24px; box-shadow: 0 10px 25px rgba(43, 54, 116, 0.4);
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    z-index: 2000; border: 2px solid white;
+    text-decoration: none; box-shadow: var(--shadow-float);
+    z-index: 2000; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border: 4px solid white; font-size: 28px;
 }
-.btn-support-float:hover {
-    background: var(--accent-orange); transform: scale(1.1) rotate(15deg);
-    box-shadow: 0 15px 35px rgba(255, 159, 67, 0.4);
+.floating-cart-btn:hover {
+    background: var(--secondary); transform: scale(1.1) rotate(-10deg);
+}
+.cart-count-badge {
+    position: absolute; top: 0; right: 0;
+    background-color: var(--accent); color: var(--secondary);
+    font-size: 13px; font-weight: 800; width: 28px; height: 28px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 50%; border: 2px solid white;
+}
+
+/* Confirmation Box */
+.confirmation-box {
+    background: white; border-radius: 24px; padding: 60px 40px;
+    text-align: center; box-shadow: var(--shadow-lg);
+    max-width: 550px; margin: -60px auto 0 auto; position: relative; z-index: 10;
+}
+.success-icon-circle {
+    width: 90px; height: 90px; background: #DCFCE7; color: #15803D;
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-size: 44px; margin: 0 auto 25px auto;
 }
 
 /* ==========================================================================
-   10. PAGINA ASSISTENZA (HELP)
-   (Layout griglia, FAQ a fisarmonica, Textarea)
+   10. ASSISTENZA & FAQ
    ========================================================================== */
 .help-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
 
-details { background: white; border-radius: 15px; margin-bottom: 15px; border: 1px solid #eee; overflow: hidden; transition: 0.3s; }
-details[open] { border-color: var(--accent-orange); box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+details { 
+    background: white; border-radius: 16px; margin-bottom: 20px; 
+    border: 1px solid #F1F5F9; overflow: hidden; box-shadow: var(--shadow-sm); 
+}
+details[open] { border-color: var(--primary); }
 
 summary {
-    padding: 20px; cursor: pointer; font-weight: 600; color: var(--primary-dark);
+    padding: 20px; cursor: pointer; font-weight: 600; color: var(--secondary);
     list-style: none; display: flex; justify-content: space-between; align-items: center;
 }
-summary::after {
-    content: '+'; font-size: 20px; font-weight: bold; color: #A3AED0; transition: 0.3s;
-}
-details[open] summary::after { content: '-'; color: var(--accent-orange); }
+summary::after { content: '+'; font-size: 22px; color: var(--text-light); }
+details[open] summary::after { content: '-'; color: var(--primary); }
 
-.faq-answer {
-    padding: 0 20px 20px 20px; color: #707EAE; font-size: 14px; line-height: 1.6;
-    border-top: 1px solid #f9f9f9; padding-top: 15px;
-}
-
-textarea {
-    width: 100%; padding: 15px; border: 1px solid #E0E5F2; border-radius: 12px;
-    background: var(--bg-light); font-family: 'Poppins', sans-serif;
-    resize: vertical; min-height: 120px; transition: 0.3s;
-}
-textarea:focus { outline: none; border-color: var(--accent-orange); background: white; }
-
-.contact-icon-box {
-    width: 60px; height: 60px; background: #E6FAF5; color: #05CD99;
-    border-radius: 50%; display: flex; align-items: center; justify-content: center;
-    font-size: 24px; margin-bottom: 20px;
-}
+.faq-answer { padding: 0 20px 25px 20px; color: var(--text-muted); line-height: 1.6; }
 
 /* ==========================================================================
-   11. PAGINA CONFERMA AGGIUNTA CARRELLO (ADD_TO_CART)
-   ========================================================================== */
-.confirmation-box {
-    background: white;
-    border-radius: 20px;
-    padding: 50px 30px;
-    text-align: center;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-    max-width: 600px;
-    margin: -50px auto 0 auto;
-    position: relative;
-    z-index: 10;
-}
-
-.success-icon-circle {
-    width: 80px; height: 80px; background: #E6FAF5; color: #05CD99;
-    border-radius: 50%; display: flex; align-items: center; justify-content: center;
-    font-size: 40px; margin: 0 auto 20px auto;
-}
-
-.added-item-name {
-    font-size: 22px; font-weight: 700; color: var(--primary-dark); margin-bottom: 5px;
-}
-
-.cart-summary {
-    background: #F9FAFB; border-radius: 15px; padding: 20px;
-    margin: 30px 0; display: flex; justify-content: space-between; align-items: center;
-}
-
-.cart-total-label { font-size: 14px; color: var(--text-grey); }
-.cart-total-value { font-size: 24px; font-weight: 700; color: var(--primary-dark); }
-
-.action-buttons {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
-}
-
-.btn-continue {
-    background: #F4F7FE; color: var(--primary-brand);
-    padding: 15px; border-radius: 15px; font-weight: 600;
-    transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px;
-}
-.btn-continue:hover { background: #e0e7ff; }
-
-.btn-checkout {
-    background: var(--primary-brand); color: white;
-    padding: 15px; border-radius: 15px; font-weight: 600;
-    transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px;
-    box-shadow: 0 10px 20px rgba(26, 77, 78, 0.2);
-}
-.btn-checkout:hover { background: var(--accent-orange); transform: translateY(-3px); }
-
-/* ==========================================================================
-   12. MEDIA QUERIES (RESPONSIVE)
+   11. RESPONSIVE
    ========================================================================== */
 @media (max-width: 900px) {
-    .profile-wrapper,
-    .help-grid {
-        grid-template-columns: 1fr;
-    }
+    .profile-wrapper, .help-grid, .checkout-layout { grid-template-columns: 1fr; }
+    .hero-title h1 { font-size: 32px; }
 }
 
 @media (max-width: 768px) {
     .top-navbar { padding: 15px 20px; }
     .nav-links span { display: none; }
-    .hero-section { padding: 40px 20px 80px 20px; }
+    .hero-section { padding: 50px 20px 100px 20px; text-align: center; }
+    .categories-wrapper { margin-top: -60px; }
     .main-container { padding: 0 20px 40px 20px; }
-}
-
-@media (max-width: 600px) {
-    .action-buttons {
-        grid-template-columns: 1fr;
-    }
-}
-
-/* ==========================================================================
-   11. PAGINA CONFERMA AGGIUNTA CARRELLO (ADD_TO_CART)
-   ========================================================================== */
-.confirmation-box {
-    background: white;
-    border-radius: 20px;
-    padding: 50px 30px;
-    text-align: center;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-    max-width: 600px;
-    margin: -50px auto 0 auto; 
-    position: relative;
-    z-index: 10;
-}
-
-.success-icon-circle {
-    width: 80px; height: 80px; background: #E6FAF5; color: #05CD99;
-    border-radius: 50%; display: flex; align-items: center; justify-content: center;
-    font-size: 40px; margin: 0 auto 20px auto;
-}
-
-.added-item-name {
-    font-size: 22px; font-weight: 700; color: var(--primary-dark); margin-bottom: 5px;
-}
-
-.cart-summary {
-    background: #F9FAFB; border-radius: 15px; padding: 20px;
-    margin: 30px 0; display: flex; justify-content: space-between; align-items: center;
-}
-
-.cart-total-label { font-size: 14px; color: var(--text-grey); }
-.cart-total-value { font-size: 24px; font-weight: 700; color: var(--primary-dark); }
-
-.action-buttons {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
-}
-
-.btn-continue {
-    background: #F4F7FE; color: var(--primary-brand);
-    padding: 15px; border-radius: 15px; font-weight: 600;
-    transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px;
-}
-.btn-continue:hover { background: #e0e7ff; }
-
-.btn-checkout {
-    background: var(--primary-brand); color: white;
-    padding: 15px; border-radius: 15px; font-weight: 600;
-    transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px;
-    box-shadow: 0 10px 20px rgba(26, 77, 78, 0.2);
-}
-.btn-checkout:hover { background: var(--accent-orange); transform: translateY(-3px); }
-
-/* ==========================================================================
-   13. PAGINA CHECKOUT
-   ========================================================================== */
-.checkout-layout {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 30px;
-}
-
-.checkout-form {
-    padding: 30px;
-}
-
-.checkout-summary {
-    background: #F9FAFB;
-    padding: 30px;
-    border-left: 1px solid #eee;
-    border-radius: 0 20px 20px 0; 
-}
-
-.checkout-section-title {
-    margin-top: 0;
-    font-size: 18px; 
-    font-weight: 700; 
-    color: var(--primary-dark);
-    margin-bottom: 20px;
-}
-
-.checkout-select {
-    width: 100%;
-    padding: 12px;
-    border: 1px solid #E0E5F2;
-    border-radius: 12px;
-    background: #F9FAFB;
-    font-size: 14px;
-    color: #333;
-    outline: none;
-    transition: 0.3s;
-    appearance: none; 
-    background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%231A4D4E%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
-    background-repeat: no-repeat;
-    background-position: right 15px top 50%;
-    background-size: 12px auto;
-}
-
-.checkout-select:focus {
-    border-color: var(--accent-orange);
-    background-color: white;
-}
-
-.pickup-info {
-    background: #E6FAF5;
-    color: var(--success);
-    padding: 15px;
-    border-radius: 10px;
-    margin-bottom: 20px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-weight: 600;
-    font-size: 14px;
-}
-
-.summary-row {
-    display: flex;
-    justify-content: space-between;
-    padding: 12px 0;
-    border-bottom: 1px dashed #E0E5F2;
-    font-size: 14px;
-    color: var(--text-grey);
-}
-
-.qty-highlight {
-    color: var(--primary-brand);
-    font-weight: 700;
-    margin-right: 5px;
-}
-
-.summary-total {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 25px;
-    font-size: 20px;
-    font-weight: 700;
-    color: var(--primary-brand);
-    border-top: 2px solid #E0E5F2;
-    padding-top: 20px;
-}
-
-.btn-confirm {
-    width: 100%;
-    background: var(--primary-brand);
-    color: white;
-    border: none;
-    padding: 16px;
-    border-radius: 12px;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    margin-top: 25px;
-    transition: 0.3s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    box-shadow: 0 4px 10px rgba(26, 77, 78, 0.2);
-}
-
-.btn-confirm:hover {
-    background: var(--accent-orange);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(255, 159, 67, 0.3);
-}
-
-@media (max-width: 768px) {
-    .checkout-layout {
-        grid-template-columns: 1fr;
-    }
-    .checkout-summary {
-        border-left: none;
-        border-top: 1px solid #eee;
-        border-radius: 0 0 20px 20px;
-    }
-}
-
-/* ==========================================================================
-   14. CONTROLLI QUANTITÀ (CHECKOUT)
-   ========================================================================== */
-.qty-control-box {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    background: white;
-    padding: 5px 10px;
-    border-radius: 8px;
-    border: 1px solid #E0E5F2;
-}
-
-.btn-qty {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    font-size: 12px;
-    transition: 0.2s;
-    color: white;
-    text-decoration: none;
-}
-
-.btn-qty.minus {
-    background-color: #A3AED0;
-}
-.btn-qty.minus:hover {
-    background-color: #FF6B6B;
-}
-
-.btn-qty.plus {
-    background-color: #05CD99;
-}
-.btn-qty.plus:hover {
-    background-color: #04b183;
-}
-
-.btn-remove-item {
-    color: #FF6B6B;
-    font-size: 14px;
-    margin-left: 10px;
-    cursor: pointer;
-    transition: 0.2s;
-}
-.btn-remove-item:hover {
-    color: #d63031;
-}
-
-.item-name-checkout {
-    flex-grow: 1;
-    font-weight: 500;
-    color: var(--primary-dark);
-    margin-left: 10px;
-}
-
-/* ==========================================================================
-   15. FLOATING CART BUTTON (Tasto Carrello Galleggiante)
-   ========================================================================== */
-.floating-cart-btn {
-    position: fixed;
-    bottom: 30px;
-    right: 30px;
-    width: 65px;
-    height: 65px;
-    background: var(--primary-dark); 
-    color: white;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-decoration: none;
-    box-shadow: 0 10px 25px rgba(43, 54, 116, 0.4);
-    z-index: 2000; 
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    border: 3px solid white;
-    font-size: 24px;
-}
-
-.floating-cart-btn:hover {
-    background: var(--accent-orange);
-    transform: scale(1.1) rotate(-5deg);
-    color: white;
-    box-shadow: 0 15px 35px rgba(255, 159, 67, 0.5);
-}
-
-.cart-count-badge {
-    position: absolute;
-    top: -5px;
-    right: -5px;
-    background-color: var(--accent-red);
-    color: white;
-    font-size: 12px;
-    font-weight: 700;
-    width: 26px;
-    height: 26px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    border: 2px solid white;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-}
-
-/* ==========================================================================
-   16. STATI ORDINE AGGIUNTIVI (STORICO)
-   ========================================================================== */
-.status-badge.accepted { 
-    background: #E0F7FA; 
-    color: #006064; 
-    border: 1px solid #B2EBF2;
-}
-
-.status-badge.rejected { 
-    background: #FFEBEE; 
-    color: #C62828; 
-    border: 1px solid #FFCDD2;
 }

@@ -71,7 +71,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['send_help'])) {
 <body>
 
     <nav class="top-navbar">
-        <a href="dashboard.php" class="brand-logo"><i class="fa-solid fa-leaf" style="color: #05CD99;"></i> ClickNeat</a>
+        <a href="dashboard_consumatore.php" class="brand-logo"><i class="fa-solid fa-leaf" style="color: #05CD99;"></i> ClickNeat</a>
         <div class="nav-links">
             <a href="dashboard_consumatore.php" class="nav-item"><i class="fa-solid fa-house"></i> <span>Home</span></a>
             <a href="storico.php" class="nav-item"><i class="fa-solid fa-clock-rotate-left"></i> <span>Ordini</span></a>
@@ -83,7 +83,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['send_help'])) {
 
     <header class="hero-section">
         <div class="hero-content">
-            <a href="dashboard.php" class="btn-back-hero"><i class="fa-solid fa-arrow-left"></i> Torna alla Home</a>
+            <a href="dashboard_consumatore.php" class="btn-back-hero"><i class="fa-solid fa-arrow-left"></i> Torna alla Home</a>
             <div class="hero-title">
                 <h1>Centro Assistenza</h1>
                 <p>Inviaci una richiesta diretta alla nostra email.</p>
