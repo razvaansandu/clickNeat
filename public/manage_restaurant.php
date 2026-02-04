@@ -21,7 +21,7 @@ if ($stmt = mysqli_prepare($link, $sql)) {
     mysqli_stmt_execute($stmt);
     $result = mysqli_stmt_get_result($stmt);
     $restaurant = $result->fetch_assoc();
-
+    
     if (!$restaurant) {
         header("location: dashboard_ristoratore.php");
         exit;
@@ -61,77 +61,59 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete_dish'])) {
     }
 }
 
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_order'])) {
+    $order_id = $_POST['order_id'];
+    $new_status = $_POST['status'];  
+    
+    $sql = "UPDATE orders SET status = ? WHERE id = ? AND restaurant_id = ?";
+    if ($stmt = mysqli_prepare($link, $sql)) {
+        mysqli_stmt_bind_param($stmt, "sii", $new_status, $order_id, $restaurant_id);
+        mysqli_stmt_execute($stmt);
+        mysqli_stmt_close($stmt);
+    }
+}
+
 $menu_items = [];
 $sql_menu = "SELECT * FROM menu_items WHERE restaurant_id = ? ORDER BY created_at DESC";
 if ($stmt = mysqli_prepare($link, $sql_menu)) {
     mysqli_stmt_bind_param($stmt, "i", $restaurant_id);
     mysqli_stmt_execute($stmt);
     $res = mysqli_stmt_get_result($stmt);
-    while ($row = $res->fetch_assoc())
-        $menu_items[] = $row;
+    while ($row = $res->fetch_assoc()) $menu_items[] = $row;
+    mysqli_stmt_close($stmt);
+}
+
+$orders = [];
+$sql_orders = "SELECT o.*, u.username 
+               FROM orders o 
+               JOIN users u ON o.user_id = u.id 
+               WHERE o.restaurant_id = ? 
+               ORDER BY CASE WHEN o.status = 'pending' THEN 1 WHEN o.status = 'accepted' THEN 2 ELSE 3 END, o.created_at DESC";
+if ($stmt = mysqli_prepare($link, $sql_orders)) {
+    mysqli_stmt_bind_param($stmt, "i", $restaurant_id);
+    mysqli_stmt_execute($stmt);
+    $res = mysqli_stmt_get_result($stmt);
+    while ($row = $res->fetch_assoc()) $orders[] = $row;
     mysqli_stmt_close($stmt);
 }
 ?>
 
 <!DOCTYPE html>
 <html lang="it">
-
 <head>
     <meta charset="UTF-8">
     <title>Gestisci <?php echo htmlspecialchars($restaurant['nome']); ?> - ClickNeat</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* STILI BASE */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Inter', sans-serif;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background-color: #F4F7FE; min-height: 100vh; }
+        .main-content { margin-left: 260px; padding: 40px; }
 
-        body {
-            background-color: #F4F7FE;
-            min-height: 100vh;
-        }
-
-        .main-content {
-            margin-left: 260px;
-            padding: 40px;
-        }
-
-        .top-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-        }
-
-        .top-header h1 {
-            color: #2B3674;
-            font-size: 26px;
-            font-weight: 700;
-        }
-
-        .top-header span {
-            color: #A3AED0;
-            font-size: 14px;
-        }
-
-        .btn-back {
-            color: #1A4D4E;
-            text-decoration: none;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: 0.3s;
-        }
-
-        .btn-back:hover {
-            transform: translateX(-5px);
-            color: #E89020;
-        }
+        .top-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .top-header h1 { color: #2B3674; font-size: 26px; font-weight: 700; }
+        .top-header span { color: #A3AED0; font-size: 14px; }
+        .btn-back { color: #1A4D4E; text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 8px; }
 
         .management-grid {
             display: grid;
@@ -139,219 +121,68 @@ if ($stmt = mysqli_prepare($link, $sql_menu)) {
             gap: 30px;
         }
 
-        .card {
-            background: white;
-            border-radius: 20px;
-            padding: 25px;
-            box-shadow: 0 18px 40px rgba(112, 144, 176, 0.12);
-            height: fit-content;
-        }
+        .card { background: white; border-radius: 20px; padding: 25px; box-shadow: 0 18px 40px rgba(112, 144, 176, 0.12); height: fit-content; }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #F4F7FE; padding-bottom: 15px; }
+        .card-title { font-size: 18px; font-weight: 700; color: #2B3674; }
 
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            border-bottom: 1px solid #F4F7FE;
-            padding-bottom: 15px;
-        }
+        .add-dish-form { background: #F4F7FE; padding: 20px; border-radius: 15px; margin-bottom: 20px; }
+        .form-row { display: flex; gap: 10px; margin-bottom: 10px; }
+        input, textarea { width: 100%; padding: 10px; border: 1px solid #E0E5F2; border-radius: 10px; outline: none; }
+        .btn-add { background: #1A4D4E; color: white; border: none; padding: 10px 15px; border-radius: 10px; cursor: pointer; font-weight: 600; width: 100%; }
+        .btn-add:hover { background: #E89020; }
 
-        .card-title {
-            font-size: 18px;
-            font-weight: 700;
-            color: #2B3674;
-        }
+        .menu-list { max-height: 600px; overflow-y: auto; }
+        .menu-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid #eee; }
+        .menu-item:last-child { border-bottom: none; }
+        .dish-info h4 { color: #1B2559; font-weight: 600; }
+        .dish-info p { color: #A3AED0; font-size: 13px; }
+        .dish-price { font-weight: bold; color: #1A4D4E; margin-right: 15px; }
+        .btn-delete { color: #E53E3E; background: none; border: none; cursor: pointer; font-size: 16px; }
 
-        .add-dish-form {
-            background: #F4F7FE;
-            padding: 20px;
-            border-radius: 15px;
-            margin-bottom: 20px;
-        }
+        .order-card { background: #fff; border: 1px solid #E0E5F2; border-radius: 15px; padding: 20px; margin-bottom: 15px; }
+        .order-header { display: flex; justify-content: space-between; margin-bottom: 10px; }
+        .order-user { font-weight: 700; color: #1B2559; }
+        .order-time { font-size: 12px; color: #A3AED0; }
+        
+        .status-badge { padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+        .status-pending { background: #FFF7E6; color: #D97706; } /* Giallo */
+        .status-accepted { background: #E6FFFA; color: #1A4D4E; } /* Verde acqua */
+        .status-completed { background: #F0FFF4; color: #2F855A; } /* Verde scuro */
+        .status-cancelled { background: #FFF5F5; color: #C53030; } /* Rosso */
 
-        .form-row {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
+        .order-total { font-size: 18px; font-weight: 700; color: #1A4D4E; margin: 10px 0; }
 
-        input,
-        textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #E0E5F2;
-            border-radius: 10px;
-            outline: none;
-            transition: 0.3s;
-        }
+        .order-actions { display: flex; gap: 10px; margin-top: 15px; }
+        .btn-action { flex: 1; padding: 8px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.2s; }
+        
+        .btn-accept { background: #E6FFFA; color: #1A4D4E; border: 1px solid #1A4D4E; }
+        .btn-accept:hover { background: #1A4D4E; color: white; }
+        
+        .btn-complete { background: #2F855A; color: white; }
+        .btn-complete:hover { background: #276749; }
 
-        input:focus,
-        textarea:focus {
-            border-color: #1A4D4E;
-            box-shadow: 0 0 0 3px rgba(26, 77, 78, 0.1);
-        }
-
-        .btn-add {
-            background: #1A4D4E;
-            color: white;
-            border: none;
-            padding: 12px 15px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: 600;
-            width: 100%;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            box-shadow: 0 4px 6px rgba(26, 77, 78, 0.2);
-        }
-
-        .btn-add:hover {
-            background: #E89020;
-            transform: translateY(-3px) scale(1.02);
-            box-shadow: 0 10px 20px rgba(232, 144, 32, 0.3);
-        }
-
-        .btn-add:active {
-            transform: scale(0.95);
-            box-shadow: 0 2px 4px rgba(232, 144, 32, 0.2);
-        }
-
-        .menu-list {
-            max-height: 600px;
-            overflow-y: auto;
-        }
-
-        .menu-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 0;
-            border-bottom: 1px solid #eee;
-            transition: 0.3s;
-        }
-
-        .menu-item:hover {
-            background-color: #FAFCFE;
-            padding-left: 10px;
-        }
-
-        .menu-item:last-child {
-            border-bottom: none;
-        }
-
-        .dish-info h4 {
-            color: #1B2559;
-            font-weight: 600;
-        }
-
-        .dish-info p {
-            color: #A3AED0;
-            font-size: 13px;
-        }
-
-        .dish-price {
-            font-weight: bold;
-            color: #1A4D4E;
-            margin-right: 15px;
-        }
-
-        .btn-delete {
-            color: #E53E3E;
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 16px;
-            transition: 0.3s;
-        }
-
-        .btn-delete:hover {
-            transform: scale(1.2) rotate(10deg);
-            color: #C53030;
-        }
-
-        .btn-action {
-            flex: 1;
-            padding: 10px;
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .btn-action:hover {
-            transform: translateY(-3px);
-        }
-
-        .btn-action:active {
-            transform: scale(0.95);
-        }
-
-        .btn-accept {
-            background: #E6FFFA;
-            color: #1A4D4E;
-            border: 1px solid #1A4D4E;
-        }
-
-        .btn-accept:hover {
-            background: #1A4D4E;
-            color: white;
-            box-shadow: 0 5px 15px rgba(26, 77, 78, 0.3);
-        }
-
-        .btn-complete {
-            background: #2F855A;
-            color: white;
-            box-shadow: 0 4px 6px rgba(47, 133, 90, 0.2);
-        }
-
-        .btn-complete:hover {
-            background: #276749;
-            box-shadow: 0 8px 15px rgba(47, 133, 90, 0.4);
-        }
-
-        .btn-cancel {
-            background: white;
-            color: #C53030;
-            border: 1px solid #C53030;
-        }
-
-        .btn-cancel:hover {
-            background: #C53030;
-            color: white;
-            box-shadow: 0 5px 15px rgba(197, 48, 48, 0.3);
-        }
+        .btn-cancel { background: white; color: #C53030; border: 1px solid #C53030; }
+        .btn-cancel:hover { background: #C53030; color: white; }
 
         @media (max-width: 1000px) {
-            .management-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .main-content {
-                margin-left: 0;
-            }
+            .management-grid { grid-template-columns: 1fr; }
+            .main-content { margin-left: 0; }
         }
     </style>
 </head>
-
 <body>
 
     <?php include 'includes/sidebar.php'; ?>
 
     <div class="main-content">
-
+        
         <div class="top-header">
             <div>
-                <a href="dashboard_ristoratore.php" class="btn-back"><i class="fa-solid fa-arrow-left"></i> Torna alla
-                    Dashboard</a>
+                <a href="dashboard_ristoratore.php" class="btn-back"><i class="fa-solid fa-arrow-left"></i> Torna alla Dashboard</a>
                 <h1 style="margin-top:10px;"><?php echo htmlspecialchars($restaurant['nome']); ?></h1>
-                <span><i class="fa-solid fa-location-dot"></i>
-                    <?php echo htmlspecialchars($restaurant['indirizzo']); ?></span>
+                <span><i class="fa-solid fa-location-dot"></i> <?php echo htmlspecialchars($restaurant['indirizzo']); ?></span>
             </div>
-            <?php if ($msg): ?>
+            <?php if($msg): ?>
                 <div style="background:white; padding:10px 20px; border-radius:10px; color:green; font-weight:bold;">
                     <?php echo $msg; ?>
                 </div>
@@ -374,17 +205,16 @@ if ($stmt = mysqli_prepare($link, $sql_menu)) {
                             <input type="text" name="name" placeholder="Nome Piatto" required>
                             <input type="number" step="0.50" name="price" placeholder="€" style="width: 80px;" required>
                         </div>
-                        <textarea name="description" placeholder="Ingredienti..." rows="2"
-                            style="margin-bottom:10px;"></textarea>
+                        <textarea name="description" placeholder="Ingredienti..." rows="2" style="margin-bottom:10px;"></textarea>
                         <button type="submit" class="btn-add">Salva Piatto</button>
                     </form>
                 </div>
 
                 <div class="menu-list">
-                    <?php if (empty($menu_items)): ?>
+                    <?php if(empty($menu_items)): ?>
                         <p style="text-align:center; color:#ccc; margin-top:20px;">Il menu è vuoto.</p>
                     <?php else: ?>
-                        <?php foreach ($menu_items as $item): ?>
+                        <?php foreach($menu_items as $item): ?>
                             <div class="menu-item">
                                 <div class="dish-info">
                                     <h4><?php echo htmlspecialchars($item['name']); ?></h4>
@@ -403,8 +233,73 @@ if ($stmt = mysqli_prepare($link, $sql_menu)) {
                     <?php endif; ?>
                 </div>
             </div>
+
+            <div class="card" style="background: transparent; box-shadow: none; padding: 0;">
+                <h3 style="margin-bottom:20px; color:#2B3674;">Ordini in Arrivo</h3>
+
+                <?php if(empty($orders)): ?>
+                    <div style="text-align:center; padding:50px; background:white; border-radius:20px;">
+                        <i class="fa-solid fa-bell-slash" style="font-size:40px; color:#E0E5F2; margin-bottom:20px;"></i>
+                        <p style="color:#A3AED0;">Nessun ordine ricevuto.</p>
+                    </div>
+                <?php else: ?>
+                    <?php foreach($orders as $order): ?>
+                        <div class="order-card">
+                            <div class="order-header">
+                                <div>
+                                    <div class="order-user"><?php echo htmlspecialchars($order['username']); ?></div>
+                                    <div class="order-time"><?php echo date("d/m H:i", strtotime($order['created_at'])); ?></div>
+                                </div>
+                                <div>
+                                    <?php 
+                                    $status = $order['status'];
+                                    $label = match($status) {
+                                        'pending' => 'In Attesa',
+                                        'accepted' => 'In Preparazione',
+                                        'completed' => 'Consegnato',
+                                        'cancelled' => 'Annullato',
+                                        default => $status
+                                    };
+                                    ?>
+                                    <span class="status-badge status-<?php echo $status; ?>"><?php echo $label; ?></span>
+                                </div>
+                            </div>
+
+                            <div class="order-total">Totale: € <?php echo number_format($order['total_amount'], 2); ?></div>
+
+                            <div class="order-actions">
+                                
+                                <?php if($status == 'pending'): ?>
+                                    <form method="POST" style="flex:1;">
+                                        <input type="hidden" name="update_order" value="1">
+                                        <input type="hidden" name="order_id" value="<?php echo $order['id']; ?>">
+                                        <input type="hidden" name="status" value="accepted">
+                                        <button type="submit" class="btn-action btn-accept">Accetta</button>
+                                    </form>
+                                    
+                                    <form method="POST" style="flex:1;">
+                                        <input type="hidden" name="update_order" value="1">
+                                        <input type="hidden" name="order_id" value="<?php echo $order['id']; ?>">
+                                        <input type="hidden" name="status" value="cancelled">
+                                        <button type="submit" class="btn-action btn-cancel">Rifiuta</button>
+                                    </form>
+                                <?php endif; ?>
+
+                                <?php if($status == 'accepted'): ?>
+                                    <form method="POST" style="width:100%;">
+                                        <input type="hidden" name="update_order" value="1">
+                                        <input type="hidden" name="order_id" value="<?php echo $order['id']; ?>">
+                                        <input type="hidden" name="status" value="completed">
+                                        <button type="submit" class="btn-action btn-complete">Segna come Completato</button>
+                                    </form>
+                                <?php endif; ?>
+
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </div>
         </div>
     </div>
-
 </body>
 </html>

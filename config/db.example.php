@@ -25,9 +25,9 @@ if (isset($_SESSION['LAST_ACTIVITY']) && (time() - $_SESSION['LAST_ACTIVITY'] > 
     session_unset();
     session_destroy();
     
-    $redirect = 'login_consumatore.php';
+    $redirect = 'login.php';
     if(isset($_SESSION['ruolo']) && $_SESSION['ruolo'] == 'ristoratore'){
-        $redirect = 'login_ristoratore.php';
+        $redirect = 'login.php';
     }
     
     header("Location: ../public/$redirect?timeout=1");
@@ -52,7 +52,7 @@ if(isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true){
             session_unset();
             session_destroy();
             
-            $redirect = 'login_consumatore.php';
+            $redirect = 'login.php';
             header("Location: ../public/$redirect?security=1");
             exit();
         }

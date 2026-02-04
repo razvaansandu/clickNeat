@@ -3,7 +3,7 @@ session_start();
 require_once "../config/db.php";
 
 if (!isset($_SESSION["loggedin"]) || $_SESSION["ruolo"] !== 'ristoratore') {
-    header("location: login_ristoratore.php");
+    header("location: login.php");
     exit;
 }
 

@@ -70,10 +70,10 @@ mysqli_close($link);
             Controlla anche la cartella spam!
         </p>
         <p style="text-align: center; margin-top: 30px;">
-            <a href="login_consumatore.php">← Torna al login consumatore</a>
+            <a href="login.php">← Torna al login consumatore</a>
         </p>
         <p style="text-align: center;">
-            <a href="login_ristoratore.php">← Torna al login ristoratore</a>
+            <a href="login.php">← Torna al login ristoratore</a>
         </p>
     </div>
 </body>

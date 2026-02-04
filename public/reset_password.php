@@ -69,7 +69,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
             mysqli_stmt_bind_param($stmt, "si", $param_password, $user["id"]);
             
             if(mysqli_stmt_execute($stmt)){
-                header("location: login_" . $user["ruolo"] . ".php");
+                header("location: login" . $user["ruolo"] . ".php");
                 exit();
             }
             mysqli_stmt_close($stmt);
