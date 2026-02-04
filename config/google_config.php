@@ -1,7 +1,7 @@
 <?php
 define('GOOGLE_CLIENT_ID', '720927387722-ec3a3n7bmiqrp1svvi7ktsdnbluko418.apps.googleusercontent.com');
 define('GOOGLE_CLIENT_SECRET', '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'); 
-define('GOOGLE_REDIRECT_URL', 'http://localhost:8000/google_callback.php');
+define('GOOGLE_REDIRECT_URL', 'http://localhost:8000/auth/google_callback.php');
 
 function getGoogleLoginUrl() {
     $params = [

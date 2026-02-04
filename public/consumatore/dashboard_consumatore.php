@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once "../config/db.php";
+require_once "../../config/db.php";
 
 // Controllo accesso
 if (!isset($_SESSION["loggedin"]) || $_SESSION["ruolo"] !== 'consumatore') {
@@ -42,7 +42,7 @@ if ($result = mysqli_query($link, $sql)) {
 <head>
     <meta charset="UTF-8">
     <title>Dashboard - ClickNeat</title>
-    <link rel="stylesheet" href="css/style_consumatori.css">
+    <link rel="stylesheet" href="../css/style_consumatori.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
@@ -62,7 +62,11 @@ if ($result = mysqli_query($link, $sql)) {
             <a href="profile_consumatore.php" class="nav-item">
                 <i class="fa-solid fa-user"></i> <span>Profilo</span>
             </a>
-            <a href="logout.php" class="btn-logout-nav">
+
+            <a href="mailto:help@clickneat.com" class="nav-item">
+    <i class="fa-solid fa-circle-question"></i> <span>Aiuto</span>
+</a>
+            <a href="../auth/logout.php" class="btn-logout-nav">
                 <i class="fa-solid fa-right-from-bracket"></i> Esci
             </a>
         </div>
@@ -127,6 +131,6 @@ if ($result = mysqli_query($link, $sql)) {
             <?php endif; ?>
         </div>
     </div>
-
+</a>
 </body>
 </html>

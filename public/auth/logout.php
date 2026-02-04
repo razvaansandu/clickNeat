@@ -1,5 +1,5 @@
 <?php
-require_once "../config/db.php";
+require_once "../../config/db.php";
 $redirect = "login.php";
 if(isset($_SESSION["ruolo"])) {
 	if($_SESSION["ruolo"] === "consumatore") {

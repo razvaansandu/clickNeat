@@ -1,9 +1,5 @@
-/* css/style_consumatori.css */
-
-/* IMPORT FONT */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
 
-/* VARIABILI COLORI */
 :root {
     --primary-dark: #2B3674;
     --primary-brand: #1A4D4E;
@@ -223,4 +219,29 @@ a { text-decoration: none; color: inherit; }
     .nav-links span { display: none; }
     .hero-section { padding: 40px 20px 80px 20px; }
     .main-container { padding: 0 20px 40px 20px; }
+}
+
+.btn-support-float {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: var(--primary-dark); /* Blu scuro */
+    color: white;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    box-shadow: 0 10px 25px rgba(43, 54, 116, 0.4);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Effetto rimbalzo */
+    z-index: 2000; /* Sopra a tutto */
+    border: 2px solid white;
+}
+
+.btn-support-float:hover {
+    background: var(--accent-orange); /* Diventa arancione al passaggio */
+    transform: scale(1.1) rotate(15deg);
+    box-shadow: 0 15px 35px rgba(255, 159, 67, 0.4);
 }

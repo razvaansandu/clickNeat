@@ -17,7 +17,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 <head>
     <meta charset="UTF-8">
     <title>Dimentica password - clickNeat</title>
-    <link rel="stylesheet" href="css/style.css?v=1.0">
+    <link rel="stylesheet" href="../css/style.css?v=1.0">
 </head>
 <body>
     <div class="container">
