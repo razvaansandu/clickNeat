@@ -1,11 +1,10 @@
 <?php
-// FILE: public/login.php (Pagina Unificata)
 
 require_once "../config/db.php";
 require_once "../src/rate_limiter.php";
 require_once "../config/google_config.php";
 
-$login_url = getGoogleLoginUrl(); // Genera il link per il login con Google
+$login_url = getGoogleLoginUrl(); 
 
 $login_err = "";
 $username = "";
@@ -13,7 +12,6 @@ $blocked = false;
 $show_resend = false;
 $email_to_resend = "";
 
-// Gestione messaggi di errore via GET
 if (isset($_GET['timeout'])) {
     $login_err = "Sessione scaduta. Effettua nuovamente il login.";
 }
@@ -24,13 +22,11 @@ if (isset($_GET['resent'])) {
     $login_err = "<span style='color:green;'>Nuova email di verifica inviata! Controlla la posta.</span>";
 }
 
-// LOGICA DI LOGIN
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     $username = trim($_POST["username"]);
     $password = trim($_POST["password"]);
 
-    // Controllo tentativi (Rate Limiting)
     $attempts = check_login_attempts($link, $username);
     if ($attempts >= 5) {
         $login_err = "Troppi tentativi falliti. Riprova tra 15 minuti.";
@@ -43,7 +39,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         } elseif (empty($password)) {
             $login_err = "Inserisci la password.";
         } else {
-            // QUERY UNIFICATA: Non controlliamo il ruolo qui, lo prendiamo dal DB
             $sql = "SELECT id, username, password, ruolo, email_verified, email FROM users WHERE username = ? OR email = ?";
 
             if ($stmt = mysqli_prepare($link, $sql)) {
@@ -53,11 +48,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 if (mysqli_stmt_execute($stmt)) {
                     mysqli_stmt_store_result($stmt);
 
-                    // Se l'utente esiste
                     if (mysqli_stmt_num_rows($stmt) == 1) {
                         mysqli_stmt_bind_result($stmt, $id, $db_username, $hashed_password, $ruolo, $email_verified, $db_email);
                         if (mysqli_stmt_fetch($stmt)) {
-                            // Verifica Password
                             if ($hashed_password !== null && password_verify($password, $hashed_password)) {
 
                                 if ($email_verified == 0) {
@@ -65,7 +58,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                     $show_resend = true;
                                     $email_to_resend = $db_email;
                                 } else {
-                                    // Login Successo
                                     mysqli_stmt_close($stmt);
                                     clear_login_attempts($link, $username);
                                     session_regenerate_id(true);
@@ -81,7 +73,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
                                     mysqli_close($link);
 
-                                    // REDIRECT INTELLIGENTE IN BASE AL RUOLO
                                     if ($ruolo === 'ristoratore') {
                                         header("Location: dashboard_ristoratore.php");
                                     } else {
@@ -90,14 +81,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                     exit();
                                 }
                             } else {
-                                // Password errata
                                 record_failed_attempt($link, $username);
                                 $remaining = 5 - check_login_attempts($link, $username);
                                 $login_err = "Username o password non validi. ($remaining tentativi rimasti)";
                             }
                         }
                     } else {
-                        // Utente non trovato
                         record_failed_attempt($link, $username);
                         $remaining = 5 - check_login_attempts($link, $username);
                         $login_err = "Username o password non validi. ($remaining tentativi rimasti)";
@@ -150,7 +139,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             transition: background-color .218s, border-color .218s, box-shadow .218s;
             vertical-align: middle;
             white-space: nowrap;
-            width: 100%; /* Larghezza piena nel contenitore */
+            width: 100%;
             max-width: 400px;
             min-width: min-content;
         }
