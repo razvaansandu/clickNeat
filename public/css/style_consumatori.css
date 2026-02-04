@@ -377,18 +377,51 @@ details[open] summary::after { content: '-'; color: var(--primary); }
 
 .faq-answer { padding: 0 20px 25px 20px; color: var(--text-muted); line-height: 1.6; }
 
-/* ==========================================================================
-   11. RESPONSIVE
-   ========================================================================== */
-@media (max-width: 900px) {
-    .profile-wrapper, .help-grid, .checkout-layout { grid-template-columns: 1fr; }
-    .hero-title h1 { font-size: 32px; }
+.status-badge.accepted { 
+    background: #E0F7FA; 
+    color: #006064; 
+    border: 1px solid #B2EBF2;
 }
 
-@media (max-width: 768px) {
-    .top-navbar { padding: 15px 20px; }
-    .nav-links span { display: none; }
-    .hero-section { padding: 50px 20px 100px 20px; text-align: center; }
-    .categories-wrapper { margin-top: -60px; }
-    .main-container { padding: 0 20px 40px 20px; }
+.status-badge.rejected { 
+    background: #FFEBEE; 
+    color: #C62828; 
+    border: 1px solid #FFCDD2;
+} 
+.searchBar {
+    position: relative;
+    width: 100%;
+    max-width: 500px;
+    margin: 0 20px; 
+    border-radius: 100px; 
 }
+
+.searchBar input {
+    width: 100%;
+    padding: 12px 45px 12px 15px;
+    border: 2px solid #e0e5f2;
+    border-radius: 100px; 
+ 
+    background: white;
+    transition: all 0.3s ease;
+}
+
+.searchBar input:focus {
+    outline: none;
+    border-color:black; 
+} 
+
+.searchBar svg { 
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #707EAE;
+    pointer-events: pointer;  
+} 
+
+@media (max-width: 768px) {
+    .searchBar {
+        margin: 0 10px;
+    }
+} 
