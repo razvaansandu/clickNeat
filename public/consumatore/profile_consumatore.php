@@ -59,19 +59,19 @@ if ($stmt = mysqli_prepare($link, $sql)) {
 
     <nav class="top-navbar">
         <a href="dashboard_consumatore.php" class="brand-logo">
-            <i class="fa-solid fa-leaf" style="color: #FF9F43;"></i> ClickNeat
+            <i class="fa-solid fa-leaf" style="color: #05CD99;"></i> ClickNeat
         </a>
         <div class="nav-links">
             <a href="dashboard_consumatore.php" class="nav-item">
                 <i class="fa-solid fa-house"></i> <span>Home</span>
             </a>
-            <a href="history.php" class="nav-item">
+            <a href="storico.php" class="nav-item">
                 <i class="fa-solid fa-clock-rotate-left"></i> <span>Ordini</span>
             </a>
             <a href="profile_consumatore.php" class="nav-item active">
                 <i class="fa-solid fa-user"></i> <span>Profilo</span>
             </a>
-            <a href="mailto:help@clickneat.com" class="nav-item">
+            <a href="help.php" class="nav-item">
     <i class="fa-solid fa-circle-question"></i> <span>Aiuto</span>
 </a>
             <a href="logout.php" class="btn-logout-nav">

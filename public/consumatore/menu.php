@@ -1,5 +1,4 @@
 <?php
-session_start();
 require_once "../../config/db.php";
 
 if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
@@ -40,6 +39,13 @@ try {
         }
     }
 } catch (Exception $e) {}
+
+$total_qty = 0;
+if (isset($_SESSION['cart']) && !empty($_SESSION['cart']['items'])) {
+    foreach ($_SESSION['cart']['items'] as $item) {
+        $total_qty += $item['qty'];
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -54,21 +60,21 @@ try {
 
     <nav class="top-navbar">
         <a href="dashboard_consumatore.php" class="brand-logo">
-            <i class="fa-solid fa-leaf" style="color: #FF9F43;"></i> ClickNeat
+            <i class="fa-solid fa-leaf" style="color: #05CD99;"></i> ClickNeat
         </a>
         <div class="nav-links">
             <a href="dashboard_consumatore.php" class="nav-item">
                 <i class="fa-solid fa-house"></i> <span>Home</span>
             </a>
-            <a href="history.php" class="nav-item">
+            <a href="storico.php" class="nav-item">
                 <i class="fa-solid fa-clock-rotate-left"></i> <span>Ordini</span>
             </a>
             <a href="profile_ristoratore.php" class="nav-item">
                 <i class="fa-solid fa-user"></i> <span>Profilo</span>
             </a>
-            <a href="mailto:help@clickneat.com" class="nav-item">
-    <i class="fa-solid fa-circle-question"></i> <span>Aiuto</span>
-</a>
+            <a href="help.php" class="nav-item">
+                <i class="fa-solid fa-circle-question"></i> <span>Aiuto</span>
+            </a>
             <a href="logout.php" class="btn-logout-nav">
                 <i class="fa-solid fa-right-from-bracket"></i> Esci
             </a>
@@ -124,6 +130,13 @@ try {
             <?php endif; ?>
         </div>
     </div>
+
+    <?php if ($total_qty > 0): ?>
+    <a href="checkout.php" class="floating-cart-btn" title="Vai al carrello">
+        <i class="fa-solid fa-cart-shopping"></i>
+        <span class="cart-count-badge"><?php echo $total_qty; ?></span>
+    </a>
+    <?php endif; ?>
 
 </body>
 </html>
