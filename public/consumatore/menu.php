@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once "../config/db.php";
+require_once "../../config/db.php";
 
 if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
     header("Location: login.php");
@@ -47,14 +47,14 @@ try {
 <head>
     <meta charset="UTF-8">
     <title>Menu - <?php echo htmlspecialchars($ristorante['nome']); ?></title>
-    <link rel="stylesheet" href="css/style_consumatori.css">
+    <link rel="stylesheet" href="../css/style_consumatori.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
 
     <nav class="top-navbar">
         <a href="dashboard_consumatore.php" class="brand-logo">
-            <i class="fa-solid fa-leaf" style="color: #05CD99;"></i> ClickNeat
+            <i class="fa-solid fa-leaf" style="color: #FF9F43;"></i> ClickNeat
         </a>
         <div class="nav-links">
             <a href="dashboard_consumatore.php" class="nav-item">
@@ -63,9 +63,12 @@ try {
             <a href="history.php" class="nav-item">
                 <i class="fa-solid fa-clock-rotate-left"></i> <span>Ordini</span>
             </a>
-            <a href="profile.php" class="nav-item">
+            <a href="profile_ristoratore.php" class="nav-item">
                 <i class="fa-solid fa-user"></i> <span>Profilo</span>
             </a>
+            <a href="mailto:help@clickneat.com" class="nav-item">
+    <i class="fa-solid fa-circle-question"></i> <span>Aiuto</span>
+</a>
             <a href="logout.php" class="btn-logout-nav">
                 <i class="fa-solid fa-right-from-bracket"></i> Esci
             </a>

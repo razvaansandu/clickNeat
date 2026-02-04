@@ -1,8 +1,8 @@
 <?php
 
-require_once "../config/db.php";
-require_once "../src/rate_limiter.php";
-require_once "../config/google_config.php";
+require_once "../../config/db.php";
+require_once "../../src/rate_limiter.php";
+require_once "../../config/google_config.php";
 
 $login_url = getGoogleLoginUrl(); 
 
@@ -74,9 +74,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                     mysqli_close($link);
 
                                     if ($ruolo === 'ristoratore') {
-                                        header("Location: dashboard_ristoratore.php");
+                                        header("Location: ../ristoratore/dashboard_ristoratore.php");
                                     } else {
-                                        header("Location: dashboard_consumatore.php");
+                                        header("Location: ../consumatore/dashboard_consumatore.php");
                                     }
                                     exit();
                                 }
@@ -109,7 +109,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Accedi - ClickNeat</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=1.0">
+    <link rel="stylesheet" href="../css/style.css?v=1.0">
     
     <style>
         .gsi-material-button {
@@ -201,7 +201,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     <div class="container">
         <div class="logo-area" style="text-align: center; margin-bottom: 20px;">
-            <img src="image/image.png" alt="ClickNeat Logo" width="150" style="mix-blend-mode: multiply;">
+            <img src="../image/image.png" alt="ClickNeat Logo" width="150" style="mix-blend-mode: multiply;">
         </div>
 
         <h2>Accedi a ClickNeat</h2>

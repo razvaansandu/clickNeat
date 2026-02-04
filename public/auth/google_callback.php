@@ -1,7 +1,7 @@
 <?php
 session_start();
-require_once "../config/db.php";
-require_once "../config/google_config.php";
+require_once "../../config/db.php";
+require_once "../../config/google_config.php";
 
 if (isset($_GET['code'])) {
     
@@ -88,9 +88,9 @@ if (isset($_GET['code'])) {
         }
         
         if (isset($_SESSION['ruolo']) && $_SESSION['ruolo'] == 'ristoratore') {
-            header("Location: dashboard_ristoratore.php");
+            header("Location: ../ristoratore/dashboard_ristoratore.php");
         } else {
-            header("Location: dashboard_consumatore.php");
+            header("Location: ../consumatore/dashboard_consumatore.php");
         }
         exit();
     }

@@ -73,7 +73,7 @@
             class="<?php echo basename($_SERVER['PHP_SELF']) == 'dashboard_ristoratore.php' ? 'active' : ''; ?>">
             <i class="material-symbols-outlined">dashboard_2</i> Dashboard
         </a>
-        <a href="profile.php">
+        <a href="profile_ristoratore.php">
             <i class="fa-solid fa-user"></i> Il mio Profilo
         </a>
         <a href="stats.php">
@@ -81,7 +81,7 @@
         </a>
     </div>
 
-    <a href="logout.php" class="btn-logout-sidebar">
+    <a href="../auth/logout.php" class="btn-logout-sidebar">
         <i class="fa-solid fa-right-from-bracket"></i> Esci
     </a>
 </div>

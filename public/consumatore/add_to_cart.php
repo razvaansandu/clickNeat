@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once "../config/db.php";
+require_once "../../config/db.php";
 
 // Controllo accesso
 if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
@@ -71,7 +71,7 @@ if (!$found) {
         'price' => $piatto['price'],
         'qty' => 1,
         // Fallback immagine se manca
-        'image' => !empty($piatto['image_url']) ? $piatto['image_url'] : "https://loremflickr.com/300/300/food?lock=".$piatto['id']
+        'image' => !empty($piatto['image_url']) ? $piatto['image_url'] : "https://loremflickr.com/300/300/food?lock=" . $piatto['id']
     ];
 }
 
@@ -82,12 +82,13 @@ $_SESSION['cart']['total'] += $piatto['price'];
 
 <!DOCTYPE html>
 <html lang="it">
+
 <head>
     <meta charset="UTF-8">
     <title>Prodotto Aggiunto - ClickNeat</title>
-    <link rel="stylesheet" href="css/style_consumatori.css">
+    <link rel="stylesheet" href="../css/style_consumatori.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+
     <style>
         /* CSS Extra specifico per questa pagina di conferma */
         .confirmation-box {
@@ -95,25 +96,32 @@ $_SESSION['cart']['total'] += $piatto['price'];
             border-radius: 20px;
             padding: 50px 30px;
             text-align: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
             max-width: 600px;
-            margin: -50px auto 0 auto; /* Sovrappone all'hero */
+            margin: -50px auto 0 auto;
+            /* Sovrappone all'hero */
             position: relative;
             z-index: 10;
         }
 
         .success-icon-circle {
-            width: 80px; height: 80px;
+            width: 80px;
+            height: 80px;
             background: #E6FAF5;
             color: #05CD99;
             border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-size: 40px;
             margin: 0 auto 20px auto;
         }
 
         .added-item-name {
-            font-size: 22px; font-weight: 700; color: #2B3674; margin-bottom: 5px;
+            font-size: 22px;
+            font-weight: 700;
+            color: #2B3674;
+            margin-bottom: 5px;
         }
 
         .cart-summary {
@@ -121,34 +129,72 @@ $_SESSION['cart']['total'] += $piatto['price'];
             border-radius: 15px;
             padding: 20px;
             margin: 30px 0;
-            display: flex; justify-content: space-between; align-items: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        .cart-total-label { font-size: 14px; color: #A3AED0; }
-        .cart-total-value { font-size: 24px; font-weight: 700; color: #2B3674; }
+        .cart-total-label {
+            font-size: 14px;
+            color: #A3AED0;
+        }
+
+        .cart-total-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #2B3674;
+        }
 
         .action-buttons {
-            display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
         }
 
         .btn-continue {
-            background: #F4F7FE; color: #1A4D4E; padding: 15px; border-radius: 15px;
-            font-weight: 600; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px;
+            background: #F4F7FE;
+            color: #1A4D4E;
+            padding: 15px;
+            border-radius: 15px;
+            font-weight: 600;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
-        .btn-continue:hover { background: #e0e7ff; }
+
+        .btn-continue:hover {
+            background: #e0e7ff;
+        }
 
         .btn-checkout {
-            background: #1A4D4E; color: white; padding: 15px; border-radius: 15px;
-            font-weight: 600; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px;
+            background: #1A4D4E;
+            color: white;
+            padding: 15px;
+            border-radius: 15px;
+            font-weight: 600;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
             box-shadow: 0 10px 20px rgba(26, 77, 78, 0.2);
         }
-        .btn-checkout:hover { background: #FF9F43; transform: translateY(-3px); }
+
+        .btn-checkout:hover {
+            background: #FF9F43;
+            transform: translateY(-3px);
+        }
 
         @media (max-width: 600px) {
-            .action-buttons { grid-template-columns: 1fr; }
+            .action-buttons {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
+
 <body>
 
     <nav class="top-navbar">
@@ -162,8 +208,11 @@ $_SESSION['cart']['total'] += $piatto['price'];
             <a href="history.php" class="nav-item">
                 <i class="fa-solid fa-clock-rotate-left"></i> <span>Ordini</span>
             </a>
-            <a href="profile.php" class="nav-item">
+            <a href="profile_ristoratore.php" class="nav-item">
                 <i class="fa-solid fa-user"></i> <span>Profilo</span>
+            </a>
+            <a href="mailto:help@clickneat.com" class="nav-item">
+                <i class="fa-solid fa-circle-question"></i> <span>Aiuto</span>
             </a>
             <a href="logout.php" class="btn-logout-nav">
                 <i class="fa-solid fa-right-from-bracket"></i> Esci
@@ -171,7 +220,8 @@ $_SESSION['cart']['total'] += $piatto['price'];
         </div>
     </nav>
 
-    <header class="hero-section" style="background: linear-gradient(100deg, #FF9F43 0%, #FF6B6B 100%); padding-bottom: 80px;">
+    <header class="hero-section"
+        style="background: linear-gradient(100deg, #FF9F43 0%, #FF6B6B 100%); padding-bottom: 80px;">
         <div class="hero-content" style="text-align: center;">
             <div class="hero-title">
                 <h1>Ottima scelta! 😋</h1>
@@ -181,7 +231,7 @@ $_SESSION['cart']['total'] += $piatto['price'];
     </header>
 
     <div class="main-container">
-        
+
         <div class="confirmation-box">
             <div class="success-icon-circle">
                 <i class="fa-solid fa-check"></i>
@@ -189,11 +239,12 @@ $_SESSION['cart']['total'] += $piatto['price'];
 
             <div style="color: #A3AED0; font-size: 14px; margin-bottom: 5px;">Hai aggiunto:</div>
             <div class="added-item-name"><?php echo htmlspecialchars($piatto['name']); ?></div>
-            
+
             <div class="cart-summary">
                 <div>
                     <div class="cart-total-label">Totale Carrello</div>
-                    <div style="font-size: 13px; color: #A3AED0;"><?php echo count($_SESSION['cart']['items']); ?> articoli</div>
+                    <div style="font-size: 13px; color: #A3AED0;"><?php echo count($_SESSION['cart']['items']); ?>
+                        articoli</div>
                 </div>
                 <div class="cart-total-value">
                     € <?php echo number_format($_SESSION['cart']['total'], 2); ?>
@@ -204,7 +255,7 @@ $_SESSION['cart']['total'] += $piatto['price'];
                 <a href="menu.php?id=<?php echo $ristorante_id; ?>" class="btn-continue">
                     <i class="fa-solid fa-arrow-left"></i> Continua a ordinare
                 </a>
-                
+
                 <a href="checkout.php" class="btn-checkout">
                     Vai alla cassa <i class="fa-solid fa-arrow-right"></i>
                 </a>
@@ -214,8 +265,10 @@ $_SESSION['cart']['total'] += $piatto['price'];
     </div>
 
 </body>
+
 </html>
-<?php 
-if (isset($stmt)) mysqli_stmt_close($stmt);
-mysqli_close($link); 
+<?php
+if (isset($stmt))
+    mysqli_stmt_close($stmt);
+mysqli_close($link);
 ?>
