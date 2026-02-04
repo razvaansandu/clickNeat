@@ -2,7 +2,6 @@
 session_start();
 require_once "../../config/db.php";
 
-// Controllo accesso
 if (!isset($_SESSION["loggedin"]) || $_SESSION["ruolo"] !== 'consumatore') {
     header("location: login.php");
     exit;
@@ -12,7 +11,6 @@ $user_id = $_SESSION["id"];
 $username = $_SESSION["username"];
 $restaurants = [];
 
-// Query Ristoranti
 $sql = "SELECT id, nome, indirizzo, descrizione FROM ristoranti";
 if ($result = mysqli_query($link, $sql)) {
     while ($row = mysqli_fetch_assoc($result)) {
@@ -26,7 +24,6 @@ if ($result = mysqli_query($link, $sql)) {
         elseif (strpos($nome_lower, 'pasta') !== false) { $keyword = 'pasta'; $category = 'Italiano'; }
         elseif (strpos($nome_lower, 'dolce') !== false) { $keyword = 'cake'; $category = 'Dolci'; }
 
-        // Immagine placeholder di qualità
         $row['image_url'] = "https://loremflickr.com/600/400/" . $keyword . "?lock=" . $row['id'];
         
         $row['category'] = $category;
@@ -56,14 +53,14 @@ if ($result = mysqli_query($link, $sql)) {
             <a href="dashboard_consumatore.php" class="nav-item active">
                 <i class="fa-solid fa-house"></i> <span>Home</span>
             </a>
-            <a href="history.php" class="nav-item">
+            <a href="storico.php" class="nav-item">
                 <i class="fa-solid fa-clock-rotate-left"></i> <span>Ordini</span>
             </a>
             <a href="profile_consumatore.php" class="nav-item">
                 <i class="fa-solid fa-user"></i> <span>Profilo</span>
             </a>
 
-            <a href="mailto:help@clickneat.com" class="nav-item">
+            <a href="help.php" class="nav-item">
     <i class="fa-solid fa-circle-question"></i> <span>Aiuto</span>
 </a>
             <a href="../auth/logout.php" class="btn-logout-nav">
