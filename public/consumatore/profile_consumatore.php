@@ -74,7 +74,7 @@ if ($stmt = mysqli_prepare($link, $sql)) {
             <a href="help.php" class="nav-item">
     <i class="fa-solid fa-circle-question"></i> <span>Aiuto</span>
 </a>
-            <a href="logout.php" class="btn-logout-nav">
+            <a href="../auth/logout.php" class="btn-logout-nav">
                 <i class="fa-solid fa-right-from-bracket"></i> Esci
             </a>
         </div>
@@ -99,7 +99,7 @@ if ($stmt = mysqli_prepare($link, $sql)) {
                 <div class="info-list">
                     <div class="info-row"><span>Iscritto dal</span><b><?php echo date("d M Y", strtotime($created_at)); ?></b></div>
                     <div class="info-row"><span>Email</span><b><?php echo htmlspecialchars($email); ?></b></div>
-                    <div class="info-row"><span>Stato</span><b style="color: #05CD99;">Attivo <i class="fa-solid fa-check-circle"></i></b></div>
+                    <div class="info-row"><span>Stato</span><b style="color: #05CD99;">Attivo </b></div>
                 </div>
             </div>
 
