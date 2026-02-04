@@ -65,7 +65,7 @@
 
 <div class="sidebar">
     <div class="brand-logo">
-        <i class="fa-solid fa-leaf"></i> ClickNeat
+        <i class="fa-solid fa-leaf" ></i> ClickNeat
     </div>
 
     <div class="nav-links">

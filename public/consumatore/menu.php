@@ -142,7 +142,7 @@ if (isset($_SESSION['cart']) && !empty($_SESSION['cart']['items'])) {
 </body>
 </html>
 <?php 
-if (isset($stmt)) mysqli_stmt_close($stmt);
+if (isset($stmt)) mysqli_stmt_close($stmt);  
 if (isset($stmt_piatti)) mysqli_stmt_close($stmt_piatti);
 mysqli_close($link); 
 ?>
