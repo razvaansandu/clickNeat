@@ -11,30 +11,45 @@ $error = "";
 $success = "";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    
     $nome = trim($_POST["nome"]);
     $indirizzo = trim($_POST["indirizzo"]);
     $descrizione = trim($_POST["descrizione"]);
+
+    // LOGICA DOPPIA SCELTA
+    $cat_predefinita = $_POST["categoria_predefinita"] ?? '';
+    $cat_custom = trim($_POST["categoria_custom"] ?? '');
+
+    if (!empty($cat_custom)) {
+        $categoria = $cat_custom;
+    } elseif ($cat_predefinita !== 'custom') {
+        $categoria = $cat_predefinita;
+    } else {
+        $categoria = 'altro'; 
+    }
+
     $proprietario_id = $_SESSION["id"];
 
     if (empty($nome) || empty($indirizzo)) {
         $error = "Per favore, inserisci almeno il nome e l'indirizzo del locale.";
     } else {
-        $sql = "INSERT INTO ristoranti (proprietario_id, nome, indirizzo, descrizione) VALUES (?, ?, ?, ?)";
+        $sql = "INSERT INTO ristoranti (proprietario_id, nome, indirizzo, descrizione, categoria) VALUES (?, ?, ?, ?, ?)";
         
         if ($stmt = mysqli_prepare($link, $sql)) {
-            mysqli_stmt_bind_param($stmt, "isss", $proprietario_id, $nome, $indirizzo, $descrizione);
+            mysqli_stmt_bind_param($stmt, "issss", $proprietario_id, $nome, $indirizzo, $descrizione, $categoria);
             
             if (mysqli_stmt_execute($stmt)) {
                 $success = "Ristorante creato con successo! Verrai reindirizzato...";
                 header("refresh:2;url=dashboard_ristoratore.php");
             } else {
-                $error = "Qualcosa è andato storto. Riprova più tardi.";
+                $error = "Errore durante il salvataggio: " . mysqli_error($link);
             }
             mysqli_stmt_close($stmt);
+        } else {
+            $error = "Errore nella preparazione della query: " . mysqli_error($link);
         }
     }
 }
+
 ?>
 
 <!DOCTYPE html>
@@ -195,6 +210,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <label for="descrizione">Descrizione (Opzionale)</label>
                     <textarea id="descrizione" name="descrizione" placeholder="Raccontaci brevemente la tua cucina... (es. Specialità pesce fresco)"></textarea>
                 </div>
+                <div class="form-group">
+    <label>Categoria Ristorante:</label>
+    <select name="categoria" class="form-control" required>
+        <option value="pizza">Pizzeria</option>
+        <option value="pasta">Pasta</option>
+        <option value="panineria">Panineria & Burger</option>
+        <option value="orientale">Cucina Orientale</option>
+        <option value="altro" selected>Altro</option>
+    </select>
+</div>
 
                 <button type="submit" class="btn-submit">Crea Ristorante</button>
             </form>

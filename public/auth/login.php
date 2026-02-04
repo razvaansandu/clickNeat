@@ -1,11 +1,8 @@
 <?php
-
 require_once "../../config/db.php";
 require_once "../../src/rate_limiter.php";
 require_once "../../config/google_config.php";
-
 $login_url = getGoogleLoginUrl(); 
-
 $login_err = "";
 $username = "";
 $blocked = false;

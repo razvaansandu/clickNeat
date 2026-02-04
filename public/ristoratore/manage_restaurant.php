@@ -36,11 +36,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_dish'])) {
     $name = trim($_POST['name']);
     $desc = trim($_POST['description']);
     $price = $_POST['price'];
+    $categoria = $_POST['categoria'];
 
     if (!empty($name) && !empty($price)) {
-        $sql = "INSERT INTO menu_items (restaurant_id, name, description, price) VALUES (?, ?, ?, ?)";
+        $sql = "INSERT INTO menu_items (restaurant_id, name, description, price, categoria) VALUES (?, ?, ?, ?, ?)";
         if ($stmt = mysqli_prepare($link, $sql)) {
-            mysqli_stmt_bind_param($stmt, "isss", $restaurant_id, $name, $desc, $price);
+            mysqli_stmt_bind_param($stmt, "issss", $restaurant_id, $name, $desc, $price, $categoria);
             mysqli_stmt_execute($stmt);
             $msg = "Piatto aggiunto al menu!";
             $msg_type = "success";
@@ -206,6 +207,20 @@ if ($stmt = mysqli_prepare($link, $sql_orders)) {
                             <input type="number" step="0.50" name="price" placeholder="€" style="width: 80px;" required>
                         </div>
                         <textarea name="description" placeholder="Ingredienti..." rows="2" style="margin-bottom:10px;"></textarea>
+                        <div>
+                            <label>Categoria del piatto:</label>
+                            <select name="categoria" required>
+                                <option value="pizza">Pizza</option>
+                                <option value="pasta">Pasta</option>
+                                <option value="panino">panino</option>
+                                <option value="orientale">Orientale</option>
+                                <option value="altro">Altro</option>
+                            </select>
+                            <div class="form-group">
+    <label for="categoria"></label>
+    <input type="text" id="categoria" name="categoria" placeholder="Scrivi la tua categoria..." required>
+</div>
+                        </div>
                         <button type="submit" class="btn-add">Salva Piatto</button>
                     </form>
                 </div>
