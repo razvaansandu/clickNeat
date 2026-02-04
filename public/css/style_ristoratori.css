@@ -1,0 +1,418 @@
+/* =========================================
+   0. VARIABILI E CONFIGURAZIONE
+   ========================================= */
+:root {
+    /* Palette Principale */
+    --primary: #0F4C4F;      /* Teal più profondo e serio */
+    --primary-light: #1A6B6F; /* Per hover */
+    --accent: #F59E0B;       /* Arancione più caldo e vibrante */
+    --accent-hover: #D97706;
+
+    /* Sfondi e Testi */
+    --bg-body: #F8FAFC;      /* Grigio chiarissimo, più pulito del bluastro precedente */
+    --bg-card: #FFFFFF;
+    --text-dark: #1E293B;    /* Quasi nero, meno duro */
+    --text-muted: #64748B;   /* Grigio medio moderno */
+    --border-light: #E2E8F0; /* Bordi sottili */
+
+    /* Ombre (Il segreto per un look moderno) */
+    --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --shadow-hover: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+
+    /* Stati */
+    --success-bg: #DCFCE7; --success-text: #166534;
+    --warning-bg: #FEF3C7; --warning-text: #92400E;
+    --danger-bg: #FEE2E2;  --danger-text: #991B1B;
+    --info-bg: #E0F2FE;    --info-text: #075985;
+}
+
+/* =========================================
+   1. RESET & BASE
+   ========================================= */
+* { 
+    margin: 0; padding: 0; box-sizing: border-box; 
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+body { 
+    background-color: var(--bg-body); 
+    min-height: 100vh; 
+    color: var(--text-dark);
+    -webkit-font-smoothing: antialiased; /* Rende i font più nitidi su Mac */
+}
+
+a { text-decoration: none; transition: color 0.2s; }
+
+/* Wrapper principale */
+.main-content { 
+    margin-left: 260px; 
+    padding: 40px; 
+    transition: margin-left 0.3s ease;
+}
+
+/* =========================================
+   2. COMPONENTI COMUNI E TIPOGRAFIA
+   ========================================= */
+
+/* Header Pagina */
+.page-header, .top-bar, .top-header, .header-title { 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    margin-bottom: 35px; 
+}
+.header-title { display: block; text-align: center; }
+
+h1, .page-title h1 { 
+    color: var(--text-dark);
+    font-size: 30px; /* Leggermente più grande */
+    font-weight: 800; 
+    letter-spacing: -0.025em;
+}
+
+h2 { color: var(--text-dark); font-weight: 700; }
+h3 { color: var(--text-dark); font-weight: 700; }
+
+p, .page-title p, .subtitle, .text-muted { 
+    color: var(--text-muted); 
+    margin-top: 5px; 
+    font-size: 15px; 
+    font-weight: 500;
+}
+
+/* --- CARDS (Il cuore del restyling) --- */
+.card, .form-card, .chart-card, .top-list-card, .order-card { 
+    background: var(--bg-card);
+    border-radius: 24px; /* Arrotondamento più moderno */
+    padding: 30px; 
+    box-shadow: var(--shadow-md); /* Ombra più morbida */
+    border: 1px solid rgba(255, 255, 255, 0.5); /* Bordo sottilissimo per definizione */
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* Transizione più fluida */
+}
+
+.card:hover, .form-card:hover, .chart-card:hover { 
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
+}
+
+.card-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 25px; border-bottom: 1px solid var(--border-light); padding-bottom: 20px;
+}
+.card-title { font-size: 18px; font-weight: 700; color: var(--text-dark); }
+
+/* --- BOTTONI --- */
+button, .btn-submit, .btn-add, .btn-action {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+    color: white; 
+    border: none; 
+    padding: 14px 28px; 
+    border-radius: 12px; 
+    font-weight: 600; 
+    cursor: pointer; 
+    transition: all 0.3s ease; 
+    font-size: 15px;
+    box-shadow: var(--shadow-sm);
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+}
+
+button:hover, .btn-submit:hover, .btn-add:hover { 
+    background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(15, 76, 79, 0.3); /* Ombra colorata coerente */
+}
+
+/* Bottone Indietro */
+.btn-back { 
+    padding: 10px 20px; 
+    background: white;
+    color: var(--text-muted);
+    border: 1px solid var(--border-light);
+    border-radius: 10px; 
+    font-weight: 600; 
+    display: inline-flex; 
+    align-items: center; 
+    gap: 8px; 
+    transition: 0.3s;
+    box-shadow: var(--shadow-sm);
+}
+.btn-back:hover { 
+    background: var(--primary-light); 
+    color: white; 
+    border-color: transparent;
+}
+
+/* Alerts */
+.alert { 
+    padding: 15px; border-radius: 12px; margin-bottom: 25px; 
+    font-size: 14px; font-weight: 600; text-align: center; display: flex; align-items: center; justify-content: center; gap: 10px;
+    box-shadow: var(--shadow-sm);
+}
+.alert-error, .alert.error { background-color: var(--danger-bg); color: var(--danger-text); border: 1px solid #FECACA; }
+.alert-success, .alert.success { background-color: var(--success-bg); color: var(--success-text); border: 1px solid #BBF7D0; }
+
+/* =========================================
+   3. FORMS & INPUTS (Più puliti e tattili)
+   ========================================= */
+.form-group { margin-bottom: 25px; }
+.form-group label, .info-box label { 
+    display: block; margin-bottom: 10px; 
+    color: var(--text-dark); font-weight: 600; font-size: 14px; 
+}
+
+input[type="text"], input[type="password"], input[type="email"], 
+input[type="number"], textarea { 
+    width: 100%; padding: 14px 16px; 
+    border: 2px solid var(--border-light); /* Bordo leggermente più spesso */
+    border-radius: 12px; 
+    font-size: 15px; color: var(--text-dark); background-color: #fff;
+    transition: all 0.2s ease; 
+}
+
+input:focus, textarea:focus { 
+    border-color: var(--primary); 
+    outline: none; 
+    background-color: #F8FAFC; /* Leggero cambio background al focus */
+    box-shadow: 0 0 0 4px rgba(15, 76, 79, 0.1); 
+}
+textarea { resize: vertical; min-height: 120px; }
+
+/* Form Card Specifica */
+.form-card { margin: 40px auto; width: 100%; max-width: 550px; padding: 40px; }
+.icon-top {
+    width: 70px; height: 70px; background: var(--warning-bg); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 20px; color: var(--accent); font-size: 32px;
+    box-shadow: var(--shadow-sm);
+}
+
+/* =========================================
+   4. DASHBOARD & GRIGLIE
+   ========================================= */
+.grid-container {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 30px;
+}
+
+/* Ristorante Card in Dashboard */
+.card-icon {
+    width: 56px; height: 56px; 
+    background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 100%);
+    border-radius: 16px; /* Quadrato arrotondato è più moderno del cerchio */
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 24px; margin-bottom: 25px;
+    box-shadow: 0 8px 15px -5px rgba(15, 76, 79, 0.3);
+}
+
+.stat-row { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--border-light); }
+.revenue { font-size: 28px; font-weight: 800; color: var(--primary); letter-spacing: -0.5px; }
+.revenue span { font-size: 14px; color: var(--text-muted); font-weight: 600; display: block; margin-top: 5px; }
+.mini-chart { display: flex; gap: 6px; align-items: flex-end; height: 50px; }
+.bar { width: 10px; background-color: var(--border-light); border-radius: 4px; }
+.bar.active { background-color: var(--accent); box-shadow: 0 4px 6px -1px rgba(245, 158, 11, 0.3); }
+
+/* Card "Aggiungi Nuovo" */
+.card-add {
+    border: 3px dashed var(--border-light); background: transparent; box-shadow: none;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    min-height: 250px; cursor: pointer;
+    transition: all 0.3s ease;
+}
+.card-add:hover { 
+    border-color: var(--accent); 
+    background-color: #FFFBEB; 
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-md);
+}
+.icon-plus { font-size: 48px; color: var(--accent-hover); margin-bottom: 15px; }
+.text-add { font-weight: 700; color: var(--primary); font-size: 18px; }
+
+.btn-manage {
+    display: block; margin-top: 20px; text-align: center; padding: 12px;
+    background: var(--bg-body); color: var(--primary); border-radius: 12px; font-weight: 700;
+    border: 1px solid var(--border-light);
+}
+.btn-manage:hover { background: var(--primary); color: white; border-color: transparent; }
+
+/* =========================================
+   5. GESTIONE MENU & ORDINI (Manage Page)
+   ========================================= */
+.management-grid { display: grid; grid-template-columns: 1fr 1.4fr; gap: 35px; }
+
+.add-dish-form { 
+    background: white; border: 1px solid var(--border-light);
+    padding: 25px; border-radius: 20px; margin-bottom: 25px; 
+    box-shadow: var(--shadow-sm);
+}
+.add-dish-form h5 { font-size: 16px; font-weight: 700; margin-bottom: 15px; color: var(--primary); }
+.form-row { display: flex; gap: 15px; margin-bottom: 15px; }
+.btn-add { width: 100%; background: var(--primary); }
+
+.menu-list { max-height: 650px; overflow-y: auto; padding-right: 10px; }
+/* Scrollbar custom per la lista menu */
+.menu-list::-webkit-scrollbar { width: 6px; }
+.menu-list::-webkit-scrollbar-track { background: transparent; }
+.menu-list::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 10px; }
+.menu-list::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+.menu-item { 
+    display: flex; justify-content: space-between; align-items: center; 
+    padding: 20px 15px; border-bottom: 1px solid var(--border-light); 
+    transition: background 0.2s; border-radius: 12px;
+}
+.menu-item:hover { background-color: #F8FAFC; }
+.dish-info h4 { color: var(--text-dark); font-weight: 700; font-size: 16px; margin-bottom: 5px; }
+.dish-price { font-weight: 800; color: var(--accent); margin-right: 20px; font-size: 16px; }
+.btn-delete { color: var(--text-muted); background: none; border: none; font-size: 18px; padding: 5px; opacity: 0.7; }
+.btn-delete:hover { transform: scale(1.2); background: none; box-shadow: none; color: var(--danger-text); opacity: 1; }
+
+/* =========================================
+   6. VISUALIZZAZIONE ORDINI & STATUS
+   ========================================= */
+.order-card { 
+    margin-bottom: 25px; border-left: none; /* Rimosso il bordo sinistro spesso */
+    position: relative; overflow: hidden;
+}
+/* Indicatore colorato in alto */
+.order-card::before {
+    content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 6px;
+    background: linear-gradient(90deg, var(--primary), var(--accent));
+}
+
+.order-header { display: flex; justify-content: space-between; margin-bottom: 20px; border-bottom: 1px solid var(--border-light); padding-bottom: 15px; }
+.order-user, .order-id { font-weight: 800; color: var(--text-dark); font-size: 18px; }
+.order-time, .order-meta { font-size: 13px; color: var(--text-muted); font-weight: 500; display: flex; align-items: center; gap: 5px; }
+.order-total { font-size: 22px; font-weight: 800; color: var(--primary); margin: 15px 0; }
+
+/* Status Badges (Più moderni) */
+.status-badge, .status { 
+    padding: 8px 16px; border-radius: 30px; font-size: 13px; font-weight: 700; 
+    text-transform: uppercase; display: inline-flex; align-items: center; gap: 6px;
+    box-shadow: var(--shadow-sm); letter-spacing: 0.5px;
+}
+/* Aggiunta di un pallino colorato prima del testo */
+.status::before, .status-badge::before { content: ''; width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+
+.status-pending { background: var(--warning-bg); color: var(--warning-text); }
+.status-pending::before { background: var(--warning-text); }
+
+.status-accepted { background: var(--info-bg); color: var(--info-text); }
+.status-accepted::before { background: var(--info-text); }
+
+.status-completed { background: var(--success-bg); color: var(--success-text); }
+.status-completed::before { background: var(--success-text); }
+
+.status-cancelled { background: var(--danger-bg); color: var(--danger-text); }
+.status-cancelled::before { background: var(--danger-text); }
+
+/* Azioni Ordini */
+.order-actions { display: flex; gap: 15px; margin-top: 25px; }
+.btn-action { padding: 12px; border-radius: 12px; font-size: 14px; }
+.btn-accept { background: var(--info-bg); color: var(--info-text); box-shadow: none; }
+.btn-accept:hover { background: var(--info-text); color: white; }
+.btn-complete { background: var(--success-bg); color: var(--success-text); box-shadow: none; }
+.btn-complete:hover { background: var(--success-text); color: white; }
+.btn-cancel { background: transparent; color: var(--danger-text); border: 2px solid var(--danger-bg); box-shadow: none; }
+.btn-cancel:hover { background: var(--danger-bg); transform: translateY(-2px); }
+
+/* Tabella Ordini */
+.items-table { 
+    width: 100%; border-collapse: separate; border-spacing: 0 8px; 
+    background: transparent; margin-top: 20px; 
+}
+.items-table tr { background: #F8FAFC; border-radius: 12px; }
+.items-table td { 
+    padding: 15px 20px; font-size: 15px; border: none; color: var(--text-dark); 
+}
+.items-table tr td:first-child { border-top-left-radius: 12px; border-bottom-left-radius: 12px; font-weight: 700; color: var(--primary); }
+.items-table tr td:last-child { border-top-right-radius: 12px; border-bottom-right-radius: 12px; font-weight: 700; }
+
+/* =========================================
+   7. PROFILO
+   ========================================= */
+.profile-grid { display: grid; grid-template-columns: 380px 1fr; gap: 40px; }
+.profile-card { text-align: center; padding: 50px 30px; }
+.avatar-circle {
+    width: 140px; height: 140px; 
+    background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+    border-radius: 50%; margin: 0 auto 25px; 
+    display: flex; align-items: center; justify-content: center;
+    font-size: 50px; color: white; font-weight: 800; 
+    box-shadow: var(--shadow-lg); border: 4px solid white;
+}
+.profile-card h2 { font-size: 24px; margin-bottom: 10px; }
+.role-badge {
+    background-color: var(--primary); color: white; padding: 8px 20px;
+    border-radius: 30px; font-size: 13px; font-weight: 700; text-transform: uppercase;
+    display: inline-block; margin-top: 10px; box-shadow: var(--shadow-sm);
+}
+.info-item { 
+    padding: 20px 0; border-bottom: 1px solid var(--border-light); 
+    font-size: 15px; color: var(--text-muted); display: flex; justify-content: space-between; 
+}
+.info-item b { color: var(--text-dark); font-weight: 600; }
+
+/* =========================================
+   8. STATISTICHE & GRAFICI
+   ========================================= */
+.kpi-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; margin-bottom: 40px; }
+.kpi-card { 
+    display: flex; align-items: center; gap: 25px; padding: 35px; 
+    position: relative; overflow: hidden;
+}
+/* Effetto bagliore sfumato dietro l'icona */
+.kpi-card::after {
+    content: ''; position: absolute; top: -50%; right: -50%; width: 200px; height: 200px;
+    background: radial-gradient(circle, var(--primary-light) 0%, transparent 70%);
+    opacity: 0.1; pointer-events: none;
+}
+
+.kpi-icon { 
+    width: 70px; height: 70px; border-radius: 18px; 
+    display: flex; align-items: center; justify-content: center; font-size: 28px; 
+    box-shadow: var(--shadow-md);
+}
+.icon-money { background: linear-gradient(135deg, #10B981 0%, #059669 100%); color: white; }
+.icon-cart { background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%); color: white; }
+.icon-avg { background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%); color: white; }
+
+.kpi-info h4 { color: var(--text-muted); font-size: 15px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+.kpi-info h2 { color: var(--text-dark); font-size: 36px; font-weight: 800; margin-top: 5px; letter-spacing: -1px; }
+
+.dashboard-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 35px; margin-bottom: 40px; }
+.chart-container { position: relative; height: 350px; width: 100%; margin-top: 20px; }
+
+/* Top List Ristoranti */
+.top-item { 
+    display: flex; justify-content: space-between; align-items: center; 
+    padding: 20px 15px; border-bottom: 1px solid var(--border-light); 
+    transition: 0.2s; border-radius: 12px;
+}
+.top-item:hover { background-color: #F8FAFC; }
+.rank-circle {
+    width: 36px; height: 36px; background: var(--bg-body); color: var(--text-dark); 
+    border-radius: 50%; display: flex; align-items: center; justify-content: center; 
+    font-weight: 800; font-size: 16px; margin-right: 20px; border: 2px solid var(--border-light);
+}
+.rank-1 { background: #FDE047; color: #854D0E; border-color: #EAB308; }
+.rank-2 { background: #E2E8F0; color: #475569; border-color: #CBD5E1; }
+.rank-3 { background: #FFEDD5; color: #9A3412; border-color: #FDBA74; }
+
+/* =========================================
+   9. RESPONSIVE GENERALE
+   ========================================= */
+@media (max-width: 1100px) {
+    .dashboard-grid, .management-grid, .profile-grid { grid-template-columns: 1fr; }
+    .kpi-row { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 768px) {
+    .main-content { margin-left: 0; padding: 25px; }
+    .kpi-row { grid-template-columns: 1fr; }
+    .grid-container { grid-template-columns: 1fr; }
+    .top-bar { flex-direction: column; align-items: flex-start; gap: 20px; }
+    .header-title, .page-title { text-align: left; }
+    .order-header { flex-direction: column; gap: 15px; }
+    .order-header div[style="text-align: right;"] { text-align: left !important; }
+}

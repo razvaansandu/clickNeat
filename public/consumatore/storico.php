@@ -52,13 +52,13 @@ try {
             <a href="storico.php" class="nav-item active">
                 <i class="fa-solid fa-clock-rotate-left"></i> <span>Ordini</span>
             </a>
-            <a href="profile_ristoratore.php" class="nav-item">
+            <a href="profile_consumatore.php" class="nav-item">
                 <i class="fa-solid fa-user"></i> <span>Profilo</span>
             </a>
             <a href="help.php" class="nav-item">
                 <i class="fa-solid fa-circle-question"></i> <span>Aiuto</span>
             </a>
-            <a href="logout.php" class="btn-logout-nav">
+            <a href="../auth/logout.php" class="btn-logout-nav">
                 <i class="fa-solid fa-right-from-bracket"></i> Esci
             </a>
         </div>

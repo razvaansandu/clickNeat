@@ -32,6 +32,7 @@ if ($stmt = mysqli_prepare($link, $sql)) {
 $msg = "";
 $msg_type = "";
 
+// Aggiunta Piatto
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_dish'])) {
     $name = trim($_POST['name']);
     $desc = trim($_POST['description']);
@@ -49,6 +50,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_dish'])) {
     }
 }
 
+// Eliminazione Piatto
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete_dish'])) {
     $dish_id = $_POST['dish_id'];
     $sql = "DELETE FROM menu_items WHERE id = ? AND restaurant_id = ?";
@@ -61,6 +63,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete_dish'])) {
     }
 }
 
+// Aggiornamento Stato Ordine
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_order'])) {
     $order_id = $_POST['order_id'];
     $new_status = $_POST['status'];  
@@ -73,6 +76,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_order'])) {
     }
 }
 
+// Fetch Menu Items
 $menu_items = [];
 $sql_menu = "SELECT * FROM menu_items WHERE restaurant_id = ? ORDER BY created_at DESC";
 if ($stmt = mysqli_prepare($link, $sql_menu)) {
@@ -83,6 +87,7 @@ if ($stmt = mysqli_prepare($link, $sql_menu)) {
     mysqli_stmt_close($stmt);
 }
 
+// Fetch Orders
 $orders = [];
 $sql_orders = "SELECT o.*, u.username 
                FROM orders o 
@@ -105,70 +110,7 @@ if ($stmt = mysqli_prepare($link, $sql_orders)) {
     <title>Gestisci <?php echo htmlspecialchars($restaurant['nome']); ?> - ClickNeat</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-        body { background-color: #F4F7FE; min-height: 100vh; }
-        .main-content { margin-left: 260px; padding: 40px; }
-
-        .top-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-        .top-header h1 { color: #2B3674; font-size: 26px; font-weight: 700; }
-        .top-header span { color: #A3AED0; font-size: 14px; }
-        .btn-back { color: #1A4D4E; text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 8px; }
-
-        .management-grid {
-            display: grid;
-            grid-template-columns: 1fr 1.2fr;
-            gap: 30px;
-        }
-
-        .card { background: white; border-radius: 20px; padding: 25px; box-shadow: 0 18px 40px rgba(112, 144, 176, 0.12); height: fit-content; }
-        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #F4F7FE; padding-bottom: 15px; }
-        .card-title { font-size: 18px; font-weight: 700; color: #2B3674; }
-
-        .add-dish-form { background: #F4F7FE; padding: 20px; border-radius: 15px; margin-bottom: 20px; }
-        .form-row { display: flex; gap: 10px; margin-bottom: 10px; }
-        input, textarea { width: 100%; padding: 10px; border: 1px solid #E0E5F2; border-radius: 10px; outline: none; }
-        .btn-add { background: #1A4D4E; color: white; border: none; padding: 10px 15px; border-radius: 10px; cursor: pointer; font-weight: 600; width: 100%; }
-        .btn-add:hover { background: #E89020; }
-
-        .menu-list { max-height: 600px; overflow-y: auto; }
-        .menu-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid #eee; }
-        .menu-item:last-child { border-bottom: none; }
-        .dish-info h4 { color: #1B2559; font-weight: 600; }
-        .dish-info p { color: #A3AED0; font-size: 13px; }
-        .dish-price { font-weight: bold; color: #1A4D4E; margin-right: 15px; }
-        .btn-delete { color: #E53E3E; background: none; border: none; cursor: pointer; font-size: 16px; }
-
-        .order-card { background: #fff; border: 1px solid #E0E5F2; border-radius: 15px; padding: 20px; margin-bottom: 15px; }
-        .order-header { display: flex; justify-content: space-between; margin-bottom: 10px; }
-        .order-user { font-weight: 700; color: #1B2559; }
-        .order-time { font-size: 12px; color: #A3AED0; }
-        
-        .status-badge { padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
-        .status-pending { background: #FFF7E6; color: #D97706; } /* Giallo */
-        .status-accepted { background: #E6FFFA; color: #1A4D4E; } /* Verde acqua */
-        .status-completed { background: #F0FFF4; color: #2F855A; } /* Verde scuro */
-        .status-cancelled { background: #FFF5F5; color: #C53030; } /* Rosso */
-
-        .order-total { font-size: 18px; font-weight: 700; color: #1A4D4E; margin: 10px 0; }
-
-        .order-actions { display: flex; gap: 10px; margin-top: 15px; }
-        .btn-action { flex: 1; padding: 8px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.2s; }
-        
-        .btn-accept { background: #E6FFFA; color: #1A4D4E; border: 1px solid #1A4D4E; }
-        .btn-accept:hover { background: #1A4D4E; color: white; }
-        
-        .btn-complete { background: #2F855A; color: white; }
-        .btn-complete:hover { background: #276749; }
-
-        .btn-cancel { background: white; color: #C53030; border: 1px solid #C53030; }
-        .btn-cancel:hover { background: #C53030; color: white; }
-
-        @media (max-width: 1000px) {
-            .management-grid { grid-template-columns: 1fr; }
-            .main-content { margin-left: 0; }
-        }
-    </style>
+    <link rel="stylesheet" href="../css/style_ristoratori.css">
 </head>
 <body>
 
@@ -183,8 +125,8 @@ if ($stmt = mysqli_prepare($link, $sql_orders)) {
                 <span><i class="fa-solid fa-location-dot"></i> <?php echo htmlspecialchars($restaurant['indirizzo']); ?></span>
             </div>
             <?php if($msg): ?>
-                <div style="background:white; padding:10px 20px; border-radius:10px; color:green; font-weight:bold;">
-                    <?php echo $msg; ?>
+                <div style="background:white; padding:10px 20px; border-radius:10px; color:green; font-weight:bold; box-shadow: 0 5px 15px rgba(0,0,0,0.05);">
+                    <i class="fa-solid fa-check"></i> <?php echo $msg; ?>
                 </div>
             <?php endif; ?>
         </div>
@@ -238,7 +180,7 @@ if ($stmt = mysqli_prepare($link, $sql_orders)) {
                 <h3 style="margin-bottom:20px; color:#2B3674;">Ordini in Arrivo</h3>
 
                 <?php if(empty($orders)): ?>
-                    <div style="text-align:center; padding:50px; background:white; border-radius:20px;">
+                    <div style="text-align:center; padding:50px; background:white; border-radius:20px; box-shadow: 0 18px 40px rgba(112, 144, 176, 0.12);">
                         <i class="fa-solid fa-bell-slash" style="font-size:40px; color:#E0E5F2; margin-bottom:20px;"></i>
                         <p style="color:#A3AED0;">Nessun ordine ricevuto.</p>
                     </div>
