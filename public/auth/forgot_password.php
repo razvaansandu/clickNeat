@@ -17,7 +17,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 <head>
     <meta charset="UTF-8">
     <title>Dimentica password - clickNeat</title>
-    <link rel="stylesheet" href="css/style.css?v=1.0">
+    <link rel="stylesheet" href="../css/style.css?v=1.0">
 </head>
 <body>
     <div class="container">
@@ -35,7 +35,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                 <button type="submit">Invia link di reset</button>
             </div>
         </form>
-        <p><a href="login_consumatore.php">Torna al login consumatore</a> | <a href="login_ristoratore.php">Torna al login ristoratore</a></p>
+        <p><a href="login.php">Torna al login consumatore</a> | <a href="login.php">Torna al login ristoratore</a></p>
     </div>
 </body>
 </html>

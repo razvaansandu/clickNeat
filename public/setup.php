@@ -100,7 +100,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <div style="margin-bottom: 20px;">
                 <?php echo $message; ?>
             </div>
-            <a href="login_ristoratore.php" class="back-link">Vai al Login Ristoratore →</a>
+            <a href="login.php" class="back-link">Vai al Login Ristoratore →</a>
         <?php else: ?>
             <p>Clicca il pulsante qui sotto per creare automaticamente tutte le tabelle necessarie per ClickNeat.</p>
             <form method="POST">

@@ -1,9 +1,9 @@
 <?php
-// session_start();
-require_once "../config/db.php";
+session_start();
+require_once "../../config/db.php";
 
 if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
-    header("location: login_ristoratore.php");
+    header("location: login.php");
     exit;
 }
 
@@ -191,7 +191,7 @@ if ($stmt = mysqli_prepare($link, $sql)) {
 </head>
 <body>
 
-    <?php include 'includes/sidebar.php'; ?>
+    <?php include '../includes/sidebar.php'; ?>
 
     <div class="main-content">
         <div class="page-header">

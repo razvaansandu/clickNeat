@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Verifica Email - ClickNeat</title>
-    <link rel="stylesheet" href="css/style.css?v=1.0">
+    <link rel="stylesheet" href="../css/style.css?v=1.0">
 </head>
 <body>
     <div class="container">
@@ -17,7 +17,7 @@
             Non hai ricevuto l'email? Controlla la cartella spam.
         </p>
         <p style="text-align: center; margin-top: 30px;">
-            <a href="login_consumatore.php">← Torna al login consumatore</a>
+            <a href="login.php">← Torna al login consumatore</a>
     </div>
 </body>
 </html>

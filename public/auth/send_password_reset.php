@@ -1,5 +1,5 @@
 <?php
-require_once "../config/db.php";
+require_once "../../config/db.php";
 
 $email = $_POST["email"];
 
@@ -58,7 +58,7 @@ mysqli_close($link);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Email Inviata - ClickNeat</title>
-    <link rel="stylesheet" href="css/style.css?v=1.0">
+    <link rel="stylesheet" href="../css/style.css?v=1.0">
 </head>
 <body>
     <div class="container">
@@ -70,10 +70,10 @@ mysqli_close($link);
             Controlla anche la cartella spam!
         </p>
         <p style="text-align: center; margin-top: 30px;">
-            <a href="login_consumatore.php">← Torna al login consumatore</a>
+            <a href="login.php">← Torna al login consumatore</a>
         </p>
         <p style="text-align: center;">
-            <a href="login_ristoratore.php">← Torna al login ristoratore</a>
+            <a href="login.php">← Torna al login ristoratore</a>
         </p>
     </div>
 </body>

@@ -1,9 +1,9 @@
 <?php
-require_once "../config/db.php";
+require_once "../../config/db.php";
 session_start();
 
 if(!isset($_SESSION["user_id"]) || !isset($_SESSION["ruolo"]) || $_SESSION["ruolo"] !== "consumatore"){
-    header("location: login_consumatore.php");
+    header("location: login.php");
     exit;
 }
 
@@ -22,7 +22,7 @@ mysqli_close($link);
 <head>
     <meta charset="UTF-8">
     <title>Ristoranti disponibili</title>
-    <link rel="stylesheet" href="css/style.css?v=1.0">
+    <link rel="stylesheet" href="../css/style.css?v=1.0">
 </head>
 <body>
     <div class="container">

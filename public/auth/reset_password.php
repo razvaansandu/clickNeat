@@ -1,5 +1,5 @@
 <?php
-require_once "../config/db.php";
+require_once "../../config/db.php";
 
 $token = $_GET["token"] ?? null;
 
@@ -69,7 +69,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
             mysqli_stmt_bind_param($stmt, "si", $param_password, $user["id"]);
             
             if(mysqli_stmt_execute($stmt)){
-                header("location: login_" . $user["ruolo"] . ".php");
+                header("location: login" . $user["ruolo"] . ".php");
                 exit();
             }
             mysqli_stmt_close($stmt);
@@ -84,7 +84,7 @@ mysqli_close($link);
 <head>
     <meta charset="UTF-8">
     <title>Reset Password</title>
-    <link rel="stylesheet" href="css/style.css?v=1.0">
+    <link rel="stylesheet" href="../css/style.css?v=1.0">
 </head>
 <body>
     <div class="wrapper">

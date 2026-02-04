@@ -1,9 +1,9 @@
 <?php
-// session_start();
-require_once "../config/db.php";
+session_start();
+require_once "../../config/db.php";
 
 if (!isset($_SESSION["loggedin"]) || $_SESSION["ruolo"] !== 'ristoratore') {
-    header("location: login_ristoratore.php");
+    header("location: login.php");
     exit;
 }
 
@@ -224,7 +224,7 @@ if ($max_val == 0) $max_val = 1;
 </head>
 <body>
 
-    <?php include 'includes/sidebar.php'; ?>
+    <?php include '../includes/sidebar.php'; ?>
 
     <div class="main-content">
         
