@@ -639,9 +639,6 @@ textarea:focus { outline: none; border-color: var(--accent-orange); background: 
     box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 
-/* ==========================================================================
-   16. STATI ORDINE AGGIUNTIVI (STORICO)
-   ========================================================================== */
 .status-badge.accepted { 
     background: #E0F7FA; 
     color: #006064; 
@@ -652,4 +649,41 @@ textarea:focus { outline: none; border-color: var(--accent-orange); background: 
     background: #FFEBEE; 
     color: #C62828; 
     border: 1px solid #FFCDD2;
+} 
+.searchBar {
+    position: relative;
+    width: 100%;
+    max-width: 500px;
+    margin: 0 20px; 
+    border-radius: 100px; 
 }
+
+.searchBar input {
+    width: 100%;
+    padding: 12px 45px 12px 15px;
+    border: 2px solid #e0e5f2;
+    border-radius: 100px; 
+ 
+    background: white;
+    transition: all 0.3s ease;
+}
+
+.searchBar input:focus {
+    outline: none;
+    border-color:black; 
+} 
+
+.searchBar svg { 
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #707EAE;
+    pointer-events: pointer;  
+} 
+
+@media (max-width: 768px) {
+    .searchBar {
+        margin: 0 10px;
+    }
+} 
