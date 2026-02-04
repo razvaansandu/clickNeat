@@ -23,7 +23,6 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true || !isset($_S
             padding: 0;
         }
 
-        /* TOP MENU STYLES */
         .top-menu {
             background: white;
             padding: 16px 40px;
@@ -110,10 +109,183 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true || !isset($_S
                 font-size: 12px;
             }
         }
+
+        .search-wrapper {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            max-width: 620px;
+            width: 100%;
+        }
+
+        .search-input-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .search-wrapper img.search-icon {
+            width: 220px;
+            height: 220px;
+            border-radius: 18px;
+            object-fit: cover;
+            box-shadow: 0 12px 40px rgba(26, 77, 78, 0.14);
+            flex-shrink: 0;
+            transition: transform 0.18s ease, box-shadow 0.18s ease;
+        }
+
+        .search-wrapper img.search-icon:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 18px 50px rgba(26, 77, 78, 0.18);
+        }
+
+        @media (max-width: 1400px) {
+            .search-wrapper img.search-icon {
+                width: 200px;
+                height: 200px;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .search-wrapper img.search-icon {
+                width: 160px;
+                height: 160px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .search-wrapper img.search-icon {
+                width: 140px;
+                height: 140px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .search-wrapper img.search-icon {
+                width: 110px;
+                height: 110px;
+                margin-left: auto;
+            }
+
+            .search-wrapper {
+                gap: 8px;
+                align-items: center;
+            }
+
+            .search-submit-btn {
+                padding: 8px 10px;
+                font-size: 14px;
+            }
+        }
+
+        :root { --accent-orange: #ff6a00; }
+        .hero {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            margin: 20px 40px;
+            min-height: 420px;
+            justify-content: space-between;
+        }
+
+        .hero-left {
+            flex: 1 1 54%;
+            max-width: 54%;
+            padding-right: 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .search-wrapper { margin-top: 18px; }
+
+        .hero-right {
+            --bg-shift: 35%;
+            flex: 1 1 42%;
+            min-width: 320px;
+            background: transparent;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            position: relative;
+            overflow: visible;
+            padding: 25px 0 25px 2px;
+            color: white;
+        }
+
+        .hero-right::before {
+            content: "";
+            position: absolute;
+            right: -10%;
+            top: -20%;
+            width: 135%;
+            height: 150%;
+            background: linear-gradient(120deg, var(--accent-orange) 0%, #ff7a1a 100%);
+            transform: translateX(var(--bg-shift, 5%)) skewX(-10deg);
+            transform-origin: top right;
+            z-index: 0;
+            border-radius: 12px;
+        }
+
+        .promo-wrap {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 260px;
+        }
+
+        .promo-image {
+            position: absolute;
+            left: calc(50% + var(--bg-shift, 5%));
+            top: 55%;
+            transform: translate(-50%, -50%) rotate(-6deg);
+            max-width: 400px;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            box-shadow: 0 22px 44px rgba(0,0,0,0.18);
+            transition: transform 0.22s ease, box-shadow 0.22s ease, left 0.22s ease;
+        }
+
+        .promo-image:hover {
+            transform: translate(-50%, -52%) rotate(-6deg) scale(1.02);
+            box-shadow: 0 40px 80px rgba(0,0,0,0.28);
+        }
+
+
+
+        @media (max-width: 1200px) {
+            .hero { min-height: 360px; }
+            .hero-right { --bg-shift: 4%; }
+            .promo-image { max-width: 370px; left: calc(50% + var(--bg-shift, 4%)); }
+        }
+
+        @media (max-width: 1024px) {
+            .hero { min-height: 320px; }
+            .hero-right { --bg-shift: 3%; }
+            .promo-image { max-width: 350px; left: calc(50% + var(--bg-shift, 3%)); }
+        }
+
+        @media (max-width: 768px) {
+            .hero { flex-direction: column-reverse; gap: 12px; min-height: auto; margin: 16px; }
+            .hero-left { max-width: 100%; padding-right: 0; }
+            .hero-right { width: 100%; padding: 14px; border-radius: 10px; --bg-shift: 0%; }
+            .promo-image { max-width: 60%; position: relative; right: 0; top: 0; transform: rotate(-4deg); left: 50%; transform: translate(-50%, 0) rotate(-4deg); }
+            .promo-logo { position: relative; bottom: 0; left: 0; transform: none; margin-top: 12px; }
+        }
+
+        @media (max-width: 480px) {
+            .promo-image { max-width: 46%; }
+            .hero { margin: 12px; }
+            .promo-logo { font-size: 14px; }
+        }
     </style>
 </head>
 <body>
-        <!-- TOP MENU -->
         <div class="top-menu">
             <a href="dashboard_consumatore.php" class="lead" style="text-decoration: none;">
                 <i class="fa-solid fa-leaf"></i> ClickNeat
@@ -131,7 +303,6 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true || !isset($_S
             </div>
         </div>
 
-        <!-- HERO SECTION -->
         <div class="hero">
             <div class="hero-left">
                 <div class="welcome-section">
@@ -149,13 +320,17 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true || !isset($_S
                     <button class="search-submit-btn">Cerca</button>
                 </div>
             </div>
+
+            <div class="hero-right" aria-hidden="true">
+                <div class="promo-wrap">
+                    <img src="https://cdn.discordapp.com/attachments/1463887221835960498/1468526820130291805/Picsart_26-02-04_09-41-08-370.jpg?ex=698457ad&is=6983062d&hm=3dfefc754de02d1761839fc29e1388eeca7b012f492129dccb42284571c85e56" alt="Promo" class="promo-image" />
+                </div>
+            </div>
         </div>
 
         <div class="container">
-            <!-- Header con benvenuto -->
             <div class="dashboard-header">
                 
-                <!-- Statistiche rapide -->
                 <div class="stats-cards">
                     <div class="stat-card">
                         <div class="stat-icon">
@@ -184,7 +359,6 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true || !isset($_S
                 </div>
             </div>
 
-            <!-- Sezione ristoranti -->
             <div class="ristoranti-section">
                 <div class="section-title-bar">
                     <h2><i class="fas fa-store"></i> I Ristoranti Piu' Popolari</h2>
@@ -263,7 +437,6 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true || !isset($_S
                 <?php endif; ?>
             </div>
 
-            <!-- Footer della dashboard -->
             <div class="dashboard-footer">
                 <div class="footer-content">
                     <div class="footer-info">
@@ -305,10 +478,8 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true || !isset($_S
         </div>
     </div>
 
-    <!-- Script semplice per la ricerca -->
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Usa `locationInput` come unico campo di ricerca
         const locationInput = document.getElementById('locationInput');
         const searchInput = locationInput; // alias per chiarezza
         const ristorantiGrid = document.getElementById('ristorantiGrid');
@@ -345,7 +516,6 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true || !isset($_S
                     }
                 });
 
-                // Mostra/Nascondi messaggio "nessun risultato"
                 if (visibleCount === 0 && searchTerm !== '') {
                     noResults.style.display = 'block';
                     if (ristorantiGrid) ristorantiGrid.style.display = 'none';
@@ -356,7 +526,6 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true || !isset($_S
             });
         }
 
-        // Bottone Cerca nella hero
         const searchBtn = document.querySelector('.search-submit-btn');
         if (searchBtn && locationInput) {
             searchBtn.addEventListener('click', function() {
@@ -369,7 +538,6 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true || !isset($_S
             });
         }
         
-        // Aggiungi ai preferiti
         const favoriteButtons = document.querySelectorAll('.btn-favorite');
         favoriteButtons.forEach(button => {
             button.addEventListener('click', function() {
@@ -390,7 +558,6 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true || !isset($_S
             });
         });
         
-        // Click su card (esclusi bottoni)
         cards.forEach(card => {
             card.addEventListener('click', function(e) {
                 if (!e.target.closest('.btn-menu') && !e.target.closest('.btn-favorite')) {
