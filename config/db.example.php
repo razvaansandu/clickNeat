@@ -37,12 +37,7 @@ if (isset($_SESSION['LAST_ACTIVITY']) && (time() - $_SESSION['LAST_ACTIVITY'] > 
     session_unset();
     session_destroy();
     
-<<<<<<< HEAD
-    // Reindirizza al login appropriato
-    $redirect = 'login_consumatore.php';
-=======
     $redirect = 'login.php';
->>>>>>> a9fa74ebda6512b7041b489d26dcee1007f08c71
     if(isset($_SESSION['ruolo']) && $_SESSION['ruolo'] == 'ristoratore'){
         $redirect = 'login.php';
     }
