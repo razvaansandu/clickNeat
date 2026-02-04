@@ -1,0 +1,18 @@
+# Ignora la cartella delle librerie (si reinstalla con composer)
+/vendor/
+
+# Ignora file di sistema inutili
+.DS_Store
+Thumbs.db
+
+# Ignora backup del database e file zip
+*.sql
+*.zip
+*.gz
+*.rar
+
+# IMPORTANTE: Ignora il file con le password vere!
+config/db.php
+
+# Ignora la cartella dei dati di Docker (se l'hai mappata localmente)
+mysql_data/
