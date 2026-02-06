@@ -73,16 +73,19 @@ $_SESSION['cart']['total'] += $piatto['price'];
 
 <!DOCTYPE html>
 <html lang="it">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Prodotto Aggiunto - ClickNeat</title>
-    
+
     <link rel="stylesheet" href="../../css/style_consumatori.css">
-    
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
 </head>
+
 <body>
 
     <nav class="top-navbar">
@@ -99,7 +102,7 @@ $_SESSION['cart']['total'] += $piatto['price'];
             <a href="profile_ristoratore.php" class="nav-item">
                 <i class="fa-solid fa-user"></i> <span>Profilo</span>
             </a>
-            <a href="logout.php" class="btn-logout-nav">
+            <a href="../auth/logout.php" class="btn-logout-nav">
                 <i class="fa-solid fa-right-from-bracket"></i> Esci
             </a>
         </div>
@@ -116,15 +119,16 @@ $_SESSION['cart']['total'] += $piatto['price'];
 
     <div class="main-container">
         <div class="confirmation-box">
-            
+
             <div class="success-icon-circle">
                 <i class="fa-solid fa-check"></i>
             </div>
 
             <div style="color: #A3AED0; font-size: 14px; margin-bottom: 5px;">Hai aggiunto:</div>
-            
-            <img src="<?php echo htmlspecialchars($img_url); ?>" alt="Piatto" style="width: 100px; height: 100px; object-fit: cover; border-radius: 15px; margin: 15px auto; display: block;">
-            
+
+            <img src="<?php echo htmlspecialchars($img_url); ?>" alt="Piatto"
+                style="width: 100px; height: 100px; object-fit: cover; border-radius: 15px; margin: 15px auto; display: block;">
+
             <div class="added-item-name"><?php echo htmlspecialchars($piatto['name']); ?></div>
 
             <div class="cart-summary">
@@ -153,8 +157,10 @@ $_SESSION['cart']['total'] += $piatto['price'];
     </div>
 
 </body>
+
 </html>
 <?php
-if (isset($stmt)) mysqli_stmt_close($stmt);
+if (isset($stmt))
+    mysqli_stmt_close($stmt);
 mysqli_close($link);
 ?>

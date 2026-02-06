@@ -54,7 +54,7 @@ if (isset($_SESSION['cart']) && !empty($_SESSION['cart']['items'])) {
     <meta charset="UTF-8">
     <title>Menu - <?php echo htmlspecialchars($ristorante['nome']); ?></title>
     <link rel="stylesheet" href="../css/style_consumatori.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https:wcdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
 
@@ -75,7 +75,7 @@ if (isset($_SESSION['cart']) && !empty($_SESSION['cart']['items'])) {
             <a href="help.php" class="nav-item">
                 <i class="fa-solid fa-circle-question"></i> <span>Aiuto</span>
             </a>
-            <a href="logout.php" class="btn-logout-nav">
+            <a href="../auth/logout.php" class="btn-logout-nav">
                 <i class="fa-solid fa-right-from-bracket"></i> Esci
             </a>
         </div>
