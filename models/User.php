@@ -80,18 +80,40 @@ class User
         );
     }
 
-    public function verifyEmail($token_hash) {
+    public function verifyEmail($token_hash)
+    {
         $user = $this->db->selectOne("SELECT id FROM users WHERE email_verify_token = ?", [$token_hash]);
 
         if ($user) {
             return $this->db->update(
-                'users', 
-                ['email_verified' => 1, 'email_verify_token' => null], 
-                'id = ?', 
+                'users',
+                ['email_verified' => 1, 'email_verify_token' => null],
+                'id = ?',
                 [$user['id']]
             );
         }
-        return false; // Token non trovato
+        return false;
+    }
+
+    public function updateProfile($id, $username, $email)
+    {
+        return $this->db->update('users', ['username' => $username, 'email' => $email], 'id = ?', [$id]);
+    }
+
+    public function getPasswordHash($id)
+    {
+        $user = $this->db->selectOne("SELECT password FROM users WHERE id = ?", [$id]);
+        return $user ? $user['password'] : null;
+    }
+
+    public function updatePassword($id, $new_hash)
+    {
+        return $this->db->update('users', ['password' => $new_hash], 'id = ?', [$id]);
+    }
+
+    public function getProfileData($id)
+    {
+        return $this->db->selectOne("SELECT username, email, created_at FROM users WHERE id = ?", [$id]);
     }
 }
 ?>

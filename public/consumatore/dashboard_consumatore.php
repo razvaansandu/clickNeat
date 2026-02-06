@@ -1,6 +1,6 @@
 <?php
 require_once "../../config/db.php";
-require_once "../../models/Ristorante.php";
+require_once "../../models/dashboard_consumatore_ristoranti.php";
 
 if (!isset($_SESSION["loggedin"]) || $_SESSION["ruolo"] !== 'consumatore') {
     header("location: login.php");
@@ -33,6 +33,7 @@ foreach ($raw_restaurants as $row) {
     
     $restaurants[] = $row;
 }
+
 ?>
 
 <!DOCTYPE html>
@@ -149,7 +150,6 @@ foreach ($raw_restaurants as $row) {
     </div>
 
     <script>
-    // Passiamo l'array PHP a JavaScript
     let allRestaurants = <?php echo json_encode($restaurants); ?>;
     let currentCategory = 'all';
 
@@ -257,7 +257,6 @@ foreach ($raw_restaurants as $row) {
             return div.innerHTML;
         }
         
-        // Render iniziale
         renderRestaurants(allRestaurants);
     });
     </script>

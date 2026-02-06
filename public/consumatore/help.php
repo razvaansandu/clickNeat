@@ -1,15 +1,7 @@
 <?php
-
 if(session_status() !== PHP_SESSION_ACTIVE) session_start();
 
 require_once "../../config/db.php";
-
-require '../../vendor/phpmailer/phpmailer/src/Exception.php';
-require '../../vendor/phpmailer/phpmailer/src/PHPMailer.php';
-require '../../vendor//phpmailer/phpmailer/src/SMTP.php';
-
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
 
 if (!isset($_SESSION["loggedin"]) || $_SESSION["ruolo"] !== 'consumatore') {
     header("location: ../auth/login.php");
@@ -25,38 +17,27 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['send_help'])) {
     $oggetto = trim($_POST['subject']);
     $messaggio_utente = trim($_POST['message']);
     
-    $mail = new PHPMailer(true);
+    $mail = require __DIR__ . "/../../src/mailer.php";
 
     try {
-        $mail->isSMTP();
-        $mail->Host       = 'smtp.gmail.com';
-        $mail->SMTPAuth   = true;
-        
-        $mail->Username   = 'clickneat2026@gmail.com'; 
-        
-        $mail->Password   = 'mgtt fvkc knrh fgso'; 
-        
-        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-        $mail->Port       = 587;
+        $mail->addAddress('clickneat2026@gmail.com', 'ClickNeat Supporto'); 
 
-        $mail->setFrom('clickneat2026@gmail.com', 'ClickNeat Assistenza');
-        
-        $mail->addAddress('clickneat2026@gmail.com'); 
-                
-        $mail->isHTML(true);
         $mail->Subject = "[Supporto] " . $oggetto;
+        
         $mail->Body    = "<h3>Nuova richiesta di supporto</h3>
                           <p><b>Da Utente:</b> " . htmlspecialchars($_SESSION['username']) . " (ID: $user_id)</p>
                           <hr>
                           <p><b>Messaggio:</b><br>" . nl2br(htmlspecialchars($messaggio_utente)) . "</p>";
+                          
         $mail->AltBody = "Messaggio da " . $_SESSION['username'] . ":\n" . $messaggio_utente;
 
         $mail->send();
+        
         $msg = "Richiesta inviata con successo! Ti risponderemo presto.";
         $msg_type = "success";
 
     } catch (Exception $e) {
-        $msg = "Errore nell'invio. Controlla la Password per le App. Errore: " . $mail->ErrorInfo;
+        $msg = "Errore nell'invio. Riprova più tardi."; 
         $msg_type = "error";
     }
 }

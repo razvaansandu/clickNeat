@@ -39,7 +39,7 @@ $db->close();
                 </a>
             </p>
         <?php else: ?>
-            <h2>❌ Errore</h2>
+            <h2>Errore</h2>
             <p style="text-align: center; color: #e53e3e;"><?php echo $error; ?></p>
             <p style="text-align: center; margin-top: 20px;">
                 <a href="register.php">Torna alla registrazione</a>

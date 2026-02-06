@@ -1,11 +1,12 @@
 <?php
-
-if(session_status() !== PHP_SESSION_ACTIVE) session_start();
+if (session_status() !== PHP_SESSION_ACTIVE)
+    session_start();
 
 require_once "../../config/db.php";
+require_once "../../models/Menu.php";
 
 if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
-    header("Location: login.php");
+    header("Location: ../auth/login.php");
     exit;
 }
 
@@ -22,12 +23,8 @@ if ($piatto_id === 0 || $ristorante_id === 0) {
     exit;
 }
 
-$sql = "SELECT * FROM menu_items WHERE id = ?";
-$stmt = mysqli_prepare($link, $sql);
-mysqli_stmt_bind_param($stmt, "i", $piatto_id);
-mysqli_stmt_execute($stmt);
-$result = mysqli_stmt_get_result($stmt);
-$piatto = mysqli_fetch_assoc($result);
+$menuModel = new Menu($db);
+$piatto = $menuModel->getById($piatto_id);
 
 if (!$piatto) {
     die("Errore: Prodotto non trovato.");
@@ -57,6 +54,7 @@ foreach ($_SESSION['cart']['items'] as &$item) {
         break;
     }
 }
+unset($item);
 
 $img_url = !empty($piatto['image_url']) ? $piatto['image_url'] : "https://via.placeholder.com/150?text=No+Image";
 
@@ -101,8 +99,7 @@ $_SESSION['cart']['total'] += $piatto['price'];
             <a href="storico.php" class="nav-item">
                 <i class="fa-solid fa-clock-rotate-left"></i> <span>Ordini</span>
             </a>
-            <a href="profile_ristoratore.php" class="nav-item">
-                <i class="fa-solid fa-user"></i> <span>Profilo</span>
+            <a href="profile_consumatore.php" class="nav-item"> <i class="fa-solid fa-user"></i> <span>Profilo</span>
             </a>
             <a href="../auth/logout.php" class="btn-logout-nav">
                 <i class="fa-solid fa-right-from-bracket"></i> Esci
@@ -161,8 +158,3 @@ $_SESSION['cart']['total'] += $piatto['price'];
 </body>
 
 </html>
-<?php
-if (isset($stmt))
-    mysqli_stmt_close($stmt);
-mysqli_close($link);
-?>
