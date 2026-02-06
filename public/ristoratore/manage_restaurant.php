@@ -198,7 +198,7 @@ if ($stmt = mysqli_prepare($link, $sql_orders)) {
                                     $label = match($status) {
                                         'pending' => 'In Attesa',
                                         'accepted' => 'In Preparazione',
-                                        'completed' => 'Consegnato',
+                                        'completed' => 'Ritirato',
                                         'cancelled' => 'Annullato',
                                         default => $status
                                     };
