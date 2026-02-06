@@ -1,7 +1,9 @@
 <?php
-session_start();
-require_once "../../config/db.php";
+if(session_status() !== PHP_SESSION_ACTIVE) session_start();
+
+require_once "../../config/db.php";          
 require_once "../../config/google_config.php";
+require_once "../../models/User.php";      
 
 if (isset($_GET['code'])) {
     
@@ -19,7 +21,7 @@ if (isset($_GET['code'])) {
     curl_setopt($ch, CURLOPT_POST, 1);
     curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($post_data));
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); 
     
     $response = curl_exec($ch);
     $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -32,7 +34,6 @@ if (isset($_GET['code'])) {
     }
 
     $access_token = $token_data['access_token'];
-
     $info_url = 'https://www.googleapis.com/oauth2/v3/userinfo';
     
     $ch = curl_init();
@@ -46,54 +47,47 @@ if (isset($_GET['code'])) {
 
     $google_account_info = json_decode($info_response, true);
 
-    $google_id = $google_account_info['sub']; // ID univoco Google
+    $google_id = $google_account_info['sub'];
     $email = $google_account_info['email'];
     $name = $google_account_info['name'];
 
-    $sql = "SELECT id, username, ruolo, google_id FROM users WHERE email = ?";
-    if ($stmt = mysqli_prepare($link, $sql)) {
-        mysqli_stmt_bind_param($stmt, "s", $email);
-        mysqli_stmt_execute($stmt);
-        $result = mysqli_stmt_get_result($stmt);
-        $user = $result->fetch_assoc();
-        mysqli_stmt_close($stmt);
+    $userModel = new User($db);
 
-        if ($user) {
-            if (empty($user['google_id'])) {
-                $upd = "UPDATE users SET google_id = ?, email_verified = 1 WHERE id = ?";
-                $stmt_upd = mysqli_prepare($link, $upd);
-                mysqli_stmt_bind_param($stmt_upd, "si", $google_id, $user['id']);
-                mysqli_stmt_execute($stmt_upd);
-            }
-            $_SESSION["loggedin"] = true;
-            $_SESSION["id"] = $user['id'];
-            $_SESSION["username"] = $user['username'];
-            $_SESSION["ruolo"] = $user['ruolo'];
-            
-        } else {
-            $ruolo = 'consumatore';
-            $password_fake = password_hash(bin2hex(random_bytes(10)), PASSWORD_DEFAULT);
-            $verified = 1;
+    $user = $userModel->findByEmail($email);
 
-            $ins = "INSERT INTO users (username, email, password, ruolo, email_verified, google_id) VALUES (?, ?, ?, ?, ?, ?)";
-            if ($stmt_ins = mysqli_prepare($link, $ins)) {
-                mysqli_stmt_bind_param($stmt_ins, "ssssis", $name, $email, $password_fake, $ruolo, $verified, $google_id);
-                if (mysqli_stmt_execute($stmt_ins)) {
-                    $_SESSION["loggedin"] = true;
-                    $_SESSION["id"] = mysqli_insert_id($link);
-                    $_SESSION["username"] = $name;
-                    $_SESSION["ruolo"] = $ruolo;
-                }
-            }
+    if ($user) {
+        if (empty($user['google_id'])) {
+            $userModel->linkGoogleId($user['id'], $google_id);
         }
+
+        $_SESSION["loggedin"] = true;
+        $_SESSION["id"] = $user['id'];
+        $_SESSION["username"] = $user['username'];
+        $_SESSION["ruolo"] = $user['ruolo'];
         
-        if (isset($_SESSION['ruolo']) && $_SESSION['ruolo'] == 'ristoratore') {
-            header("Location: ../ristoratore/dashboard_ristoratore.php");
+    } else {
+        $ruolo = 'consumatore';
+        $password_fake = password_hash(bin2hex(random_bytes(10)), PASSWORD_DEFAULT);
+
+        $new_user_id = $userModel->create($name, $email, $password_fake, $ruolo, $google_id);
+
+        if ($new_user_id) {
+            $_SESSION["loggedin"] = true;
+            $_SESSION["id"] = $new_user_id;
+            $_SESSION["username"] = $name;
+            $_SESSION["ruolo"] = $ruolo;
         } else {
-            header("Location: ../consumatore/dashboard_consumatore.php");
+            die("Errore nella creazione dell'account.");
         }
-        exit();
     }
+    
+    if (isset($_SESSION['ruolo']) && $_SESSION['ruolo'] == 'ristoratore') {
+        header("Location: ../ristoratore/dashboard_ristoratore.php");
+    } else {
+        header("Location: ../consumatore/dashboard_consumatore.php");
+    }
+    exit();
+
 } else {
     header("Location: login.php");
     exit();

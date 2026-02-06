@@ -1,28 +1,24 @@
 <?php
-require_once "../../config/db.php";
+require_once "../../config/db.php";         
+require_once "../../models/User.php";       
 
 $token = $_GET["token"] ?? null;
 
-if(!$token){
-    die("Token non valido");
+if (!$token) {
+    die("Token non valido.");
 }
 
 $token_hash = hash("sha256", $token);
 
-$sql = "UPDATE users SET email_verified = 1, email_verify_token = NULL WHERE email_verify_token = ?";
+$userModel = new User($db);
 
-if($stmt = mysqli_prepare($link, $sql)){
-    mysqli_stmt_bind_param($stmt, "s", $token_hash);
-    mysqli_stmt_execute($stmt);
-    
-    if(mysqli_stmt_affected_rows($stmt) > 0){
-        $success = true;
-    } else {
-        $error = "Token non valido o già utilizzato";
-    }
-    mysqli_stmt_close($stmt);
+if ($userModel->verifyEmail($token_hash)) {
+    $success = true;
+} else {
+    $error = "Token non valido, scaduto o account già attivato.";
 }
-mysqli_close($link);
+
+$db->close();
 ?>
 <!DOCTYPE html>
 <html lang="it">

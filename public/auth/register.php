@@ -1,33 +1,33 @@
 <?php
-require_once "../../config/db.php";
-require_once "../config/google_config.php";
+
+if(session_status() !== PHP_SESSION_ACTIVE) session_start();
+
+require_once "../../config/db.php";         
+require_once "../config/google_config.php"; 
+require_once "../../models/User.php";       
+
 $register_url = getGoogleLoginUrl();
+$userModel = new User($db); 
 
-
-function generate_csrf_token()
-{
+function generate_csrf_token() {
     if (empty($_SESSION['csrf_token'])) {
         $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
     }
     return $_SESSION['csrf_token'];
 }
 
-function verify_csrf_token($token)
-{
+function verify_csrf_token($token) {
     return isset($_SESSION['csrf_token']) && hash_equals($_SESSION['csrf_token'], $token);
 }
-
 
 $username_err = $email_err = $password_err = $confirm_password_err = $ruolo_err = "";
 $username = $email = $ruolo = "";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
-
     if (!isset($_POST['csrf_token']) || !verify_csrf_token($_POST['csrf_token'])) {
-        die("Errore CSRF token");
+        die("Errore di sicurezza (CSRF token non valido).");
     }
-
 
     if (empty(trim($_POST["username"]))) {
         $username_err = "Inserisci un username.";
@@ -36,22 +36,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     } elseif (strlen(trim($_POST["username"])) > 50) {
         $username_err = "L'username è troppo lungo.";
     } else {
-        $sql = "SELECT id FROM users WHERE username = ?";
-        if ($stmt = mysqli_prepare($link, $sql)) {
-            mysqli_stmt_bind_param($stmt, "s", $param_username);
-            $param_username = trim($_POST["username"]);
-            if (mysqli_stmt_execute($stmt)) {
-                mysqli_stmt_store_result($stmt);
-                if (mysqli_stmt_num_rows($stmt) == 1) {
-                    $username_err = "Questo username è già in uso.";
-                } else {
-                    $username = trim($_POST["username"]);
-                }
-            }
-            mysqli_stmt_close($stmt);
+        if ($userModel->findByUsername(trim($_POST["username"]))) {
+            $username_err = "Questo username è già in uso.";
+        } else {
+            $username = trim($_POST["username"]);
         }
     }
-
 
     if (empty(trim($_POST["email"]))) {
         $email_err = "Inserisci un'email.";
@@ -60,22 +50,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     } elseif (strlen(trim($_POST["email"])) > 100) {
         $email_err = "Email troppo lunga.";
     } else {
-        $sql = "SELECT id FROM users WHERE email = ?";
-        if ($stmt = mysqli_prepare($link, $sql)) {
-            mysqli_stmt_bind_param($stmt, "s", $param_email);
-            $param_email = trim($_POST["email"]);
-            if (mysqli_stmt_execute($stmt)) {
-                mysqli_stmt_store_result($stmt);
-                if (mysqli_stmt_num_rows($stmt) == 1) {
-                    $email_err = "Questa email è già registrata.";
-                } else {
-                    $email = trim($_POST["email"]);
-                }
-            }
-            mysqli_stmt_close($stmt);
+        if ($userModel->findByEmail(trim($_POST["email"]))) {
+            $email_err = "Questa email è già registrata.";
+        } else {
+            $email = trim($_POST["email"]);
         }
     }
-
 
     if (empty($_POST["ruolo"])) {
         $ruolo_err = "Seleziona un ruolo.";
@@ -84,7 +64,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     } else {
         $ruolo = $_POST["ruolo"];
     }
-
 
     if (empty(trim($_POST["password"]))) {
         $password_err = "Inserisci una password.";
@@ -99,85 +78,70 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     } elseif (!preg_match('/[!@#$%^&*()_+\-=\[\]{};:\'",.<>?]/', $_POST["password"])) {
         $password_err = "La password deve contenere almeno un carattere speciale.";
     } else {
-        $password = trim($_POST["password"]);
+        $password_plain = trim($_POST["password"]);
     }
-
 
     if (empty(trim($_POST["confirm_password"]))) {
         $confirm_password_err = "Conferma la password.";
     } else {
         $confirm_password = trim($_POST["confirm_password"]);
-        if (empty($password_err) && ($password != $confirm_password)) {
+        if (empty($password_err) && ($password_plain != $confirm_password)) {
             $confirm_password_err = "Le password non coincidono.";
         }
     }
 
-
     if (empty($username_err) && empty($email_err) && empty($password_err) && empty($confirm_password_err) && empty($ruolo_err)) {
-        $sql = "INSERT INTO users (username, email, password, ruolo) VALUES (?, ?, ?, ?)";
+        
+        $hashed_password = password_hash($password_plain, PASSWORD_DEFAULT, ['cost' => 12]);
+        
+        $user_id = $userModel->create($username, $email, $hashed_password, $ruolo, 0);
 
-        if ($stmt = mysqli_prepare($link, $sql)) {
-            mysqli_stmt_bind_param($stmt, "ssss", $param_username, $param_email, $param_password, $param_ruolo);
-            $param_username = $username;
-            $param_email = $email;
-            $param_password = password_hash($password, PASSWORD_DEFAULT, ['cost' => 12]);
-            $param_ruolo = $ruolo;
+        if ($user_id) {
+            
+            $verify_token = bin2hex(random_bytes(16));
+            $verify_token_hash = hash("sha256", $verify_token);
 
-            if (mysqli_stmt_execute($stmt)) {
-                $user_id = mysqli_insert_id($link);
+            $userModel->updateVerifyToken($user_id, $verify_token_hash);
 
+            $mail = require __DIR__ . "/../src/mailer.php";
 
-                $verify_token = bin2hex(random_bytes(16));
-                $verify_token_hash = hash("sha256", $verify_token);
+            try {
+                $mail->setFrom("clickneat2026@gmail.com", "ClickNeat");
+                $mail->addAddress($email);
+                $mail->Subject = "Verifica la tua email - ClickNeat";
+                
+                $verify_link = "http://localhost:8000/verify_email.php?token=$verify_token";
 
+                $mail->Body = <<<END
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                    <h2 style="color: #1e3c72;">Benvenuto su ClickNeat, $username!</h2>
+                    <p>Grazie per esserti registrato. Per completare la registrazione, verifica la tua email cliccando sul pulsante qui sotto:</p>
+                    <a href="$verify_link" 
+                       style="display: inline-block; padding: 15px 30px; background: linear-gradient(135deg, #1e3c72, #7e22ce); 
+                       color: white; text-decoration: none; border-radius: 10px; font-weight: bold; margin: 20px 0;">
+                       Verifica Email
+                    </a>
+                    <p style="color: #666; font-size: 13px;">Se non ti sei registrato, ignora questa email.</p>
+                    <p style="color: #666; font-size: 13px;">Questo link scadrà tra 24 ore.</p>
+                </div>
+                END;
 
-                $sql2 = "UPDATE users SET email_verify_token = ? WHERE id = ?";
-                if ($stmt2 = mysqli_prepare($link, $sql2)) {
-                    mysqli_stmt_bind_param($stmt2, "si", $verify_token_hash, $user_id);
-                    mysqli_stmt_execute($stmt2);
-                    mysqli_stmt_close($stmt2);
-                }
-
-
-                $mail = require __DIR__ . "/../src/mailer.php";
-
-                try {
-                    $mail->setFrom("clickneat2026@gmail.com", "ClickNeat");
-                    $mail->addAddress($email);
-                    $mail->Subject = "Verifica la tua email - ClickNeat";
-                    $mail->Body = <<<END
-                    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-                        <h2 style="color: #1e3c72;">Benvenuto su ClickNeat, $username!</h2>
-                        <p>Grazie per esserti registrato. Per completare la registrazione, verifica la tua email cliccando sul pulsante qui sotto:</p>
-                        <a href="http://localhost/verify_email.php?token=$verify_token" 
-                           style="display: inline-block; padding: 15px 30px; background: linear-gradient(135deg, #1e3c72, #7e22ce); 
-                           color: white; text-decoration: none; border-radius: 10px; font-weight: bold; margin: 20px 0;">
-                           Verifica Email
-                        </a>
-                        <p style="color: #666; font-size: 13px;">Se non ti sei registrato, ignora questa email.</p>
-                        <p style="color: #666; font-size: 13px;">Questo link scadrà tra 24 ore.</p>
-                    </div>
-                    END;
-
-                    $mail->send();
-                } catch (Exception $e) {
-
-                }
-
-                header("location: email_sent.php?email=" . urlencode($email));
-                exit();
-            } else {
-                echo "Qualcosa è andato storto. Riprova.";
+                $mail->send();
+            } catch (Exception $e) {
             }
-            mysqli_stmt_close($stmt);
+
+            header("location: email_sent.php?email=" . urlencode($email));
+            exit();
+
+        } else {
+            echo "<div class='alert'>Si è verificato un errore durante la creazione dell'account. Riprova.</div>";
         }
     }
-
-    mysqli_close($link);
 }
 
 $csrf_token = generate_csrf_token();
 ?>
+
 <!DOCTYPE html>
 <html lang="it">
 
@@ -289,7 +253,7 @@ $csrf_token = generate_csrf_token();
             </p>
         </form>
     </div>
-
+    
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const passwordInput = document.querySelector('input[name="password"]');
@@ -344,5 +308,4 @@ $csrf_token = generate_csrf_token();
         });
     </script>
 </body>
-
 </html>

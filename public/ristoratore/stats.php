@@ -1,5 +1,7 @@
 <?php
-session_start();
+
+if(session_status() !== PHP_SESSION_ACTIVE) session_start();
+
 require_once "../../config/db.php";
 
 if (!isset($_SESSION["loggedin"]) || $_SESSION["ruolo"] !== 'ristoratore') {
@@ -13,7 +15,6 @@ $total_revenue = 0;
 $total_orders = 0;
 $avg_order = 0;
 
-// Query KPI
 $sql_kpi = "SELECT 
                 COUNT(o.id) as num_orders, 
                 SUM(o.total_amount) as revenue 
@@ -36,7 +37,6 @@ if ($total_orders > 0) {
     $avg_order = $total_revenue / $total_orders;
 }
 
-// Query Top Ristoranti
 $top_restaurants = [];
 $sql_top = "SELECT r.nome, COALESCE(SUM(o.total_amount), 0) as fatturato 
             FROM ristoranti r 
@@ -56,18 +56,15 @@ if ($stmt = mysqli_prepare($link, $sql_top)) {
     mysqli_stmt_close($stmt);
 }
 
-// Logica dati Grafico (Ultimi 7 giorni)
 $chart_data = [];
 $labels = [];
 $data_values = [];
 
-// Inizializza gli ultimi 7 giorni a 0
 for ($i = 6; $i >= 0; $i--) {
     $date = date('Y-m-d', strtotime("-$i days"));
     $chart_data[$date] = 0; 
 }
 
-// Popola con i dati dal DB
 $sql_chart = "SELECT DATE(o.created_at) as data_ordine, COUNT(o.id) as quanti 
               FROM orders o
               JOIN ristoranti r ON o.restaurant_id = r.id
@@ -87,13 +84,11 @@ if ($stmt = mysqli_prepare($link, $sql_chart)) {
     mysqli_stmt_close($stmt);
 }
 
-// Prepara array per JavaScript
 foreach ($chart_data as $date => $count) {
-    $labels[] = date('d/m', strtotime($date)); // Formato giorno/mese
+    $labels[] = date('d/m', strtotime($date));
     $data_values[] = $count;
 }
 
-// Converti in JSON per JS
 $json_labels = json_encode($labels);
 $json_data = json_encode($data_values);
 ?>
@@ -193,21 +188,20 @@ $json_data = json_encode($data_values);
     <script>
         const ctx = document.getElementById('orderChart').getContext('2d');
         
-        // Dati passati da PHP
         const labels = <?php echo $json_labels; ?>;
         const dataValues = <?php echo $json_data; ?>;
 
         new Chart(ctx, {
-            type: 'bar', // Puoi cambiarlo in 'line' per un grafico a linee
+            type: 'bar', 
             data: {
                 labels: labels,
                 datasets: [{
                     label: 'Numero Ordini',
                     data: dataValues,
                     backgroundColor: '#1A4D4E',
-                    borderRadius: 5, // Bordi arrotondati delle barre
+                    borderRadius: 5,
                     borderSkipped: false,
-                    barThickness: 30, // Larghezza delle barre
+                    barThickness: 30, 
                 }]
             },
             options: {
@@ -215,7 +209,7 @@ $json_data = json_encode($data_values);
                 maintainAspectRatio: false,
                 plugins: {
                     legend: {
-                        display: false // Nascondi la legenda
+                        display: false
                     },
                     tooltip: {
                         backgroundColor: '#2B3674',
@@ -232,7 +226,7 @@ $json_data = json_encode($data_values);
                             borderDash: [5, 5]
                         },
                         ticks: {
-                            stepSize: 1, // Mostra solo numeri interi
+                            stepSize: 1,
                             font: { family: 'Inter', color: '#A3AED0' }
                         },
                         border: { display: false }

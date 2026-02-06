@@ -1,6 +1,7 @@
 <?php
 require_once "../../config/db.php";
-session_start();
+
+if(session_status() !== PHP_SESSION_ACTIVE) session_start();
 
 if(!isset($_SESSION["user_id"]) || !isset($_SESSION["ruolo"]) || $_SESSION["ruolo"] !== "consumatore"){
     header("location: login.php");

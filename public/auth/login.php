@@ -1,10 +1,11 @@
 <?php
-
-require_once "../../config/db.php";
-require_once "../../src/rate_limiter.php";
+require_once "../../config/db.php";          
+require_once "../../src/rate_limiter.php";   
 require_once "../../config/google_config.php";
+require_once "../../models/User.php";        
 
 $login_url = getGoogleLoginUrl(); 
+$userModel = new User($db); 
 
 $login_err = "";
 $username = "";
@@ -27,7 +28,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = trim($_POST["username"]);
     $password = trim($_POST["password"]);
 
-    $attempts = check_login_attempts($link, $username);
+    $attempts = check_login_attempts($db, $username);
+    
     if ($attempts >= 5) {
         $login_err = "Troppi tentativi falliti. Riprova tra 15 minuti.";
         $blocked = true;
@@ -39,66 +41,48 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         } elseif (empty($password)) {
             $login_err = "Inserisci la password.";
         } else {
-            $sql = "SELECT id, username, password, ruolo, email_verified, email FROM users WHERE username = ? OR email = ?";
+            $user = $userModel->findByUsernameOrEmail($username);
 
-            if ($stmt = mysqli_prepare($link, $sql)) {
-                mysqli_stmt_bind_param($stmt, "ss", $param_username, $param_username);
-                $param_username = $username;
+            if ($user) {
+                if ($user['password'] !== null && password_verify($password, $user['password'])) {
 
-                if (mysqli_stmt_execute($stmt)) {
-                    mysqli_stmt_store_result($stmt);
-
-                    if (mysqli_stmt_num_rows($stmt) == 1) {
-                        mysqli_stmt_bind_result($stmt, $id, $db_username, $hashed_password, $ruolo, $email_verified, $db_email);
-                        if (mysqli_stmt_fetch($stmt)) {
-                            if ($hashed_password !== null && password_verify($password, $hashed_password)) {
-
-                                if ($email_verified == 0) {
-                                    $login_err = "Email non verificata.";
-                                    $show_resend = true;
-                                    $email_to_resend = $db_email;
-                                } else {
-                                    mysqli_stmt_close($stmt);
-                                    clear_login_attempts($link, $username);
-                                    session_regenerate_id(true);
-
-                                    $_SESSION["loggedin"] = true;
-                                    $_SESSION["id"] = $id;
-                                    $_SESSION["username"] = $db_username;
-                                    $_SESSION["ruolo"] = $ruolo; // Salviamo il ruolo in sessione
-                                    $_SESSION['USER_IP'] = $_SERVER['REMOTE_ADDR'];
-                                    $_SESSION['USER_AGENT'] = $_SERVER['HTTP_USER_AGENT'];
-                                    $_SESSION['LAST_ACTIVITY'] = time();
-                                    $_SESSION['CREATED'] = time();
-
-                                    mysqli_close($link);
-
-                                    if ($ruolo === 'ristoratore') {
-                                        header("Location: ../ristoratore/dashboard_ristoratore.php");
-                                    } else {
-                                        header("Location: ../consumatore/dashboard_consumatore.php");
-                                    }
-                                    exit();
-                                }
-                            } else {
-                                record_failed_attempt($link, $username);
-                                $remaining = 5 - check_login_attempts($link, $username);
-                                $login_err = "Username o password non validi. ($remaining tentativi rimasti)";
-                            }
-                        }
+                    if ($user['email_verified'] == 0) {
+                        $login_err = "Email non verificata.";
+                        $show_resend = true;
+                        $email_to_resend = $user['email'];
                     } else {
-                        record_failed_attempt($link, $username);
-                        $remaining = 5 - check_login_attempts($link, $username);
-                        $login_err = "Username o password non validi. ($remaining tentativi rimasti)";
+                        clear_login_attempts($db, $username);
+                        session_regenerate_id(true);
+
+                        $_SESSION["loggedin"] = true;
+                        $_SESSION["id"] = $user['id'];
+                        $_SESSION["username"] = $user['username'];
+                        $_SESSION["ruolo"] = $user['ruolo'];
+                        
+                        $_SESSION['USER_IP'] = $_SERVER['REMOTE_ADDR'];
+                        $_SESSION['USER_AGENT'] = $_SERVER['HTTP_USER_AGENT'];
+                        $_SESSION['LAST_ACTIVITY'] = time();
+                        $_SESSION['CREATED'] = time();
+
+                        if ($user['ruolo'] === 'ristoratore') {
+                            header("Location: ../ristoratore/dashboard_ristoratore.php");
+                        } else {
+                            header("Location: ../consumatore/dashboard_consumatore.php");
+                        }
+                        exit();
                     }
                 } else {
-                    $login_err = "Errore di sistema. Riprova più tardi.";
+                    record_failed_attempt($db, $username);
+                    $remaining = 5 - check_login_attempts($db, $username);
+                    $login_err = "Username o password non validi. ($remaining tentativi rimasti)";
                 }
-                mysqli_stmt_close($stmt);
+            } else {
+                record_failed_attempt($db, $username);
+                $remaining = 5 - check_login_attempts($db, $username);
+                $login_err = "Username o password non validi. ($remaining tentativi rimasti)";
             }
         }
     }
-    mysqli_close($link);
 }
 ?>
 
@@ -158,7 +142,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             -webkit-flex-wrap: nowrap;
             flex-wrap: nowrap;
             height: 100%;
-            justify-content: center; /* Centrato */
+            justify-content: center;
             position: relative;
             width: 100%;
         }
