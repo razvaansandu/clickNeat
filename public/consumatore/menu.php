@@ -1,7 +1,7 @@
 <?php
 require_once "../../config/db.php";
-require_once "../../models/RistoranteModel.php";
-require_once "../../models/MenuModel.php";
+require_once "../../models/consumatore/RistoranteModel.php";
+require_once "../../models/consumatore/MenuModel.php";
 
 if (session_status() !== PHP_SESSION_ACTIVE)
     session_start();

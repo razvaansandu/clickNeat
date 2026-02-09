@@ -1,6 +1,6 @@
 <?php
 require_once "../../config/db.php";
-require_once "../../models/EmailVerificationModel.php"; 
+require_once "../../models/auth/EmailVerificationModel.php"; 
 
 $token = isset($_GET["token"]) ? $_GET["token"] : null;
 $success = false;

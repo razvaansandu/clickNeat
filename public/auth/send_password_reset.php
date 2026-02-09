@@ -2,7 +2,7 @@
 if (session_status() !== PHP_SESSION_ACTIVE) session_start();
 
 require_once "../../config/db.php";
-require_once "../../models/PasswordResetModel.php"; 
+require_once "../../models/auth/PasswordResetModel.php"; 
 
 $msg = "";
 
