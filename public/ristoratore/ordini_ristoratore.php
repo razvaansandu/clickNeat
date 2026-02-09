@@ -1,5 +1,7 @@
 <?php
-session_start();
+
+if(session_status() !== PHP_SESSION_ACTIVE) session_start();
+
 require_once "../../config/db.php";
 
 if (!isset($_SESSION["loggedin"]) || $_SESSION["ruolo"] !== 'ristoratore') {
@@ -26,7 +28,6 @@ if ($stmt = mysqli_prepare($link, $sql)) {
     while ($row = mysqli_fetch_assoc($result)) {
         $order_id = $row['id'];
         
-        // Recupera i piatti
         $sql_items = "SELECT oi.quantity, oi.price_at_time, m.name 
                       FROM order_items oi 
                       JOIN menu_items m ON oi.dish_id = m.id 
@@ -52,32 +53,7 @@ if ($stmt = mysqli_prepare($link, $sql)) {
     <title>Ordini Takeout - Ristoratore</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        body { background: #F4F7FE; font-family: 'Inter', sans-serif; padding: 20px; }
-        .admin-nav { background: #fff; padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); border-radius: 10px; margin-bottom: 30px; }
-        .logo { font-size: 20px; font-weight: 800; color: #1A4D4E; text-decoration: none; }
-        .btn-back { padding: 10px 20px; background: #E0E5F2; color: #2B3674; text-decoration: none; border-radius: 10px; font-weight: 600; }
-        
-        .container { max-width: 1000px; margin: 0 auto; }
-        .page-title { font-size: 24px; font-weight: 700; color: #2B3674; margin-bottom: 20px; }
-        
-        .order-card { background: white; border-radius: 15px; padding: 25px; margin-bottom: 25px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-left: 5px solid #1A4D4E; }
-        .order-header { display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding-bottom: 15px; margin-bottom: 15px; }
-        .order-id { font-weight: 800; color: #2B3674; font-size: 18px; }
-        .order-meta { font-size: 13px; color: #A3AED0; margin-top: 5px; }
-        
-        .info-grid { margin-bottom: 20px; }
-        .info-box label { font-size: 11px; font-weight: 700; color: #A3AED0; text-transform: uppercase; }
-        .info-box p { font-size: 15px; color: #1B2559; margin-top: 5px; font-weight: 500; }
-        
-        .items-table { width: 100%; border-collapse: collapse; background: #F9FAFB; border-radius: 8px; overflow: hidden; }
-        .items-table td { padding: 10px 15px; font-size: 14px; border-bottom: 1px solid #eee; color: #2B3674; }
-        .items-table tr:last-child td { border-bottom: none; }
-        
-        .footer { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee; }
-        .total { font-size: 20px; font-weight: 700; color: #1A4D4E; }
-        .status { padding: 6px 15px; border-radius: 20px; background: #FFF8E6; color: #FFB547; font-weight: 700; font-size: 12px; text-transform: uppercase; }
-    </style>
+    <link rel="stylesheet" href="../css/style_consumatori.css">
 </head>
 <body>
 

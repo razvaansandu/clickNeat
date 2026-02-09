@@ -8,7 +8,7 @@
 </head>
 <body>
     <div class="container">
-        <h2>📧 Controlla la tua email</h2>
+        <h2> Controlla la tua email</h2>
         <p style="text-align: center;">Ti abbiamo inviato un'email di verifica.</p>
         <p style="text-align: center; color: #7e22ce; font-weight: 600;">
             Clicca sul link nell'email per attivare il tuo account.

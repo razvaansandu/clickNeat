@@ -1,43 +1,29 @@
 <?php
-function check_login_attempts($link, $identifier) {
+function check_login_attempts($db, $identifier) {
     $ip = $_SERVER['REMOTE_ADDR'];
     
-    $sql = "DELETE FROM login_attempts WHERE attempt_time < DATE_SUB(NOW(), INTERVAL 15 MINUTE)";
-    mysqli_query($link, $sql);
+    $db->delete('login_attempts', 'attempt_time < DATE_SUB(NOW(), INTERVAL 15 MINUTE)');
     
-    $sql = "SELECT COUNT(*) as attempts FROM login_attempts 
+    $sql = "SELECT COUNT(*) as attempts 
+            FROM login_attempts 
             WHERE (email = ? OR ip_address = ?) 
             AND attempt_time > DATE_SUB(NOW(), INTERVAL 15 MINUTE)";
     
-    if($stmt = mysqli_prepare($link, $sql)){
-        mysqli_stmt_bind_param($stmt, "ss", $identifier, $ip);
-        mysqli_stmt_execute($stmt);
-        $result = mysqli_stmt_get_result($stmt);
-        $row = mysqli_fetch_assoc($result);
-        mysqli_stmt_close($stmt);
-        
-        return $row['attempts'];
-    }
-    return 0;
+    $row = $db->selectOne($sql, [$identifier, $ip]);
+    
+    return $row ? (int)$row['attempts'] : 0;
 }
 
-function record_failed_attempt($link, $identifier) {
+function record_failed_attempt($db, $identifier) {
     $ip = $_SERVER['REMOTE_ADDR'];
     
-    $sql = "INSERT INTO login_attempts (email, ip_address) VALUES (?, ?)";
-    if($stmt = mysqli_prepare($link, $sql)){
-        mysqli_stmt_bind_param($stmt, "ss", $identifier, $ip);
-        mysqli_stmt_execute($stmt);
-        mysqli_stmt_close($stmt);
-    }
+    $db->insert('login_attempts', [
+        'email' => $identifier,
+        'ip_address' => $ip
+    ]);
 }
 
-function clear_login_attempts($link, $identifier) {
-    $sql = "DELETE FROM login_attempts WHERE email = ?";
-    if($stmt = mysqli_prepare($link, $sql)){
-        mysqli_stmt_bind_param($stmt, "s", $identifier);
-        mysqli_stmt_execute($stmt);
-        mysqli_stmt_close($stmt);
-    }
+function clear_login_attempts($db, $identifier) {
+    $db->delete('login_attempts', 'email = ?', [$identifier]);
 }
 ?>
