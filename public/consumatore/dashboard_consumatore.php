@@ -1,6 +1,6 @@
 <?php
 require_once "../../config/db.php";
-require_once "../../models/consumatore/RistoranteModel.php";
+require_once "../../models/RistoranteModel.php";
 
 if (!isset($_SESSION["loggedin"]) || $_SESSION["ruolo"] !== 'consumatore') {
     header("location: login.php");

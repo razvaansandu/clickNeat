@@ -2,7 +2,7 @@
 if (session_status() !== PHP_SESSION_ACTIVE) session_start();
 
 require_once "../../config/db.php";
-require_once "../../models/consumatore/ProfileModel.php";
+require_once "../../models/ProfileModel.php";
 
 if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
     header("location: ../auth/login.php");

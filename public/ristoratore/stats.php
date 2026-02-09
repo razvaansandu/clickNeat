@@ -1,60 +1,25 @@
 <?php
-
 if(session_status() !== PHP_SESSION_ACTIVE) session_start();
 
 require_once "../../config/db.php";
+require_once "../../models/OrderRistoratoreModel.php";
 
 if (!isset($_SESSION["loggedin"]) || $_SESSION["ruolo"] !== 'ristoratore') {
-    header("location: login.php");
+    header("location: ../auth/login.php");
     exit;
 }
 
 $user_id = $_SESSION["id"];
+$orderModel = new OrderRistoratoreModel($db);
 
-$total_revenue = 0;
-$total_orders = 0;
-$avg_order = 0;
+$kpi = $orderModel->getOwnerKPI($user_id);
+$total_revenue = $kpi['revenue'] ?? 0.0;
+$total_orders = $kpi['num_orders'] ?? 0;
+$avg_order = ($total_orders > 0) ? ($total_revenue / $total_orders) : 0;
 
-$sql_kpi = "SELECT 
-                COUNT(o.id) as num_orders, 
-                SUM(o.total_amount) as revenue 
-            FROM orders o
-            JOIN ristoranti r ON o.restaurant_id = r.id
-            WHERE r.proprietario_id = ? AND o.status = 'completed'";
+$top_restaurants = $orderModel->getTopRestaurantsByOwner($user_id);
 
-if ($stmt = mysqli_prepare($link, $sql_kpi)) {
-    mysqli_stmt_bind_param($stmt, "i", $user_id);
-    mysqli_stmt_execute($stmt);
-    mysqli_stmt_bind_result($stmt, $total_orders, $total_revenue);
-    mysqli_stmt_fetch($stmt);
-    mysqli_stmt_close($stmt);
-}
-
-$total_revenue = $total_revenue ?? 0.0;
-$total_orders = $total_orders ?? 0;
-
-if ($total_orders > 0) {
-    $avg_order = $total_revenue / $total_orders;
-}
-
-$top_restaurants = [];
-$sql_top = "SELECT r.nome, COALESCE(SUM(o.total_amount), 0) as fatturato 
-            FROM ristoranti r 
-            LEFT JOIN orders o ON r.id = o.restaurant_id AND o.status = 'completed'
-            WHERE r.proprietario_id = ? 
-            GROUP BY r.id 
-            ORDER BY fatturato DESC 
-            LIMIT 5"; 
-
-if ($stmt = mysqli_prepare($link, $sql_top)) {
-    mysqli_stmt_bind_param($stmt, "i", $user_id);
-    mysqli_stmt_execute($stmt);
-    $result = mysqli_stmt_get_result($stmt);
-    while ($row = $result->fetch_assoc()) {
-        $top_restaurants[] = $row;
-    }
-    mysqli_stmt_close($stmt);
-}
+$chart_data_raw = $orderModel->getWeeklyChartData($user_id);
 
 $chart_data = [];
 $labels = [];
@@ -65,23 +30,10 @@ for ($i = 6; $i >= 0; $i--) {
     $chart_data[$date] = 0; 
 }
 
-$sql_chart = "SELECT DATE(o.created_at) as data_ordine, COUNT(o.id) as quanti 
-              FROM orders o
-              JOIN ristoranti r ON o.restaurant_id = r.id
-              WHERE r.proprietario_id = ? 
-              AND o.created_at >= DATE(NOW()) - INTERVAL 7 DAY 
-              GROUP BY DATE(o.created_at)";
-
-if ($stmt = mysqli_prepare($link, $sql_chart)) {
-    mysqli_stmt_bind_param($stmt, "i", $user_id);
-    mysqli_stmt_execute($stmt);
-    $result = mysqli_stmt_get_result($stmt);
-    while ($row = $result->fetch_assoc()) {
-        if (isset($chart_data[$row['data_ordine']])) {
-            $chart_data[$row['data_ordine']] = $row['quanti'];
-        }
+foreach ($chart_data_raw as $row) {
+    if (isset($chart_data[$row['data_ordine']])) {
+        $chart_data[$row['data_ordine']] = $row['quanti'];
     }
-    mysqli_stmt_close($stmt);
 }
 
 foreach ($chart_data as $date => $count) {
@@ -92,7 +44,6 @@ foreach ($chart_data as $date => $count) {
 $json_labels = json_encode($labels);
 $json_data = json_encode($data_values);
 ?>
-
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -100,7 +51,8 @@ $json_data = json_encode($data_values);
     <title>Statistiche Globali - ClickNeat</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="../css/style_ristoratori.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=dashboard_2" />
+    <link rel="stylesheet" href="../../css/style_ristoratori.css">
 </head>
 <body>
 
@@ -108,12 +60,12 @@ $json_data = json_encode($data_values);
 
     <div class="main-content">
         
-        <div class="top-bar">
-            <div class="page-title">
+        <div class="page-header">
+            <div>
                 <p>Panoramica Finanziaria</p>
                 <h1>Statistiche Globali</h1>
             </div>
-            <div style="background: white; padding: 10px 20px; border-radius: 30px; color:#1A4D4E; font-weight:600; box-shadow: 0 5px 15px rgba(0,0,0,0.05);">
+            <div class="header-date">
                 <i class="fa-regular fa-calendar"></i> <?php echo date("d M Y"); ?>
             </div>
         </div>

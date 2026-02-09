@@ -3,7 +3,7 @@ if(session_status() !== PHP_SESSION_ACTIVE) session_start();
 
 require_once "../../config/db.php";
 require_once "../../config/google_config.php";
-require_once "../../models/auth/GoogleAuthModel.php"; 
+require_once "../../models/GoogleAuthModel.php"; 
 
 if (!isset($_GET['code'])) {
     header("Location: login.php");

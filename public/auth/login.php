@@ -14,7 +14,7 @@ require_once "../../config/database.php";
 require_once "../../config/db.php";          
 require_once "../../src/rate_limiter.php";   
 require_once "../../config/google_config.php";  
-require_once "../../models/auth/LoginModel.php"; 
+require_once "../../models/LoginModel.php"; 
 $login_url = getGoogleLoginUrl(); 
 $loginModel = new LoginModel($db); 
 

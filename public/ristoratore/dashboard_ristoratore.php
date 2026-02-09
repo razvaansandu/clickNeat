@@ -1,34 +1,33 @@
 <?php
+if(session_status() !== PHP_SESSION_ACTIVE) session_start();
+
 require_once "../../config/db.php";
+require_once "../../models/RistoranteRistoratoreModel.php";
+require_once "../../models/OrderRistoratoreModel.php";
 
 if (!isset($_SESSION["loggedin"]) || $_SESSION["ruolo"] !== 'ristoratore') {
-    header("location: login.php");
+    header("location: ../auth/login.php");
     exit;
 }
 
 $user_id = $_SESSION["id"];
-$my_restaurants = [];
+$ristoranteModel = new RistoranteRistoratoreModel($db);
+$orderModel = new OrderRistoratoreModel($db);
 
-$sql = "SELECT * FROM ristoranti WHERE proprietario_id = ?";
-if ($stmt = mysqli_prepare($link, $sql)) {
-    mysqli_stmt_bind_param($stmt, "i", $user_id);
-    mysqli_stmt_execute($stmt);
-    $result = mysqli_stmt_get_result($stmt);
-    while ($row = $result->fetch_assoc()) {
+$my_restaurants = $ristoranteModel->getAllByUserId($user_id);
+
+if (!empty($my_restaurants)) {
+    foreach ($my_restaurants as &$row) {
         $rest_id = $row['id'];
         
-        $sql_orders = "SELECT COUNT(*) as count FROM orders WHERE restaurant_id = $rest_id";
-        $row['total_orders'] = mysqli_fetch_assoc(mysqli_query($link, $sql_orders))['count'] ?? 0;
-
-        $sql_money = "SELECT SUM(total_amount) as total FROM orders WHERE restaurant_id = $rest_id AND status = 'completed'";
-        $row['revenue'] = mysqli_fetch_assoc(mysqli_query($link, $sql_money))['total'] ?? 0.00;
-
-        //dati fittizzi per il grafico
+        $stats = $orderModel->getRestaurantStats($rest_id);
+        
+        $row['total_orders'] = $stats['total_orders'];
+        $row['revenue'] = $stats['revenue'];
+        
         $row['trend_data'] = [rand(20, 100), rand(20, 100), rand(20, 100), rand(20, 100), rand(50, 100)];
-
-        $my_restaurants[] = $row;
     }
-    mysqli_stmt_close($stmt);
+    unset($row); 
 }
 ?>
 
