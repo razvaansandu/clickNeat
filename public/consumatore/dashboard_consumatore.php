@@ -1,5 +1,6 @@
 <?php
 require_once "../../config/db.php";
+require_once "../../models/RistoranteModel.php";
 
 if (!isset($_SESSION["loggedin"]) || $_SESSION["ruolo"] !== 'consumatore') {
     header("location: login.php");
@@ -10,27 +11,29 @@ $user_id = $_SESSION["id"];
 $username = $_SESSION["username"];
 $restaurants = [];
 
-$sql = "SELECT id, nome, indirizzo, descrizione FROM ristoranti";
-if ($result = mysqli_query($link, $sql)) {
-    while ($row = mysqli_fetch_assoc($result)) {
-        $keyword = 'food'; 
-        $category = 'Ristorante';
-        $nome_lower = strtolower($row['nome']);
-        
-        if (strpos($nome_lower, 'pizza') !== false) { $keyword = 'pizza'; $category = 'Pizzeria'; }
-        elseif (strpos($nome_lower, 'burger') !== false) { $keyword = 'burger'; $category = 'Hamburgeria'; }
-        elseif (strpos($nome_lower, 'sushi') !== false) { $keyword = 'sushi'; $category = 'Giapponese'; }
-        elseif (strpos($nome_lower, 'pasta') !== false) { $keyword = 'pasta'; $category = 'Italiano'; }
-        elseif (strpos($nome_lower, 'dolce') !== false) { $keyword = 'cake'; $category = 'Dolci'; }
+$ristoranteModel = new RistoranteModel($db);
 
-        $row['image_url'] = "https://loremflickr.com/600/400/" . $keyword . "?lock=" . $row['id'];
-        
-        $row['category'] = $category;
-        $row['descrizione_breve'] = !empty($row['descrizione']) ? substr($row['descrizione'], 0, 60) . '...' : 'Gustosi piatti preparati con ingredienti freschi.';
-        
-        $restaurants[] = $row;
-    }
+$raw_restaurants = $ristoranteModel->getAll();
+
+foreach ($raw_restaurants as $row) {
+    
+    $keyword = 'food'; 
+    $category = 'Ristorante';
+    $nome_lower = strtolower($row['nome']);
+    
+    if (strpos($nome_lower, 'pizza') !== false) { $keyword = 'pizza'; $category = 'Pizzeria'; }
+    elseif (strpos($nome_lower, 'burger') !== false) { $keyword = 'burger'; $category = 'Hamburgeria'; }
+    elseif (strpos($nome_lower, 'sushi') !== false) { $keyword = 'sushi'; $category = 'Giapponese'; }
+    elseif (strpos($nome_lower, 'pasta') !== false) { $keyword = 'pasta'; $category = 'Italiano'; }
+    elseif (strpos($nome_lower, 'dolce') !== false) { $keyword = 'cake'; $category = 'Dolci'; }
+
+    $row['image_url'] = "https://loremflickr.com/600/400/" . $keyword . "?lock=" . $row['id'];
+    $row['category'] = $category;
+    $row['descrizione_breve'] = !empty($row['descrizione']) ? substr($row['descrizione'], 0, 60) . '...' : 'Gustosi piatti preparati con ingredienti freschi.';
+    
+    $restaurants[] = $row;
 }
+
 ?>
 
 <!DOCTYPE html>
@@ -79,7 +82,7 @@ if ($result = mysqli_query($link, $sql)) {
                 <i class="fa-regular fa-calendar"></i> <?php echo date("d F Y"); ?>
             </div>
             <div class="hero-title">
-                <h1>Ciao, <?php echo htmlspecialchars($username); ?>! 🍕</h1>
+                <h1>Ciao, <?php echo htmlspecialchars($username); ?>!</h1>
                 <p>Ordina dai migliori ristoranti della tua zona.</p>
             </div>
         </div>
@@ -157,8 +160,6 @@ if ($result = mysqli_query($link, $sql)) {
         const resultsCount = document.getElementById('resultsCount');
         const countNumber = document.getElementById('countNumber');
         const categoryPills = document.querySelectorAll('.category-pill');
-        
-        const originalGridContent = gridContainer.innerHTML;
         
         function renderRestaurants(restaurants) {
             if (restaurants.length === 0) {
@@ -260,4 +261,4 @@ if ($result = mysqli_query($link, $sql)) {
     });
     </script>
 </body>
-</html> 
+</html>

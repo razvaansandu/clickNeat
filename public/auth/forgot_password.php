@@ -1,5 +1,7 @@
 <?php
-session_start();
+
+if(session_status() !== PHP_SESSION_ACTIVE) session_start();
+
 $email = "";
 $email_err = "";
 if($_SERVER["REQUEST_METHOD"] == "POST"){

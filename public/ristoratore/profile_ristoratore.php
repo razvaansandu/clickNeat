@@ -1,5 +1,7 @@
 <?php
-session_start();
+
+if(session_status() !== PHP_SESSION_ACTIVE) session_start();
+
 require_once "../../config/db.php";
 
 if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
@@ -79,115 +81,7 @@ if ($stmt = mysqli_prepare($link, $sql)) {
     <meta charset="UTF-8">
     <title>Il mio Profilo - ClickNeat</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-        body { background-color: #F4F7FE; min-height: 100vh; }
-        .main-content { margin-left: 260px; padding: 40px; }
-
-        .page-header { margin-bottom: 35px; }
-        .page-header h1 { font-size: 28px; font-weight: 700; color: #2B3674; }
-        .page-header p { color: #A3AED0; margin-top: 5px; }
-
-        .profile-grid {
-            display: grid;
-            grid-template-columns: 350px 1fr;
-            gap: 30px;
-        }
-
-        .card {
-            background: white;
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 18px 40px rgba(112, 144, 176, 0.12);
-        }
-
-        .profile-card {
-            text-align: center;
-        }
-        .avatar-circle {
-            width: 120px;
-            height: 120px;
-            background: linear-gradient(135deg, #1A4D4E 0%, #4FD1C5 100%);
-            border-radius: 50%;
-            margin: 0 auto 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 40px;
-            color: white;
-            font-weight: bold;
-            box-shadow: 0 10px 20px rgba(26, 77, 78, 0.2);
-        }
-        .role-badge {
-            background-color: #E0E5F2;
-            color: #2B3674;
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-            display: inline-block;
-            margin-top: 10px;
-        }
-        .info-list {
-            margin-top: 30px;
-            text-align: left;
-        }
-        .info-item {
-            padding: 15px 0;
-            border-bottom: 1px solid #F4F7FE;
-            font-size: 14px;
-            color: #707EAE;
-            display: flex;
-            justify-content: space-between;
-        }
-        .info-item b { color: #2B3674; }
-
-        .form-section { margin-bottom: 30px; }
-        .form-section h3 { color: #2B3674; font-size: 18px; margin-bottom: 20px; font-weight: 700; }
-        
-        .form-group { margin-bottom: 20px; }
-        .form-group label { display: block; color: #2B3674; font-weight: 600; margin-bottom: 8px; font-size: 14px; }
-        .form-group input {
-            width: 100%;
-            padding: 12px 15px;
-            border: 1px solid #E0E5F2;
-            border-radius: 10px;
-            font-size: 14px;
-            color: #1B2559;
-            transition: 0.3s;
-        }
-        .form-group input:focus {
-            border-color: #1A4D4E;
-            outline: none;
-        }
-
-        button {
-            background-color: #1A4D4E;
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 10px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-        button:hover { background-color: #E89020; }
-
-        .alert {
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            font-weight: 500;
-        }
-        .alert.success { background-color: #E6FFFA; color: #1A4D4E; border: 1px solid #B2F5EA; }
-        .alert.error { background-color: #FFF5F5; color: #C53030; border: 1px solid #FEB2B2; }
-
-        @media (max-width: 900px) {
-            .profile-grid { grid-template-columns: 1fr; }
-            .main-content { margin-left: 0; }
-        }
-    </style>
+    <link rel="stylesheet" href="../css/style_ristoratori.css">
 </head>
 <body>
 

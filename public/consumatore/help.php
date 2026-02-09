@@ -1,13 +1,7 @@
 <?php
-session_start();
+if(session_status() !== PHP_SESSION_ACTIVE) session_start();
+
 require_once "../../config/db.php";
-
-require '../../vendor/phpmailer/phpmailer/src/Exception.php';
-require '../../vendor/phpmailer/phpmailer/src/PHPMailer.php';
-require '../../vendor//phpmailer/phpmailer/src/SMTP.php';
-
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
 
 if (!isset($_SESSION["loggedin"]) || $_SESSION["ruolo"] !== 'consumatore') {
     header("location: ../auth/login.php");
@@ -23,38 +17,27 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['send_help'])) {
     $oggetto = trim($_POST['subject']);
     $messaggio_utente = trim($_POST['message']);
     
-    $mail = new PHPMailer(true);
+    $mail = require __DIR__ . "/../../src/mailer.php";
 
     try {
-        $mail->isSMTP();
-        $mail->Host       = 'smtp.gmail.com';
-        $mail->SMTPAuth   = true;
-        
-        $mail->Username   = 'clickneat2026@gmail.com'; 
-        
-        $mail->Password   = 'mgtt fvkc knrh fgso'; 
-        
-        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-        $mail->Port       = 587;
+        $mail->addAddress('clickneat2026@gmail.com', 'ClickNeat Supporto'); 
 
-        $mail->setFrom('clickneat2026@gmail.com', 'ClickNeat Assistenza');
-        
-        $mail->addAddress('clickneat2026@gmail.com'); 
-                
-        $mail->isHTML(true);
         $mail->Subject = "[Supporto] " . $oggetto;
+        
         $mail->Body    = "<h3>Nuova richiesta di supporto</h3>
                           <p><b>Da Utente:</b> " . htmlspecialchars($_SESSION['username']) . " (ID: $user_id)</p>
                           <hr>
                           <p><b>Messaggio:</b><br>" . nl2br(htmlspecialchars($messaggio_utente)) . "</p>";
+                          
         $mail->AltBody = "Messaggio da " . $_SESSION['username'] . ":\n" . $messaggio_utente;
 
         $mail->send();
+        
         $msg = "Richiesta inviata con successo! Ti risponderemo presto.";
         $msg_type = "success";
 
     } catch (Exception $e) {
-        $msg = "Errore nell'invio. Controlla la Password per le App. Errore: " . $mail->ErrorInfo;
+        $msg = "Errore nell'invio. Riprova più tardi."; 
         $msg_type = "error";
     }
 }
@@ -71,7 +54,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['send_help'])) {
 <body>
 
     <nav class="top-navbar">
-        <a href="dashboard.php" class="brand-logo"><i class="fa-solid fa-leaf" style="color: #05CD99;"></i> ClickNeat</a>
+        <a href="dashboard_consumatore.php" class="brand-logo"><i class="fa-solid fa-leaf" style="color: #05CD99;"></i> ClickNeat</a>
         <div class="nav-links">
             <a href="dashboard_consumatore.php" class="nav-item"><i class="fa-solid fa-house"></i> <span>Home</span></a>
             <a href="storico.php" class="nav-item"><i class="fa-solid fa-clock-rotate-left"></i> <span>Ordini</span></a>
@@ -83,7 +66,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['send_help'])) {
 
     <header class="hero-section">
         <div class="hero-content">
-            <a href="dashboard.php" class="btn-back-hero"><i class="fa-solid fa-arrow-left"></i> Torna alla Home</a>
+            <a href="dashboard_consumatore.php" class="btn-back-hero"><i class="fa-solid fa-arrow-left"></i> Torna alla Home</a>
             <div class="hero-title">
                 <h1>Centro Assistenza</h1>
                 <p>Inviaci una richiesta diretta alla nostra email.</p>

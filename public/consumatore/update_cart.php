@@ -1,5 +1,6 @@
 <?php
-session_start();
+
+if(session_status() !== PHP_SESSION_ACTIVE) session_start();
 
 if (!isset($_SESSION['cart']) || !isset($_GET['action']) || !isset($_GET['id'])) {
     header("Location: checkout.php");
