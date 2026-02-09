@@ -1,11 +1,12 @@
 <?php
-session_start();
-require_once "../../config/db.php";
+if (session_status() !== PHP_SESSION_ACTIVE)
+    session_start();
 
-mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+require_once "../../config/db.php";
+require_once "../../models/OrderModel.php";
 
 if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
-    header("Location: login.php");
+    header("Location: ../auth/login.php");
     exit;
 }
 
@@ -22,32 +23,30 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['place_order'])) {
     $restaurant_id = $cart['restaurant_id'];
     $total = $cart['total'];
 
+    $orderModel = new OrderModel($db);
+
     try {
-        mysqli_begin_transaction($link);
+        $orderModel->beginTransaction();
 
-        $sql = "INSERT INTO orders (user_id, restaurant_id, total_amount, status, created_at) VALUES (?, ?, ?, 'pending', NOW())";
-        $stmt = mysqli_prepare($link, $sql);
-        mysqli_stmt_bind_param($stmt, "iid", $user_id, $restaurant_id, $total);
-        mysqli_stmt_execute($stmt);
+        $order_id = $orderModel->create($user_id, $restaurant_id, $total);
 
-        $order_id = mysqli_insert_id($link);
-
-        $sql_item = "INSERT INTO order_items (order_id, dish_id, quantity, price_at_time) VALUES (?, ?, ?, ?)";
-        $stmt_item = mysqli_prepare($link, $sql_item);
-
-        foreach ($cart['items'] as $item) {
-            mysqli_stmt_bind_param($stmt_item, "iiid", $order_id, $item['id'], $item['qty'], $item['price']);
-            mysqli_stmt_execute($stmt_item);
+        if (!$order_id) {
+            throw new Exception("Impossibile creare l'ordine.");
         }
 
-        mysqli_commit($link);
+        foreach ($cart['items'] as $item) {
+            $orderModel->addItem($order_id, $item['id'], $item['qty'], $item['price']);
+        }
+
+        $orderModel->commit();
+
         unset($_SESSION['cart']);
         header("Location: storico.php?msg=success");
         exit;
 
-    } catch (mysqli_sql_exception $e) {
-        mysqli_rollback($link);
-        $msg = "Errore Database: " . $e->getMessage();
+    } catch (Exception $e) {
+        $orderModel->rollback();
+        $msg = "Errore durante il salvataggio: " . $e->getMessage();
     }
 }
 ?>
@@ -61,7 +60,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['place_order'])) {
     <title>Checkout - ClickNeat</title>
     <link rel="stylesheet" href="../../css/style_consumatori.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
 </head>
 
 <body>
@@ -76,7 +76,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['place_order'])) {
             <a href="storico.php" class="nav-item">
                 <i class="fa-solid fa-clock-rotate-left"></i> <span>Ordini</span>
             </a>
-            <a href="profile_ristoratore.php" class="nav-item">
+            <a href="profile_consumatore.php" class="nav-item">
                 <i class="fa-solid fa-user"></i> <span>Profilo</span>
             </a>
             <a href="help.php" class="nav-item">
@@ -102,7 +102,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['place_order'])) {
 
     <div class="main-container">
         <?php if ($msg): ?>
-            <div class="msg-box error"><?php echo $msg; ?></div>
+            <div
+                style="background-color: #ffebee; color: #c62828; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #ffcdd2;">
+                <i class="fa-solid fa-triangle-exclamation"></i> <?php echo htmlspecialchars($msg); ?>
+            </div>
         <?php endif; ?>
 
         <div class="card-style">
@@ -123,24 +126,27 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['place_order'])) {
                                 <option>Carta di Credito (Online)</option>
                             </select>
                         </div>
+
                 </div>
 
                 <div class="checkout-summary">
                     <h3 class="section-title checkout-section-title">Riepilogo</h3>
-                    
+
                     <?php foreach ($cart['items'] as $item): ?>
                         <div class="summary-row" style="align-items: center;">
-                            
+
                             <div class="qty-control-box">
-                                <a href="update_cart.php?action=decrease&id=<?php echo $item['id']; ?>" class="btn-qty minus">
+                                <a href="update_cart.php?action=decrease&id=<?php echo $item['id']; ?>"
+                                    class="btn-qty minus">
                                     <i class="fa-solid fa-minus"></i>
                                 </a>
-                                
+
                                 <span style="font-weight: 700; width: 20px; text-align: center;">
                                     <?php echo $item['qty']; ?>
                                 </span>
 
-                                <a href="update_cart.php?action=increase&id=<?php echo $item['id']; ?>" class="btn-qty plus">
+                                <a href="update_cart.php?action=increase&id=<?php echo $item['id']; ?>"
+                                    class="btn-qty plus">
                                     <i class="fa-solid fa-plus"></i>
                                 </a>
                             </div>
@@ -150,8 +156,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['place_order'])) {
                             </div>
 
                             <div style="text-align: right;">
-                                <div style="font-weight: 600;">€ <?php echo number_format($item['price'] * $item['qty'], 2); ?></div>
-                                <a href="update_cart.php?action=remove&id=<?php echo $item['id']; ?>" class="btn-remove-item" title="Rimuovi">
+                                <div style="font-weight: 600;">€
+                                    <?php echo number_format($item['price'] * $item['qty'], 2); ?></div>
+                                <a href="update_cart.php?action=remove&id=<?php echo $item['id']; ?>"
+                                    class="btn-remove-item" title="Rimuovi">
                                     <i class="fa-solid fa-trash"></i>
                                 </a>
                             </div>
@@ -167,6 +175,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['place_order'])) {
                     <button type="submit" name="place_order" class="btn-confirm">
                         Conferma e Ritira <i class="fa-solid fa-check"></i>
                     </button>
+
                     </form>
                 </div>
 
@@ -176,4 +185,3 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['place_order'])) {
 </body>
 
 </html>
-<?php mysqli_close($link); ?>

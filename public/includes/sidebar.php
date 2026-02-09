@@ -73,10 +73,10 @@
             class="<?php echo basename($_SERVER['PHP_SELF']) == 'dashboard_ristoratore.php' ? 'active' : ''; ?>">
             <i class="material-symbols-outlined">dashboard_2</i> Dashboard
         </a>
-        <a href="profile_ristoratore.php">
+        <a href="profile_ristoratore.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'profile_ristoratore.php' ? 'active' : ''; ?>">
             <i class="fa-solid fa-user"></i> Il mio Profilo
         </a>
-        <a href="stats.php">
+        <a href="stats.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'stats.php' ? 'active' : ''; ?>">
             <i class="fa-solid fa-chart-pie"></i> Statistiche
         </a>
     </div>

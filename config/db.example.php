@@ -4,7 +4,7 @@ ini_set('session.use_only_cookies', 1);
 ini_set('session.cookie_secure', 0); 
 ini_set('session.cookie_samesite', 'Strict');
 
-session_start();
+if(session_status() !== PHP_SESSION_ACTIVE) session_start();
 
 define('DB_SERVER', 'db');           
 define('DB_USERNAME', 'razvan_root');      

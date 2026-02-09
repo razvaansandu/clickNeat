@@ -1,6 +1,6 @@
 <?php
-session_start();
-require_once "../../config/db.php";
+
+if(session_status() !== PHP_SESSION_ACTIVE) session_start();
 
 if (!isset($_SESSION["loggedin"]) || $_SESSION["ruolo"] !== 'ristoratore') {
     header("location: login.php");

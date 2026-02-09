@@ -1,418 +1,678 @@
-/* =========================================
-   0. VARIABILI E CONFIGURAZIONE
-   ========================================= */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+
+/* ==========================================================================
+   1. GLOBALI & RESET
+   (Variabili colori, reset margini, impostazioni body e link)
+   ========================================================================== */
 :root {
-    /* Palette Principale */
-    --primary: #0F4C4F;      /* Teal più profondo e serio */
-    --primary-light: #1A6B6F; /* Per hover */
-    --accent: #F59E0B;       /* Arancione più caldo e vibrante */
-    --accent-hover: #D97706;
-
-    /* Sfondi e Testi */
-    --bg-body: #F8FAFC;      /* Grigio chiarissimo, più pulito del bluastro precedente */
-    --bg-card: #FFFFFF;
-    --text-dark: #1E293B;    /* Quasi nero, meno duro */
-    --text-muted: #64748B;   /* Grigio medio moderno */
-    --border-light: #E2E8F0; /* Bordi sottili */
-
-    /* Ombre (Il segreto per un look moderno) */
-    --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-    --shadow-hover: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
-
-    /* Stati */
-    --success-bg: #DCFCE7; --success-text: #166534;
-    --warning-bg: #FEF3C7; --warning-text: #92400E;
-    --danger-bg: #FEE2E2;  --danger-text: #991B1B;
-    --info-bg: #E0F2FE;    --info-text: #075985;
+    --primary-dark: #2B3674;
+    --primary-brand: #1A4D4E;
+    --accent-orange: #FF9F43;
+    --accent-red: #FF6B6B;
+    --text-grey: #A3AED0;
+    --bg-light: #F9FAFB;
+    --white: #ffffff;
+    --success: #05CD99;
 }
 
-/* =========================================
-   1. RESET & BASE
-   ========================================= */
-* { 
-    margin: 0; padding: 0; box-sizing: border-box; 
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-}
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
 
 body { 
-    background-color: var(--bg-body); 
-    min-height: 100vh; 
-    color: var(--text-dark);
-    -webkit-font-smoothing: antialiased; /* Rende i font più nitidi su Mac */
+    background-color: var(--bg-light); 
+    color: #333;
+    min-height: 100vh;
 }
 
-a { text-decoration: none; transition: color 0.2s; }
+a { text-decoration: none; color: inherit; }
 
-/* Wrapper principale */
-.main-content { 
-    margin-left: 260px; 
-    padding: 40px; 
-    transition: margin-left 0.3s ease;
+/* ==========================================================================
+   2. TOP NAVBAR
+   (Presente in tutte le pagine)
+   ========================================================================== */
+.top-navbar {
+    background: var(--white);
+    padding: 15px 50px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
 }
 
-/* =========================================
-   2. COMPONENTI COMUNI E TIPOGRAFIA
-   ========================================= */
-
-/* Header Pagina */
-.page-header, .top-bar, .top-header, .header-title { 
-    display: flex; 
-    justify-content: space-between; 
-    align-items: center; 
-    margin-bottom: 35px; 
-}
-.header-title { display: block; text-align: center; }
-
-h1, .page-title h1 { 
-    color: var(--text-dark);
-    font-size: 30px; /* Leggermente più grande */
-    font-weight: 800; 
-    letter-spacing: -0.025em;
+.brand-logo {
+    font-size: 24px; font-weight: 800; color: var(--primary-brand);
+    display: flex; align-items: center; gap: 10px;
 }
 
-h2 { color: var(--text-dark); font-weight: 700; }
-h3 { color: var(--text-dark); font-weight: 700; }
+.nav-links { display: flex; gap: 25px; align-items: center; }
 
-p, .page-title p, .subtitle, .text-muted { 
-    color: var(--text-muted); 
-    margin-top: 5px; 
-    font-size: 15px; 
-    font-weight: 500;
+.nav-item {
+    color: #707EAE; font-weight: 500; font-size: 15px; transition: 0.3s;
+    display: flex; align-items: center; gap: 8px;
+}
+.nav-item:hover, .nav-item.active { color: var(--accent-orange); }
+
+.btn-logout-nav {
+    padding: 8px 20px; border: 1px solid var(--accent-red); color: var(--accent-red);
+    border-radius: 20px; font-weight: 600; font-size: 14px; transition: 0.3s;
+}
+.btn-logout-nav:hover { background: var(--accent-red); color: var(--white); }
+
+/* ==========================================================================
+   3. HERO SECTION
+   (Intestazione colorata presente in tutte le pagine)
+   ========================================================================== */
+.hero-section {
+    background: linear-gradient(100deg, var(--accent-orange) 0%, var(--accent-red) 100%);
+    padding: 60px 50px 80px 50px;
+    color: var(--white);
+    position: relative;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
 }
 
-/* --- CARDS (Il cuore del restyling) --- */
-.card, .form-card, .chart-card, .top-list-card, .order-card { 
-    background: var(--bg-card);
-    border-radius: 24px; /* Arrotondamento più moderno */
-    padding: 30px; 
-    box-shadow: var(--shadow-md); /* Ombra più morbida */
-    border: 1px solid rgba(255, 255, 255, 0.5); /* Bordo sottilissimo per definizione */
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* Transizione più fluida */
+.hero-content {
+    max-width: 1200px; margin: 0 auto; position: relative; z-index: 2;
 }
 
-.card:hover, .form-card:hover, .chart-card:hover { 
-    transform: translateY(-5px);
-    box-shadow: var(--shadow-lg);
+.hero-title h1 { font-size: 36px; font-weight: 800; margin-bottom: 10px; }
+.hero-title p { font-size: 18px; opacity: 0.9; }
+
+.btn-back-hero {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(255,255,255,0.2); backdrop-filter: blur(5px);
+    padding: 8px 16px; border-radius: 20px; color: white;
+    font-weight: 600; font-size: 14px; margin-bottom: 20px; transition: 0.3s;
+}
+.btn-back-hero:hover { background: white; color: var(--accent-red); }
+
+/* ==========================================================================
+   4. DASHBOARD CONSUMATORE
+   (Pillole categorie, Griglia ristoranti, Card Ristorante)
+   ========================================================================== */
+/* Categorie */
+.categories-wrapper {
+    max-width: 1200px; margin: -35px auto 40px auto; padding: 0 20px;
+    position: relative; z-index: 10;
 }
 
-.card-header {
-    display: flex; justify-content: space-between; align-items: center;
-    margin-bottom: 25px; border-bottom: 1px solid var(--border-light); padding-bottom: 20px;
+.categories-container {
+    display: flex; gap: 15px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: none;
 }
-.card-title { font-size: 18px; font-weight: 700; color: var(--text-dark); }
+.categories-container::-webkit-scrollbar { display: none; }
 
-/* --- BOTTONI --- */
-button, .btn-submit, .btn-add, .btn-action {
-    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
-    color: white; 
-    border: none; 
-    padding: 14px 28px; 
-    border-radius: 12px; 
-    font-weight: 600; 
-    cursor: pointer; 
-    transition: all 0.3s ease; 
-    font-size: 15px;
-    box-shadow: var(--shadow-sm);
-    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+.category-pill {
+    background: white; padding: 12px 25px; border-radius: 50px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    display: flex; align-items: center; gap: 10px;
+    font-weight: 600; color: #2B3674; cursor: pointer; transition: 0.3s;
+    white-space: nowrap; border: 2px solid white;
+}
+.category-pill:hover, .category-pill.active {
+    border-color: var(--accent-orange); color: var(--accent-orange); transform: translateY(-5px);
 }
 
-button:hover, .btn-submit:hover, .btn-add:hover { 
-    background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 100%);
-    transform: translateY(-2px);
-    box-shadow: 0 10px 15px -3px rgba(15, 76, 79, 0.3); /* Ombra colorata coerente */
+.main-container {
+    max-width: 1200px; margin: 0 auto; padding: 0 20px 60px 20px;
 }
-
-/* Bottone Indietro */
-.btn-back { 
-    padding: 10px 20px; 
-    background: white;
-    color: var(--text-muted);
-    border: 1px solid var(--border-light);
-    border-radius: 10px; 
-    font-weight: 600; 
-    display: inline-flex; 
-    align-items: center; 
-    gap: 8px; 
-    transition: 0.3s;
-    box-shadow: var(--shadow-sm);
+.section-title {
+    font-size: 24px; font-weight: 700; color: var(--primary-dark); margin-bottom: 25px;
 }
-.btn-back:hover { 
-    background: var(--primary-light); 
-    color: white; 
-    border-color: transparent;
-}
-
-/* Alerts */
-.alert { 
-    padding: 15px; border-radius: 12px; margin-bottom: 25px; 
-    font-size: 14px; font-weight: 600; text-align: center; display: flex; align-items: center; justify-content: center; gap: 10px;
-    box-shadow: var(--shadow-sm);
-}
-.alert-error, .alert.error { background-color: var(--danger-bg); color: var(--danger-text); border: 1px solid #FECACA; }
-.alert-success, .alert.success { background-color: var(--success-bg); color: var(--success-text); border: 1px solid #BBF7D0; }
-
-/* =========================================
-   3. FORMS & INPUTS (Più puliti e tattili)
-   ========================================= */
-.form-group { margin-bottom: 25px; }
-.form-group label, .info-box label { 
-    display: block; margin-bottom: 10px; 
-    color: var(--text-dark); font-weight: 600; font-size: 14px; 
-}
-
-input[type="text"], input[type="password"], input[type="email"], 
-input[type="number"], textarea { 
-    width: 100%; padding: 14px 16px; 
-    border: 2px solid var(--border-light); /* Bordo leggermente più spesso */
-    border-radius: 12px; 
-    font-size: 15px; color: var(--text-dark); background-color: #fff;
-    transition: all 0.2s ease; 
-}
-
-input:focus, textarea:focus { 
-    border-color: var(--primary); 
-    outline: none; 
-    background-color: #F8FAFC; /* Leggero cambio background al focus */
-    box-shadow: 0 0 0 4px rgba(15, 76, 79, 0.1); 
-}
-textarea { resize: vertical; min-height: 120px; }
-
-/* Form Card Specifica */
-.form-card { margin: 40px auto; width: 100%; max-width: 550px; padding: 40px; }
-.icon-top {
-    width: 70px; height: 70px; background: var(--warning-bg); border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    margin: 0 auto 20px; color: var(--accent); font-size: 32px;
-    box-shadow: var(--shadow-sm);
-}
-
-/* =========================================
-   4. DASHBOARD & GRIGLIE
-   ========================================= */
 .grid-container {
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 30px;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 30px;
 }
 
-/* Ristorante Card in Dashboard */
-.card-icon {
-    width: 56px; height: 56px; 
-    background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 100%);
-    border-radius: 16px; /* Quadrato arrotondato è più moderno del cerchio */
-    display: flex; align-items: center; justify-content: center;
-    color: white; font-size: 24px; margin-bottom: 25px;
-    box-shadow: 0 8px 15px -5px rgba(15, 76, 79, 0.3);
+.restaurant-card {
+    background: var(--white); border-radius: 20px; overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05); transition: all 0.3s ease;
+    text-decoration: none; color: inherit; display: flex; flex-direction: column; border: 1px solid #eee;
+}
+.restaurant-card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(112, 144, 176, 0.15); }
+.card-img-top { height: 200px; width: 100%; object-fit: cover; }
+.card-body { padding: 20px; display: flex; flex-direction: column; flex-grow: 1; }
+.badge-cat { font-size: 11px; text-transform: uppercase; font-weight: 700; color: var(--accent-orange); letter-spacing: 1px; margin-bottom: 5px; }
+.card-title { font-size: 18px; font-weight: 700; color: var(--primary-dark); margin-bottom: 8px; }
+.card-info { font-size: 13px; color: var(--text-grey); margin-bottom: 15px; display: flex; align-items: center; gap: 6px; }
+.btn-go {
+    margin-top: auto; background: #F4F7FE; color: var(--primary-brand);
+    text-align: center; padding: 10px; border-radius: 12px; font-weight: 600; transition: 0.3s;
+}
+.restaurant-card:hover .btn-go { background: var(--primary-brand); color: white; }
+
+/* ==========================================================================
+   5. MENU RISTORANTE (PAGINA MENU)
+   (Stili per le card dei piatti)
+   ========================================================================== */
+.card-style {
+    background: var(--white); border-radius: 20px; overflow: hidden;
+    box-shadow: 0 10px 25px rgba(112, 144, 176, 0.08); transition: all 0.3s ease;
+    border: 1px solid #eee; display: flex; flex-direction: column;
 }
 
-.stat-row { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--border-light); }
-.revenue { font-size: 28px; font-weight: 800; color: var(--primary); letter-spacing: -0.5px; }
-.revenue span { font-size: 14px; color: var(--text-muted); font-weight: 600; display: block; margin-top: 5px; }
-.mini-chart { display: flex; gap: 6px; align-items: flex-end; height: 50px; }
-.bar { width: 10px; background-color: var(--border-light); border-radius: 4px; }
-.bar.active { background-color: var(--accent); box-shadow: 0 4px 6px -1px rgba(245, 158, 11, 0.3); }
-
-/* Card "Aggiungi Nuovo" */
-.card-add {
-    border: 3px dashed var(--border-light); background: transparent; box-shadow: none;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    min-height: 250px; cursor: pointer;
-    transition: all 0.3s ease;
+.dish-image { height: 160px; width: 100%; object-fit: cover; }
+.dish-body { padding: 20px; flex-grow: 1; display: flex; flex-direction: column; }
+.dish-title { font-size: 18px; font-weight: 700; color: var(--primary-dark); margin-bottom: 5px; }
+.dish-desc { font-size: 13px; color: #707EAE; margin-bottom: 15px; line-height: 1.4; flex-grow: 1; }
+.dish-footer { display: flex; justify-content: space-between; align-items: center; margin-top: auto; }
+.price-tag { font-size: 18px; font-weight: 700; color: var(--success); }
+.btn-add {
+    background: var(--bg-light); color: var(--primary-brand);
+    padding: 8px 16px; border-radius: 12px; font-weight: 600; border: none; cursor: pointer; transition: 0.3s;
+    display: flex; align-items: center; gap: 5px;
 }
-.card-add:hover { 
-    border-color: var(--accent); 
-    background-color: #FFFBEB; 
-    transform: translateY(-5px);
-    box-shadow: var(--shadow-md);
-}
-.icon-plus { font-size: 48px; color: var(--accent-hover); margin-bottom: 15px; }
-.text-add { font-weight: 700; color: var(--primary); font-size: 18px; }
+.btn-add:hover { background: var(--primary-brand); color: white; }
 
-.btn-manage {
-    display: block; margin-top: 20px; text-align: center; padding: 12px;
-    background: var(--bg-body); color: var(--primary); border-radius: 12px; font-weight: 700;
-    border: 1px solid var(--border-light);
-}
-.btn-manage:hover { background: var(--primary); color: white; border-color: transparent; }
+/* ==========================================================================
+   6. STORICO ORDINI (PAGINA HISTORY)
+   (Card riepilogo ordini passati)
+   ========================================================================== */
+.order-card { padding: 25px; display: flex; flex-direction: column; justify-content: space-between; }
+.order-header { display: flex; justify-content: space-between; margin-bottom: 15px; }
+.order-id { font-size: 13px; color: var(--text-grey); font-weight: 500; }
+.order-rest-name { font-size: 18px; font-weight: 700; color: var(--primary-dark); margin-bottom: 5px; }
+.order-date { font-size: 13px; color: var(--text-grey); display: flex; gap: 5px; align-items: center; }
+.order-footer { margin-top: 20px; border-top: 1px solid #f0f0f0; padding-top: 15px; display: flex; justify-content: space-between; align-items: center; }
 
-/* =========================================
-   5. GESTIONE MENU & ORDINI (Manage Page)
-   ========================================= */
-.management-grid { display: grid; grid-template-columns: 1fr 1.4fr; gap: 35px; }
-
-.add-dish-form { 
-    background: white; border: 1px solid var(--border-light);
-    padding: 25px; border-radius: 20px; margin-bottom: 25px; 
-    box-shadow: var(--shadow-sm);
-}
-.add-dish-form h5 { font-size: 16px; font-weight: 700; margin-bottom: 15px; color: var(--primary); }
-.form-row { display: flex; gap: 15px; margin-bottom: 15px; }
-.btn-add { width: 100%; background: var(--primary); }
-
-.menu-list { max-height: 650px; overflow-y: auto; padding-right: 10px; }
-/* Scrollbar custom per la lista menu */
-.menu-list::-webkit-scrollbar { width: 6px; }
-.menu-list::-webkit-scrollbar-track { background: transparent; }
-.menu-list::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 10px; }
-.menu-list::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
-
-.menu-item { 
-    display: flex; justify-content: space-between; align-items: center; 
-    padding: 20px 15px; border-bottom: 1px solid var(--border-light); 
-    transition: background 0.2s; border-radius: 12px;
-}
-.menu-item:hover { background-color: #F8FAFC; }
-.dish-info h4 { color: var(--text-dark); font-weight: 700; font-size: 16px; margin-bottom: 5px; }
-.dish-price { font-weight: 800; color: var(--accent); margin-right: 20px; font-size: 16px; }
-.btn-delete { color: var(--text-muted); background: none; border: none; font-size: 18px; padding: 5px; opacity: 0.7; }
-.btn-delete:hover { transform: scale(1.2); background: none; box-shadow: none; color: var(--danger-text); opacity: 1; }
-
-/* =========================================
-   6. VISUALIZZAZIONE ORDINI & STATUS
-   ========================================= */
-.order-card { 
-    margin-bottom: 25px; border-left: none; /* Rimosso il bordo sinistro spesso */
-    position: relative; overflow: hidden;
-}
-/* Indicatore colorato in alto */
-.order-card::before {
-    content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 6px;
-    background: linear-gradient(90deg, var(--primary), var(--accent));
-}
-
-.order-header { display: flex; justify-content: space-between; margin-bottom: 20px; border-bottom: 1px solid var(--border-light); padding-bottom: 15px; }
-.order-user, .order-id { font-weight: 800; color: var(--text-dark); font-size: 18px; }
-.order-time, .order-meta { font-size: 13px; color: var(--text-muted); font-weight: 500; display: flex; align-items: center; gap: 5px; }
-.order-total { font-size: 22px; font-weight: 800; color: var(--primary); margin: 15px 0; }
-
-/* Status Badges (Più moderni) */
-.status-badge, .status { 
-    padding: 8px 16px; border-radius: 30px; font-size: 13px; font-weight: 700; 
-    text-transform: uppercase; display: inline-flex; align-items: center; gap: 6px;
-    box-shadow: var(--shadow-sm); letter-spacing: 0.5px;
-}
-/* Aggiunta di un pallino colorato prima del testo */
-.status::before, .status-badge::before { content: ''; width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
-
-.status-pending { background: var(--warning-bg); color: var(--warning-text); }
-.status-pending::before { background: var(--warning-text); }
-
-.status-accepted { background: var(--info-bg); color: var(--info-text); }
-.status-accepted::before { background: var(--info-text); }
-
-.status-completed { background: var(--success-bg); color: var(--success-text); }
-.status-completed::before { background: var(--success-text); }
-
-.status-cancelled { background: var(--danger-bg); color: var(--danger-text); }
-.status-cancelled::before { background: var(--danger-text); }
-
-/* Azioni Ordini */
-.order-actions { display: flex; gap: 15px; margin-top: 25px; }
-.btn-action { padding: 12px; border-radius: 12px; font-size: 14px; }
-.btn-accept { background: var(--info-bg); color: var(--info-text); box-shadow: none; }
-.btn-accept:hover { background: var(--info-text); color: white; }
-.btn-complete { background: var(--success-bg); color: var(--success-text); box-shadow: none; }
-.btn-complete:hover { background: var(--success-text); color: white; }
-.btn-cancel { background: transparent; color: var(--danger-text); border: 2px solid var(--danger-bg); box-shadow: none; }
-.btn-cancel:hover { background: var(--danger-bg); transform: translateY(-2px); }
-
-/* Tabella Ordini */
-.items-table { 
-    width: 100%; border-collapse: separate; border-spacing: 0 8px; 
-    background: transparent; margin-top: 20px; 
-}
-.items-table tr { background: #F8FAFC; border-radius: 12px; }
-.items-table td { 
-    padding: 15px 20px; font-size: 15px; border: none; color: var(--text-dark); 
-}
-.items-table tr td:first-child { border-top-left-radius: 12px; border-bottom-left-radius: 12px; font-weight: 700; color: var(--primary); }
-.items-table tr td:last-child { border-top-right-radius: 12px; border-bottom-right-radius: 12px; font-weight: 700; }
-
-/* =========================================
-   7. PROFILO
-   ========================================= */
-.profile-grid { display: grid; grid-template-columns: 380px 1fr; gap: 40px; }
-.profile-card { text-align: center; padding: 50px 30px; }
+/* ==========================================================================
+   7. PROFILO UTENTE
+   (Layout griglia profilo, Avatar, Lista informazioni)
+   ========================================================================== */
+.profile-wrapper { display: grid; grid-template-columns: 350px 1fr; gap: 30px; margin-top: -40px; position: relative; z-index: 10;}
+.avatar-box { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 40px 20px; }
 .avatar-circle {
-    width: 140px; height: 140px; 
-    background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
-    border-radius: 50%; margin: 0 auto 25px; 
-    display: flex; align-items: center; justify-content: center;
-    font-size: 50px; color: white; font-weight: 800; 
-    box-shadow: var(--shadow-lg); border: 4px solid white;
+    width: 100px; height: 100px; background: linear-gradient(135deg, #FF9F43 0%, #FF6B6B 100%);
+    color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-size: 36px; font-weight: 700; margin-bottom: 15px;
+    box-shadow: 0 10px 20px rgba(255, 107, 107, 0.3); border: 4px solid white;
 }
-.profile-card h2 { font-size: 24px; margin-bottom: 10px; }
-.role-badge {
-    background-color: var(--primary); color: white; padding: 8px 20px;
-    border-radius: 30px; font-size: 13px; font-weight: 700; text-transform: uppercase;
-    display: inline-block; margin-top: 10px; box-shadow: var(--shadow-sm);
-}
-.info-item { 
-    padding: 20px 0; border-bottom: 1px solid var(--border-light); 
-    font-size: 15px; color: var(--text-muted); display: flex; justify-content: space-between; 
-}
-.info-item b { color: var(--text-dark); font-weight: 600; }
+.info-list { width: 100%; margin-top: 20px; text-align: left; }
+.info-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f0f0f0; font-size: 14px; color: #707EAE; }
+.info-row b { color: var(--primary-dark); }
 
-/* =========================================
-   8. STATISTICHE & GRAFICI
-   ========================================= */
-.kpi-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; margin-bottom: 40px; }
-.kpi-card { 
-    display: flex; align-items: center; gap: 25px; padding: 35px; 
-    position: relative; overflow: hidden;
+/* ==========================================================================
+   8. FORM E INPUT (CONDIVISI)
+   (Usati in Profilo, Help, Checkout)
+   ========================================================================== */
+.form-box { padding: 30px; }
+.form-title { font-size: 18px; font-weight: 700; color: var(--primary-dark); margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #f0f0f0; }
+.input-group { margin-bottom: 20px; }
+.input-group label { display: block; font-size: 13px; font-weight: 600; color: var(--primary-dark); margin-bottom: 8px; }
+.input-group input {
+    width: 100%; padding: 12px; border: 1px solid #E0E5F2; border-radius: 12px;
+    font-size: 14px; background: #F9FAFB; transition: 0.3s;
 }
-/* Effetto bagliore sfumato dietro l'icona */
-.kpi-card::after {
-    content: ''; position: absolute; top: -50%; right: -50%; width: 200px; height: 200px;
-    background: radial-gradient(circle, var(--primary-light) 0%, transparent 70%);
-    opacity: 0.1; pointer-events: none;
+.input-group input:focus { background: white; border-color: var(--accent-orange); outline: none; }
+.btn-save {
+    background: var(--primary-brand); color: white; border: none; padding: 12px 24px;
+    border-radius: 12px; font-weight: 600; cursor: pointer; transition: 0.3s;
+}
+.btn-save:hover { background: var(--accent-orange); transform: translateY(-2px); }
+
+/* ==========================================================================
+   9. UTILITÀ, BADGE E ALERT
+   (Elementi grafici condivisi)
+   ========================================================================== */
+/* Badge Stato Ordine */
+.status-badge { padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+.status-badge.completed, .status-badge.active { background: #E6FAF5; color: var(--success); }
+.status-badge.pending { background: #FFF8E6; color: var(--accent-orange); }
+.status-badge.cancelled { background: #FFEEED; color: var(--accent-red); }
+
+.msg-box { padding: 15px; border-radius: 12px; margin-bottom: 25px; font-size: 14px; font-weight: 500; }
+.msg-box.success { background: #E6FAF5; color: var(--success); border: 1px solid var(--success); }
+.msg-box.error { background: #FFEEED; color: var(--accent-red); border: 1px solid var(--accent-red); }
+
+.empty-state {
+    grid-column: 1 / -1; text-align: center; padding: 50px; background: white; border-radius: 20px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+}
+.empty-icon { font-size: 40px; color: #ddd; margin-bottom: 15px; }
+.empty-title { color: var(--primary-dark); font-size: 20px; margin-bottom: 5px; font-weight: 700; }
+.empty-text { color: var(--text-grey); }
+
+.btn-support-float {
+    position: fixed; bottom: 30px; right: 30px;
+    background: var(--primary-dark); color: white; width: 60px; height: 60px;
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-size: 24px; box-shadow: 0 10px 25px rgba(43, 54, 116, 0.4);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    z-index: 2000; border: 2px solid white;
+}
+.btn-support-float:hover {
+    background: var(--accent-orange); transform: scale(1.1) rotate(15deg);
+    box-shadow: 0 15px 35px rgba(255, 159, 67, 0.4);
 }
 
-.kpi-icon { 
-    width: 70px; height: 70px; border-radius: 18px; 
-    display: flex; align-items: center; justify-content: center; font-size: 28px; 
-    box-shadow: var(--shadow-md);
+/* ==========================================================================
+   10. PAGINA ASSISTENZA (HELP)
+   (Layout griglia, FAQ a fisarmonica, Textarea)
+   ========================================================================== */
+.help-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+
+details { background: white; border-radius: 15px; margin-bottom: 15px; border: 1px solid #eee; overflow: hidden; transition: 0.3s; }
+details[open] { border-color: var(--accent-orange); box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+
+summary {
+    padding: 20px; cursor: pointer; font-weight: 600; color: var(--primary-dark);
+    list-style: none; display: flex; justify-content: space-between; align-items: center;
 }
-.icon-money { background: linear-gradient(135deg, #10B981 0%, #059669 100%); color: white; }
-.icon-cart { background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%); color: white; }
-.icon-avg { background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%); color: white; }
-
-.kpi-info h4 { color: var(--text-muted); font-size: 15px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
-.kpi-info h2 { color: var(--text-dark); font-size: 36px; font-weight: 800; margin-top: 5px; letter-spacing: -1px; }
-
-.dashboard-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 35px; margin-bottom: 40px; }
-.chart-container { position: relative; height: 350px; width: 100%; margin-top: 20px; }
-
-/* Top List Ristoranti */
-.top-item { 
-    display: flex; justify-content: space-between; align-items: center; 
-    padding: 20px 15px; border-bottom: 1px solid var(--border-light); 
-    transition: 0.2s; border-radius: 12px;
+summary::after {
+    content: '+'; font-size: 20px; font-weight: bold; color: #A3AED0; transition: 0.3s;
 }
-.top-item:hover { background-color: #F8FAFC; }
-.rank-circle {
-    width: 36px; height: 36px; background: var(--bg-body); color: var(--text-dark); 
-    border-radius: 50%; display: flex; align-items: center; justify-content: center; 
-    font-weight: 800; font-size: 16px; margin-right: 20px; border: 2px solid var(--border-light);
-}
-.rank-1 { background: #FDE047; color: #854D0E; border-color: #EAB308; }
-.rank-2 { background: #E2E8F0; color: #475569; border-color: #CBD5E1; }
-.rank-3 { background: #FFEDD5; color: #9A3412; border-color: #FDBA74; }
+details[open] summary::after { content: '-'; color: var(--accent-orange); }
 
-/* =========================================
-   9. RESPONSIVE GENERALE
-   ========================================= */
-@media (max-width: 1100px) {
-    .dashboard-grid, .management-grid, .profile-grid { grid-template-columns: 1fr; }
-    .kpi-row { grid-template-columns: repeat(2, 1fr); }
+.faq-answer {
+    padding: 0 20px 20px 20px; color: #707EAE; font-size: 14px; line-height: 1.6;
+    border-top: 1px solid #f9f9f9; padding-top: 15px;
+}
+
+textarea {
+    width: 100%; padding: 15px; border: 1px solid #E0E5F2; border-radius: 12px;
+    background: var(--bg-light); font-family: 'Poppins', sans-serif;
+    resize: vertical; min-height: 120px; transition: 0.3s;
+}
+textarea:focus { outline: none; border-color: var(--accent-orange); background: white; }
+
+.contact-icon-box {
+    width: 60px; height: 60px; background: #E6FAF5; color: #05CD99;
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-size: 24px; margin-bottom: 20px;
+}
+
+/* ==========================================================================
+   11. PAGINA CONFERMA AGGIUNTA CARRELLO (ADD_TO_CART)
+   ========================================================================== */
+.confirmation-box {
+    background: white;
+    border-radius: 20px;
+    padding: 50px 30px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    max-width: 600px;
+    margin: -50px auto 0 auto;
+    position: relative;
+    z-index: 10;
+}
+
+.success-icon-circle {
+    width: 80px; height: 80px; background: #E6FAF5; color: #05CD99;
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-size: 40px; margin: 0 auto 20px auto;
+}
+
+.added-item-name {
+    font-size: 22px; font-weight: 700; color: var(--primary-dark); margin-bottom: 5px;
+}
+
+.cart-summary {
+    background: #F9FAFB; border-radius: 15px; padding: 20px;
+    margin: 30px 0; display: flex; justify-content: space-between; align-items: center;
+}
+
+.cart-total-label { font-size: 14px; color: var(--text-grey); }
+.cart-total-value { font-size: 24px; font-weight: 700; color: var(--primary-dark); }
+
+.action-buttons {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
+}
+
+.btn-continue {
+    background: #F4F7FE; color: var(--primary-brand);
+    padding: 15px; border-radius: 15px; font-weight: 600;
+    transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px;
+}
+.btn-continue:hover { background: #e0e7ff; }
+
+.btn-checkout {
+    background: var(--primary-brand); color: white;
+    padding: 15px; border-radius: 15px; font-weight: 600;
+    transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px;
+    box-shadow: 0 10px 20px rgba(26, 77, 78, 0.2);
+}
+.btn-checkout:hover { background: var(--accent-orange); transform: translateY(-3px); }
+
+/* ==========================================================================
+   12. MEDIA QUERIES (RESPONSIVE)
+   ========================================================================== */
+@media (max-width: 900px) {
+    .profile-wrapper,
+    .help-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 @media (max-width: 768px) {
-    .main-content { margin-left: 0; padding: 25px; }
-    .kpi-row { grid-template-columns: 1fr; }
-    .grid-container { grid-template-columns: 1fr; }
-    .top-bar { flex-direction: column; align-items: flex-start; gap: 20px; }
-    .header-title, .page-title { text-align: left; }
-    .order-header { flex-direction: column; gap: 15px; }
-    .order-header div[style="text-align: right;"] { text-align: left !important; }
+    .top-navbar { padding: 15px 20px; }
+    .nav-links span { display: none; }
+    .hero-section { padding: 40px 20px 80px 20px; }
+    .main-container { padding: 0 20px 40px 20px; }
 }
+
+@media (max-width: 600px) {
+    .action-buttons {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ==========================================================================
+   11. PAGINA CONFERMA AGGIUNTA CARRELLO (ADD_TO_CART)
+   ========================================================================== */
+.confirmation-box {
+    background: white;
+    border-radius: 20px;
+    padding: 50px 30px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    max-width: 600px;
+    margin: -50px auto 0 auto; 
+    position: relative;
+    z-index: 10;
+}
+
+.success-icon-circle {
+    width: 80px; height: 80px; background: #E6FAF5; color: #05CD99;
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-size: 40px; margin: 0 auto 20px auto;
+}
+
+.added-item-name {
+    font-size: 22px; font-weight: 700; color: var(--primary-dark); margin-bottom: 5px;
+}
+
+.cart-summary {
+    background: #F9FAFB; border-radius: 15px; padding: 20px;
+    margin: 30px 0; display: flex; justify-content: space-between; align-items: center;
+}
+
+.cart-total-label { font-size: 14px; color: var(--text-grey); }
+.cart-total-value { font-size: 24px; font-weight: 700; color: var(--primary-dark); }
+
+.action-buttons {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
+}
+
+.btn-continue {
+    background: #F4F7FE; color: var(--primary-brand);
+    padding: 15px; border-radius: 15px; font-weight: 600;
+    transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px;
+}
+.btn-continue:hover { background: #e0e7ff; }
+
+.btn-checkout {
+    background: var(--primary-brand); color: white;
+    padding: 15px; border-radius: 15px; font-weight: 600;
+    transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px;
+    box-shadow: 0 10px 20px rgba(26, 77, 78, 0.2);
+}
+.btn-checkout:hover { background: var(--accent-orange); transform: translateY(-3px); }
+
+/* ==========================================================================
+   13. PAGINA CHECKOUT
+   ========================================================================== */
+.checkout-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+}
+
+.checkout-form {
+    padding: 30px;
+}
+
+.checkout-summary {
+    background: #F9FAFB;
+    padding: 30px;
+    border-left: 1px solid #eee;
+    border-radius: 0 20px 20px 0; 
+}
+
+.checkout-section-title {
+    margin-top: 0;
+    font-size: 18px; 
+    font-weight: 700; 
+    color: var(--primary-dark);
+    margin-bottom: 20px;
+}
+
+.checkout-select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #E0E5F2;
+    border-radius: 12px;
+    background: #F9FAFB;
+    font-size: 14px;
+    color: #333;
+    outline: none;
+    transition: 0.3s;
+    appearance: none; 
+    background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%231A4D4E%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+    background-repeat: no-repeat;
+    background-position: right 15px top 50%;
+    background-size: 12px auto;
+}
+
+.checkout-select:focus {
+    border-color: var(--accent-orange);
+    background-color: white;
+}
+
+.pickup-info {
+    background: #E6FAF5;
+    color: var(--success);
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px dashed #E0E5F2;
+    font-size: 14px;
+    color: var(--text-grey);
+}
+
+.qty-highlight {
+    color: var(--primary-brand);
+    font-weight: 700;
+    margin-right: 5px;
+}
+
+.summary-total {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 25px;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--primary-brand);
+    border-top: 2px solid #E0E5F2;
+    padding-top: 20px;
+}
+
+.btn-confirm {
+    width: 100%;
+    background: var(--primary-brand);
+    color: white;
+    border: none;
+    padding: 16px;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 25px;
+    transition: 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    box-shadow: 0 4px 10px rgba(26, 77, 78, 0.2);
+}
+
+.btn-confirm:hover {
+    background: var(--accent-orange);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(255, 159, 67, 0.3);
+}
+
+@media (max-width: 768px) {
+    .checkout-layout {
+        grid-template-columns: 1fr;
+    }
+    .checkout-summary {
+        border-left: none;
+        border-top: 1px solid #eee;
+        border-radius: 0 0 20px 20px;
+    }
+}
+
+/* ==========================================================================
+   14. CONTROLLI QUANTITÀ (CHECKOUT)
+   ========================================================================== */
+.qty-control-box {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: white;
+    padding: 5px 10px;
+    border-radius: 8px;
+    border: 1px solid #E0E5F2;
+}
+
+.btn-qty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    font-size: 12px;
+    transition: 0.2s;
+    color: white;
+    text-decoration: none;
+}
+
+.btn-qty.minus {
+    background-color: #A3AED0;
+}
+.btn-qty.minus:hover {
+    background-color: #FF6B6B;
+}
+
+.btn-qty.plus {
+    background-color: #05CD99;
+}
+.btn-qty.plus:hover {
+    background-color: #04b183;
+}
+
+.btn-remove-item {
+    color: #FF6B6B;
+    font-size: 14px;
+    margin-left: 10px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+.btn-remove-item:hover {
+    color: #d63031;
+}
+
+.item-name-checkout {
+    flex-grow: 1;
+    font-weight: 500;
+    color: var(--primary-dark);
+    margin-left: 10px;
+}
+
+/* ==========================================================================
+   15. FLOATING CART BUTTON (Tasto Carrello Galleggiante)
+   ========================================================================== */
+.floating-cart-btn {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 65px;
+    height: 65px;
+    background: var(--primary-dark); 
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    box-shadow: 0 10px 25px rgba(43, 54, 116, 0.4);
+    z-index: 2000; 
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border: 3px solid white;
+    font-size: 24px;
+}
+
+.floating-cart-btn:hover {
+    background: var(--accent-orange);
+    transform: scale(1.1) rotate(-5deg);
+    color: white;
+    box-shadow: 0 15px 35px rgba(255, 159, 67, 0.5);
+}
+
+.cart-count-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background-color: var(--accent-red);
+    color: white;
+    font-size: 12px;
+    font-weight: 700;
+    width: 26px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: 2px solid white;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.status-badge.accepted { 
+    background: #E0F7FA; 
+    color: #006064; 
+    border: 1px solid #B2EBF2;
+}
+
+.status-badge.rejected { 
+    background: #FFEBEE; 
+    color: #C62828; 
+    border: 1px solid #FFCDD2;
+} 
+
+        body { background: #F4F7FE; font-family: 'Inter', sans-serif; padding: 20px; }
+        .admin-nav { background: #fff; padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); border-radius: 10px; margin-bottom: 30px; }
+        .logo { font-size: 20px; font-weight: 800; color: #1A4D4E; text-decoration: none; }
+        .btn-back { padding: 10px 20px; background: #E0E5F2; color: #2B3674; text-decoration: none; border-radius: 10px; font-weight: 600; }
+        
+        .container { max-width: 1000px; margin: 0 auto; }
+        .page-title { font-size: 24px; font-weight: 700; color: #2B3674; margin-bottom: 20px; }
+        
+        .order-card { background: white; border-radius: 15px; padding: 25px; margin-bottom: 25px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-left: 5px solid #1A4D4E; }
+        .order-header { display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding-bottom: 15px; margin-bottom: 15px; }
+        .order-id { font-weight: 800; color: #2B3674; font-size: 18px; }
+        .order-meta { font-size: 13px; color: #A3AED0; margin-top: 5px; }
+        
+        .info-grid { margin-bottom: 20px; }
+        .info-box label { font-size: 11px; font-weight: 700; color: #A3AED0; text-transform: uppercase; }
+        .info-box p { font-size: 15px; color: #1B2559; margin-top: 5px; font-weight: 500; }
+        
+        .items-table { width: 100%; border-collapse: collapse; background: #F9FAFB; border-radius: 8px; overflow: hidden; }
+        .items-table td { padding: 10px 15px; font-size: 14px; border-bottom: 1px solid #eee; color: #2B3674; }
+        .items-table tr:last-child td { border-bottom: none; }
+        
+        .footer { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee; }
+        .total { font-size: 20px; font-weight: 700; color: #1A4D4E; }
+        .status { padding: 6px 15px; border-radius: 20px; background: #FFF8E6; color: #FFB547; font-weight: 700; font-size: 12px; text-transform: uppercase; }
+   
