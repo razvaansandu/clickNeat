@@ -1,6 +1,6 @@
 <?php
 require_once "../../config/db.php";
-require_once "../../models/PasswordResetModel.php";
+require_once "../../models/auth/PasswordResetModel.php";
 
 $token = $_GET['token'] ?? $_POST['token'] ?? null;
 $error = "";

@@ -3,7 +3,7 @@ if (session_status() !== PHP_SESSION_ACTIVE)
     session_start();
 
 require_once "../../config/db.php";
-require_once "../../models/MenuModel.php";
+require_once "../../models/consumatore/MenuModel.php";
 
 if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
     header("Location: ../auth/login.php");
