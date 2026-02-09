@@ -1,13 +1,12 @@
 <?php
-
 if(session_status() !== PHP_SESSION_ACTIVE) session_start();
 
-require_once "../../config/db.php";         
+require_once "../../config/db.php";          
 require_once "../../config/google_config.php"; 
-require_once "../../models/User.php";       
+require_once "../../models/RegisterModel.php"; 
 
 $register_url = getGoogleLoginUrl();
-$userModel = new User($db); 
+$registerModel = new RegisterModel($db); 
 
 function generate_csrf_token() {
     if (empty($_SESSION['csrf_token'])) {
@@ -36,8 +35,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     } elseif (strlen(trim($_POST["username"])) > 50) {
         $username_err = "L'username è troppo lungo.";
     } else {
-        if ($userModel->findByUsername(trim($_POST["username"]))) {
-            $username_err = "Questo username è già in uso.";
+
+        if ($registerModel->findByUsernameOrEmail(trim($_POST["username"]))) {
+
+             $username_err = "Questo username (o email associata) è già in uso.";
         } else {
             $username = trim($_POST["username"]);
         }
@@ -47,10 +48,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $email_err = "Inserisci un'email.";
     } elseif (!filter_var(trim($_POST["email"]), FILTER_VALIDATE_EMAIL)) {
         $email_err = "Email non valida.";
-    } elseif (strlen(trim($_POST["email"])) > 100) {
-        $email_err = "Email troppo lunga.";
     } else {
-        if ($userModel->findByEmail(trim($_POST["email"]))) {
+        if ($registerModel->findByUsernameOrEmail(trim($_POST["email"]))) {
             $email_err = "Questa email è già registrata.";
         } else {
             $email = trim($_POST["email"]);
@@ -65,10 +64,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $ruolo = $_POST["ruolo"];
     }
 
+    $password_plain = "";
     if (empty(trim($_POST["password"]))) {
         $password_err = "Inserisci una password.";
-    } elseif (strlen(trim($_POST["password"])) < PASSWORD_MIN_LENGTH) {
-        $password_err = "La password deve avere almeno " . PASSWORD_MIN_LENGTH . " caratteri.";
+    } elseif (strlen(trim($_POST["password"])) < 8) {
+        $password_err = "La password deve avere almeno 8 caratteri.";
     } elseif (!preg_match('/[A-Z]/', $_POST["password"])) {
         $password_err = "La password deve contenere almeno una lettera maiuscola.";
     } elseif (!preg_match('/[a-z]/', $_POST["password"])) {
@@ -92,25 +92,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if (empty($username_err) && empty($email_err) && empty($password_err) && empty($confirm_password_err) && empty($ruolo_err)) {
         
-        $hashed_password = password_hash($password_plain, PASSWORD_DEFAULT, ['cost' => 12]);
-        
-        $user_id = $userModel->create($username, $email, $hashed_password, $ruolo, 0);
+        $verify_token = $registerModel->register($username, $email, $password_plain, $ruolo);
 
-        if ($user_id) {
+        if ($verify_token) {
             
-            $verify_token = bin2hex(random_bytes(16));
-            $verify_token_hash = hash("sha256", $verify_token);
-
-            $userModel->updateVerifyToken($user_id, $verify_token_hash);
-
-            $mail = require __DIR__ . "/../src/mailer.php";
+            $mail = require __DIR__ . "/../../src/mailer.php";
 
             try {
-                $mail->setFrom("clickneat2026@gmail.com", "ClickNeat");
                 $mail->addAddress($email);
                 $mail->Subject = "Verifica la tua email - ClickNeat";
                 
-                $verify_link = "http://localhost:8000/verify_email.php?token=$verify_token";
+                $verify_link = "http://localhost:8000/auth/verify_email.php?token=$verify_token";
 
                 $mail->Body = <<<END
                 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
@@ -122,7 +114,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                        Verifica Email
                     </a>
                     <p style="color: #666; font-size: 13px;">Se non ti sei registrato, ignora questa email.</p>
-                    <p style="color: #666; font-size: 13px;">Questo link scadrà tra 24 ore.</p>
                 </div>
                 END;
 
@@ -130,7 +121,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             } catch (Exception $e) {
             }
 
-            header("location: email_sent.php?email=" . urlencode($email));
+            header("location: login.php?registered=1");
             exit();
 
         } else {
@@ -149,7 +140,9 @@ $csrf_token = generate_csrf_token();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registrazione - ClickNeat</title>
-    <link rel="stylesheet" href="../css/style.css?v=1.0">
+    <link rel="stylesheet" href="../../css/style.css?v=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 
 <body>
@@ -218,34 +211,33 @@ $csrf_token = generate_csrf_token();
             </div>
 
             <div style="display: flex; justify-content: center; width: 100%; margin-top: 15px;">
-
-                <button type="button" class="gsi-material-button"
-                    onclick="window.location.href='<?php echo $register_url; ?>'">
-                    <div class="gsi-material-button-state"></div>
-                    <div class="gsi-material-button-content-wrapper">
-                        <div class="gsi-material-button-icon">
-                            <svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"
-                                xmlns:xlink="http://www.w3.org/1999/xlink" style="display: block;">
-                                <path fill="#EA4335"
-                                    d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z">
-                                </path>
-                                <path fill="#4285F4"
-                                    d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z">
-                                </path>
-                                <path fill="#FBBC05"
-                                    d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z">
-                                </path>
-                                <path fill="#34A853"
-                                    d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z">
-                                </path>
-                                <path fill="none" d="M0 0h48v48H0z"></path>
-                            </svg>
+                <a href="<?php echo $register_url; ?>" style="text-decoration: none; width: 100%; max-width: 400px;">
+                    <div class="gsi-material-button">
+                        <div class="gsi-material-button-state"></div>
+                        <div class="gsi-material-button-content-wrapper">
+                            <div class="gsi-material-button-icon">
+                                <svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"
+                                    xmlns:xlink="http://www.w3.org/1999/xlink" style="display: block;">
+                                    <path fill="#EA4335"
+                                        d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z">
+                                    </path>
+                                    <path fill="#4285F4"
+                                        d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z">
+                                    </path>
+                                    <path fill="#FBBC05"
+                                        d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z">
+                                    </path>
+                                    <path fill="#34A853"
+                                        d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z">
+                                    </path>
+                                    <path fill="none" d="M0 0h48v48H0z"></path>
+                                </svg>
+                            </div>
+                            <span class="gsi-material-button-contents">Registrati con Google</span>
+                            <span style="display: none;">Registrati con Google</span>
                         </div>
-                        <span class="gsi-material-button-contents">Registrati con Google</span>
-                        <span style="display: none;">Registrati con Google</span>
                     </div>
-                </button>
-
+                </a>
             </div>
 
             <p style="text-align: center; margin-top: 20px;">
