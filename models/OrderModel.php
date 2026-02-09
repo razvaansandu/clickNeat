@@ -1,5 +1,5 @@
 <?php
-class Order
+class OrderModel
 {
     private $db;
 
@@ -46,6 +46,7 @@ class Order
         $this->db->rollback();
     }
 
+
     public function getByUserId($user_id)
     {
         $sql = "SELECT o.id, o.created_at, o.total_amount, o.status, r.nome as nome_ristorante 
@@ -55,5 +56,28 @@ class Order
                 ORDER BY o.created_at DESC";
         return $this->db->select($sql, [$user_id]);
     }
+
+    public function getByRestaurantId($restaurant_id)
+    {
+        $sql = "SELECT o.*, u.username as cliente_nome 
+                FROM orders o 
+                JOIN users u ON o.user_id = u.id 
+                WHERE o.restaurant_id = ? 
+                ORDER BY o.created_at DESC";
+        return $this->db->select($sql, [$restaurant_id]);
+    }
+
+    public function getOrderItems($order_id)
+    {
+        $sql = "SELECT oi.*, m.name 
+                FROM order_items oi 
+                JOIN menu_items m ON oi.dish_id = m.id 
+                WHERE oi.order_id = ?";
+        return $this->db->select($sql, [$order_id]);
+    }
+
+    public function updateStatus($order_id, $status)
+    {
+        return $this->db->update('orders', ['status' => $status], 'id = ?', [$order_id]);
+    }
 }
-?>

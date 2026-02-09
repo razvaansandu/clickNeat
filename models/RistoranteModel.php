@@ -1,5 +1,5 @@
 <?php
-class Ristorante {
+class RistoranteModel {
     private $db;
 
     public function __construct($db) {

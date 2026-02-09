@@ -3,7 +3,7 @@ if (session_status() !== PHP_SESSION_ACTIVE)
     session_start();
 
 require_once "../../config/db.php";
-require_once "../../models/Order.php";
+require_once "../../models/OrderModel.php";
 
 if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
     header("Location: ../auth/login.php");
@@ -15,7 +15,7 @@ $orders = [];
 $error_message = "";
 
 try {
-    $orderModel = new Order($db);
+    $orderModel = new OrderModel($db);
 
     $orders = $orderModel->getByUserId($user_id);
 

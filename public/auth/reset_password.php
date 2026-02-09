@@ -1,107 +1,71 @@
 <?php
 require_once "../../config/db.php";
-require_once "../../models/User.php";
+require_once "../../models/PasswordResetModel.php";
 
-$token = $_POST['token'] ?? $_GET['token'] ?? null;
+$token = $_GET['token'] ?? $_POST['token'] ?? null;
+$error = "";
 
 if (!$token) {
-    die("Token non fornito.");
+    die("Token mancante.");
 }
 
+$resetModel = new PasswordResetModel($db);
 $token_hash = hash("sha256", $token);
 
-$userModel = new User($db);
-
-$user = $userModel->findByResetToken($token_hash);
+$user = $resetModel->findByResetToken($token_hash);
 
 if (!$user) {
-    die("Token non valido o già utilizzato.");
+    die("Token non valido.");
 }
-
 if (strtotime($user["reset_token_expires_at"]) <= time()) {
-    die("Token scaduto. Richiedi un nuovo reset.");
+    die("Token scaduto.");
 }
-
-$password_err = $confirm_password_err = "";
-$password = $confirm_password = "";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $password = $_POST['password'];
+    $confirm = $_POST['confirm_password'];
 
-    if (empty(trim($_POST["password"]))) {
-        $password_err = "Inserisci una password.";
-    } elseif (strlen(trim($_POST["password"])) < PASSWORD_MIN_LENGTH) {
-        $password_err = "La password deve avere almeno " . PASSWORD_MIN_LENGTH . " caratteri.";
-    } elseif (!preg_match('/[A-Z]/', $_POST["password"])) {
-        $password_err = "La password deve contenere almeno una lettera maiuscola.";
-    } elseif (!preg_match('/[a-z]/', $_POST["password"])) {
-        $password_err = "La password deve contenere almeno una lettera minuscola.";
-    } elseif (!preg_match('/[0-9]/', $_POST["password"])) {
-        $password_err = "La password deve contenere almeno un numero.";
-    } elseif (!preg_match('/[!@#$%^&*()_+\-=\[\]{};:\'",.<>?]/', $_POST["password"])) {
-        $password_err = "La password deve contenere almeno un carattere speciale.";
+    if (strlen($password) < 8) {
+        $error = "La password deve essere almeno di 8 caratteri.";
+    } elseif ($password !== $confirm) {
+        $error = "Le password non coincidono.";
     } else {
-        $password = trim($_POST["password"]);
-    }
-
-    if (empty(trim($_POST["confirm_password"]))) {
-        $confirm_password_err = "Conferma la password.";
-    } else {
-        $confirm_password = trim($_POST["confirm_password"]);
-        if (empty($password_err) && ($password != $confirm_password)) {
-            $confirm_password_err = "Le password non coincidono.";
-        }
-    }
-
-    if (empty($password_err) && empty($confirm_password_err)) {
-
-        $param_password = password_hash($password, PASSWORD_DEFAULT, ['cost' => 12]);
-
-        if ($userModel->resetPassword($user["id"], $param_password)) {
-            header("location: login.php?password_updated=1");
-            exit();
+        $new_hash = password_hash($password, PASSWORD_DEFAULT);
+        
+        if ($resetModel->resetPassword($user['id'], $new_hash)) {
+            header("Location: login.php?password_updated=1");
+            exit;
         } else {
-            echo "Qualcosa è andato storto durante l'aggiornamento. Riprova.";
+            $error = "Errore durante l'aggiornamento.";
         }
     }
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="it">
-
 <head>
     <meta charset="UTF-8">
-    <title>Reset Password - ClickNeat</title>
-    <link rel="stylesheet" href="../css/style.css?v=1.0">
+    <title>Nuova Password</title>
+    <link rel="stylesheet" href="../../css/style.css?v=1.0">
 </head>
-
 <body>
     <div class="container">
-        <h2>Reset Password</h2>
-        <p>Inserisci la tua nuova password.</p>
-
-        <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
+        <h2>Reimposta Password</h2>
+        <?php if($error) echo "<div class='alert'>$error</div>"; ?>
+        <form method="POST">
             <input type="hidden" name="token" value="<?php echo htmlspecialchars($token); ?>">
-
             <div class="form-group">
                 <label>Nuova Password</label>
-                <input type="password" name="password"
-                    class="form-control <?php echo (!empty($password_err)) ? 'is-invalid' : ''; ?>">
-                <span class="error"><?php echo $password_err; ?></span>
+                <input type="password" name="password" required>
             </div>
-
             <div class="form-group">
                 <label>Conferma Password</label>
-                <input type="password" name="confirm_password"
-                    class="form-control <?php echo (!empty($confirm_password_err)) ? 'is-invalid' : ''; ?>">
-                <span class="error"><?php echo $confirm_password_err; ?></span>
+                <input type="password" name="confirm_password" required>
             </div>
-
             <div class="form-group">
                 <button type="submit">Salva Password</button>
             </div>
         </form>
     </div>
 </body>
-
 </html>

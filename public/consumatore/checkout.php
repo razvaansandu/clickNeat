@@ -3,7 +3,7 @@ if (session_status() !== PHP_SESSION_ACTIVE)
     session_start();
 
 require_once "../../config/db.php";
-require_once "../../models/Order.php";
+require_once "../../models/OrderModel.php";
 
 if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
     header("Location: ../auth/login.php");
@@ -23,7 +23,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['place_order'])) {
     $restaurant_id = $cart['restaurant_id'];
     $total = $cart['total'];
 
-    $orderModel = new Order($db);
+    $orderModel = new OrderModel($db);
 
     try {
         $orderModel->beginTransaction();

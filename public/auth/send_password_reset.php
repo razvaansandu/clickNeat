@@ -1,81 +1,58 @@
 <?php
-require_once "../../config/db.php";         
-require_once "../../models/User.php";       
+if (session_status() !== PHP_SESSION_ACTIVE) session_start();
 
-if ($_SERVER["REQUEST_METHOD"] !== "POST") {
-    header("Location: login.php");
-    exit();
-}
+require_once "../../config/db.php";
+require_once "../../models/PasswordResetModel.php"; 
 
-$email = $_POST["email"] ?? '';
+$msg = "";
 
-if (!empty($email)) {
-    $userModel = new User($db);
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $email = isset($_POST["email"]) ? trim($_POST["email"]) : '';
 
-    $user = $userModel->findByEmail($email);
+    if (!empty($email)) {
+        $resetModel = new PasswordResetModel($db);
 
-    if ($user) {
         $token = bin2hex(random_bytes(16));
         $token_hash = hash("sha256", $token);
         $expiry = date("Y-m-d H:i:s", time() + 60 * 30); 
 
-        if ($userModel->savePasswordResetToken($email, $token_hash, $expiry)) {
-
+        if ($resetModel->saveResetToken($email, $token_hash, $expiry)) {
             $mail = require __DIR__ . "/../../src/mailer.php";
-
             try {
                 $mail->addAddress($email);
                 $mail->Subject = "Reset Password - ClickNeat";
-
-                $reset_link = "http://localhost/public/auth/reset_password.php?token=$token";
-
-                $mail->Body = <<<END
-                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                    <h2 style="color: #1e3c72;">Reset Password ClickNeat</h2>
-                    <p>Hai richiesto di reimpostare la tua password.</p>
-                    <p>Clicca sul pulsante qui sotto per procedere:</p>
-                    <a href="$reset_link" 
-                       style="display: inline-block; padding: 15px 30px; background: linear-gradient(135deg, #1e3c72, #7e22ce); 
-                       color: white; text-decoration: none; border-radius: 10px; font-weight: bold; margin: 20px 0;">
-                       Reset Password
-                    </a>
-                    <p style="color: #666; font-size: 13px;">Questo link scadrà tra 30 minuti.</p>
-                    <p style="color: #666; font-size: 13px;">Se non hai richiesto questo reset, ignora questa email.</p>
-                </div>
-                END;
-
+                $reset_link = "http://localhost:8000/public/auth/reset_password.php?token=$token";
+                $mail->Body = "Clicca qui per resettare: <a href='$reset_link'>Reset Password</a>";
                 $mail->send();
-            } catch (Exception $e) {
-       
-            }
+            } catch (Exception $e) {}
         }
     }
+    $msg = "Se l'email esiste, riceverai le istruzioni.";
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="it">
-
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Email Inviata - ClickNeat</title>
-    <link rel="stylesheet" href="../css/style.css?v=1.0">
+    <title>Recupero Password</title>
+    <link rel="stylesheet" href="../../css/style.css?v=1.0">
 </head>
-
 <body>
     <div class="container">
-        <h2>✉️ Controlla la tua email</h2>
-        <p style="text-align: center; margin-bottom: 20px;">
-            Se l'indirizzo email è registrato nel nostro sistema, riceverai un link per reimpostare la password.
-        </p>
-        <p style="text-align: center; color: #7e22ce; font-weight: 600;">
-            Controlla anche la cartella spam!
-        </p>
-        <div style="text-align: center; margin-top: 30px;">
-            <a href="login.php" style="text-decoration: none; color: #1e3c72;">← Torna al login</a>
-        </div>
+        <h2>Recupero Password</h2>
+        <?php if ($msg): ?>
+            <div class="alert" style="color: green; border-color: green;"><?php echo $msg; ?></div>
+        <?php endif; ?>
+        <form method="POST">
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <button type="submit">Invia Link</button>
+            </div>
+        </form>
+        <p style="text-align: center;"><a href="login.php">Torna al Login</a></p>
     </div>
 </body>
-
 </html>

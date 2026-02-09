@@ -10,6 +10,7 @@ if (isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true) {
     exit;
 }
 
+require_once "../../config/database.php";
 require_once "../../config/db.php";          
 require_once "../../src/rate_limiter.php";   
 require_once "../../config/google_config.php";  

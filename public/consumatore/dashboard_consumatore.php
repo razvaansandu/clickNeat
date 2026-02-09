@@ -1,6 +1,6 @@
 <?php
 require_once "../../config/db.php";
-require_once "../../models/dashboard_consumatore_ristoranti.php";
+require_once "../../models/RistoranteModel.php";
 
 if (!isset($_SESSION["loggedin"]) || $_SESSION["ruolo"] !== 'consumatore') {
     header("location: login.php");
@@ -11,7 +11,7 @@ $user_id = $_SESSION["id"];
 $username = $_SESSION["username"];
 $restaurants = [];
 
-$ristoranteModel = new Ristorante($db);
+$ristoranteModel = new RistoranteModel($db);
 
 $raw_restaurants = $ristoranteModel->getAll();
 

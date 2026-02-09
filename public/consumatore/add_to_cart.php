@@ -3,7 +3,7 @@ if (session_status() !== PHP_SESSION_ACTIVE)
     session_start();
 
 require_once "../../config/db.php";
-require_once "../../models/Menu.php";
+require_once "../../models/MenuModel.php";
 
 if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
     header("Location: ../auth/login.php");
@@ -23,7 +23,7 @@ if ($piatto_id === 0 || $ristorante_id === 0) {
     exit;
 }
 
-$menuModel = new Menu($db);
+$menuModel = new MenuModel($db);
 $piatto = $menuModel->getById($piatto_id);
 
 if (!$piatto) {

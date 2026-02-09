@@ -1,7 +1,7 @@
 <?php
 require_once "../../config/db.php";
-require_once "../../models/dashboard_consumatore_ristoranti.php";
-require_once "../../models/Menu.php";
+require_once "../../models/RistoranteModel.php";
+require_once "../../models/MenuModel.php";
 
 if (session_status() !== PHP_SESSION_ACTIVE)
     session_start();
@@ -18,8 +18,8 @@ if (!isset($_GET['id']) || empty($_GET['id'])) {
 
 $ristorante_id = intval($_GET['id']);
 
-$ristoranteModel = new Ristorante($db);
-$menuModel = new Menu($db);
+$ristoranteModel = new RistoranteModel($db);
+$menuModel = new MenuModel($db);
 
 $ristorante = $ristoranteModel->getById($ristorante_id);
 

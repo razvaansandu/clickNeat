@@ -1,5 +1,5 @@
 <?php
-class Menu
+class MenuModel
 {
     private $db;
 
