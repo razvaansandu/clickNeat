@@ -42,13 +42,11 @@ if (!empty($my_restaurants)) {
 </head>
 <body>
  
-    <div class="mobile-header"> 
-        <!-- Rimosso onclick, gestito da JavaScript -->
-        <button class="hamburger-btn"> 
+    <div class="mobile-header">  
+        <button class="hamburger-btn">  
             <i class="fa-solid fa-bars" id="menuBtn"></i> 
         </button>  
-        <span class="mobile-title">Menu</span>
-    </div>
+        </div>
 
     <?php include '../includes/sidebar.php'; ?>
 

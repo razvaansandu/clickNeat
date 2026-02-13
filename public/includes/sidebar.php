@@ -12,16 +12,15 @@
     </div>
 
     <div class="nav-links">
-        <a href="dashboard.php" class="active">
+        <a href="dashboard_ristoratore.php" class="active">
             <i class="fa-solid fa-chart-pie"></i> Dashboard
         </a>
-        <a href="profile.php">
+        <a href="profile_ristoratore.php">
             <i class="fa-solid fa-user"></i> Profilo
         </a>
-        <a href="orders.php">
+        <a href="ordini_ristoratore.php">
             <i class="fa-solid fa-clock"></i> Ordini
         </a>
-        <!-- Aggiungi altri link se necessario -->
     </div>
 
     <a href="../auth/logout.php" class="btn-logout-sidebar">
