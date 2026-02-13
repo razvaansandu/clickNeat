@@ -684,3 +684,4 @@ a { text-decoration: none; color: inherit; }
 @media (max-width: 900px) {
     .management-grid { grid-template-columns: 1fr; }
 }
+
