@@ -3,7 +3,7 @@ if(session_status() !== PHP_SESSION_ACTIVE) session_start();
 
 require_once "../../config/db.php";          
 require_once "../../config/google_config.php"; 
-require_once "../../models/auth/RegisterModel.php"; 
+require_once "../../models/RegisterModel.php"; 
 
 $register_url = getGoogleLoginUrl();
 $registerModel = new RegisterModel($db); 

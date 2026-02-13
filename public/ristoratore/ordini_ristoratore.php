@@ -1,49 +1,19 @@
 <?php
-
 if(session_status() !== PHP_SESSION_ACTIVE) session_start();
 
 require_once "../../config/db.php";
+require_once "../../models/OrderModel.php";
 
 if (!isset($_SESSION["loggedin"]) || $_SESSION["ruolo"] !== 'ristoratore') {
-    header("location: login.php");
+    header("location: ../auth/login.php");
     exit;
 }
 
 $owner_id = $_SESSION['id'];
-$orders = [];
+$orderModel = new OrderRistoratoreModel($db);
 
-$sql = "SELECT o.id, o.total_amount, o.status, o.created_at, 
-               u.username as cliente, r.nome as ristorante_nome
-        FROM orders o
-        JOIN ristoranti r ON o.restaurant_id = r.id
-        JOIN users u ON o.user_id = u.id
-        WHERE r.proprietario_id = ?
-        ORDER BY o.created_at DESC";
+$orders = $orderModel->getByOwnerId($owner_id);
 
-if ($stmt = mysqli_prepare($link, $sql)) {
-    mysqli_stmt_bind_param($stmt, "i", $owner_id);
-    mysqli_stmt_execute($stmt);
-    $result = mysqli_stmt_get_result($stmt);
-    
-    while ($row = mysqli_fetch_assoc($result)) {
-        $order_id = $row['id'];
-        
-        $sql_items = "SELECT oi.quantity, oi.price_at_time, m.name 
-                      FROM order_items oi 
-                      JOIN menu_items m ON oi.dish_id = m.id 
-                      WHERE oi.order_id = $order_id";
-                      
-        $res_items = mysqli_query($link, $sql_items);
-        $items = [];
-        if($res_items) {
-            while($item = mysqli_fetch_assoc($res_items)){
-                $items[] = $item;
-            }
-        }
-        $row['items'] = $items;
-        $orders[] = $row;
-    }
-}
 ?>
 
 <!DOCTYPE html>

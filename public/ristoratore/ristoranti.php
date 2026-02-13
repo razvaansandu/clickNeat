@@ -1,22 +1,19 @@
 <?php
-require_once "../../config/db.php";
-
 if(session_status() !== PHP_SESSION_ACTIVE) session_start();
 
-if(!isset($_SESSION["user_id"]) || !isset($_SESSION["ruolo"]) || $_SESSION["ruolo"] !== "consumatore"){
-    header("location: login.php");
+require_once "../../config/db.php";
+require_once "../../models/OrderRistoratoreModel.php";
+
+if (!isset($_SESSION["loggedin"]) || $_SESSION["ruolo"] !== 'ristoratore') {
+    header("location: ../auth/login.php");
     exit;
 }
 
-$ristoranti = [];
-$sql = "SELECT nome, indirizzo, descrizione FROM ristoranti";
-if($result = mysqli_query($link, $sql)){
-    while($row = mysqli_fetch_assoc($result)){
-        $ristoranti[] = $row;
-    }
-    mysqli_free_result($result);
-}
-mysqli_close($link);
+$owner_id = $_SESSION['id'];
+$orderModel = new OrderRistoratoreModel($db);
+
+$orders = $orderModel->getByOwnerId($owner_id);
+
 ?>
 <!DOCTYPE html>
 <html lang="it">
