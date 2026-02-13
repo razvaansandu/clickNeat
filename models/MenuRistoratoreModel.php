@@ -18,14 +18,17 @@ class MenuRistoratoreModel
         return $this->db->selectOne("SELECT * FROM menu_items WHERE id = ?", [$id]);
     }
 
-    public function create($restaurant_id, $name, $description, $price, $image_url = null)
+    public function create($restaurant_id, $name, $description, $price ,$categoria="altro" ,$image_url= null)
     {
+        $final_image = (!empty($image_url)) ? $image_url : null;
+        $final_category = (!empty($categoria)) ? $categoria : "altro";
         return $this->db->insert('menu_items', [
             'restaurant_id' => $restaurant_id,
             'name' => $name,
             'description' => $description,
             'price' => $price,
-            'image_url' => $image_url
+            'image_url' => $image_url,
+            'categoria' => $categoria
         ]);
     }
 
