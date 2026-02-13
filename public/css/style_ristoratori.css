@@ -1,8 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 /* ==========================================================================
    1. GLOBALI & RESET
-   (Variabili colori, reset margini, impostazioni body e link)
    ========================================================================== */
 :root {
     --primary-dark: #2B3674;
@@ -10,9 +10,10 @@
     --accent-orange: #FF9F43;
     --accent-red: #FF6B6B;
     --text-grey: #A3AED0;
-    --bg-light: #F9FAFB;
+    --bg-light: #F4F7FE;
     --white: #ffffff;
     --success: #05CD99;
+    --sidebar-width: 260px;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
@@ -26,653 +27,660 @@ body {
 a { text-decoration: none; color: inherit; }
 
 /* ==========================================================================
-   2. TOP NAVBAR
-   (Presente in tutte le pagine)
+   2. LA TUA SIDEBAR
    ========================================================================== */
-.top-navbar {
-    background: var(--white);
-    padding: 15px 50px;
+.sidebar {
+    width: var(--sidebar-width);
+    background: linear-gradient(180deg, #1A4D4E 0%, #153e3f 100%);
+    color: white;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.03);
-    position: sticky;
+    flex-direction: column;
+    padding: 25px;
+    box-shadow: 4px 0 10px rgba(0, 0, 0, 0.05);
+    height: 100vh;
+    position: fixed;
     top: 0;
+    left: 0;
     z-index: 1000;
 }
 
 .brand-logo {
-    font-size: 24px; font-weight: 800; color: var(--primary-brand);
-    display: flex; align-items: center; gap: 10px;
-}
-
-.nav-links { display: flex; gap: 25px; align-items: center; }
-
-.nav-item {
-    color: #707EAE; font-weight: 500; font-size: 15px; transition: 0.3s;
-    display: flex; align-items: center; gap: 8px;
-}
-.nav-item:hover, .nav-item.active { color: var(--accent-orange); }
-
-.btn-logout-nav {
-    padding: 8px 20px; border: 1px solid var(--accent-red); color: var(--accent-red);
-    border-radius: 20px; font-weight: 600; font-size: 14px; transition: 0.3s;
-}
-.btn-logout-nav:hover { background: var(--accent-red); color: var(--white); }
-
-/* ==========================================================================
-   3. HERO SECTION
-   (Intestazione colorata presente in tutte le pagine)
-   ========================================================================== */
-.hero-section {
-    background: linear-gradient(100deg, var(--accent-orange) 0%, var(--accent-red) 100%);
-    padding: 60px 50px 80px 50px;
-    color: var(--white);
-    position: relative;
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
-}
-
-.hero-content {
-    max-width: 1200px; margin: 0 auto; position: relative; z-index: 2;
-}
-
-.hero-title h1 { font-size: 36px; font-weight: 800; margin-bottom: 10px; }
-.hero-title p { font-size: 18px; opacity: 0.9; }
-
-.btn-back-hero {
-    display: inline-flex; align-items: center; gap: 8px;
-    background: rgba(255,255,255,0.2); backdrop-filter: blur(5px);
-    padding: 8px 16px; border-radius: 20px; color: white;
-    font-weight: 600; font-size: 14px; margin-bottom: 20px; transition: 0.3s;
-}
-.btn-back-hero:hover { background: white; color: var(--accent-red); }
-
-/* ==========================================================================
-   4. DASHBOARD CONSUMATORE
-   (Pillole categorie, Griglia ristoranti, Card Ristorante)
-   ========================================================================== */
-/* Categorie */
-.categories-wrapper {
-    max-width: 1200px; margin: -35px auto 40px auto; padding: 0 20px;
-    position: relative; z-index: 10;
-}
-
-.categories-container {
-    display: flex; gap: 15px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: none;
-}
-.categories-container::-webkit-scrollbar { display: none; }
-
-.category-pill {
-    background: white; padding: 12px 25px; border-radius: 50px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-    display: flex; align-items: center; gap: 10px;
-    font-weight: 600; color: #2B3674; cursor: pointer; transition: 0.3s;
-    white-space: nowrap; border: 2px solid white;
-}
-.category-pill:hover, .category-pill.active {
-    border-color: var(--accent-orange); color: var(--accent-orange); transform: translateY(-5px);
-}
-
-.main-container {
-    max-width: 1200px; margin: 0 auto; padding: 0 20px 60px 20px;
-}
-.section-title {
-    font-size: 24px; font-weight: 700; color: var(--primary-dark); margin-bottom: 25px;
-}
-.grid-container {
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 30px;
-}
-
-.restaurant-card {
-    background: var(--white); border-radius: 20px; overflow: hidden;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.05); transition: all 0.3s ease;
-    text-decoration: none; color: inherit; display: flex; flex-direction: column; border: 1px solid #eee;
-}
-.restaurant-card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(112, 144, 176, 0.15); }
-.card-img-top { height: 200px; width: 100%; object-fit: cover; }
-.card-body { padding: 20px; display: flex; flex-direction: column; flex-grow: 1; }
-.badge-cat { font-size: 11px; text-transform: uppercase; font-weight: 700; color: var(--accent-orange); letter-spacing: 1px; margin-bottom: 5px; }
-.card-title { font-size: 18px; font-weight: 700; color: var(--primary-dark); margin-bottom: 8px; }
-.card-info { font-size: 13px; color: var(--text-grey); margin-bottom: 15px; display: flex; align-items: center; gap: 6px; }
-.btn-go {
-    margin-top: auto; background: #F4F7FE; color: var(--primary-brand);
-    text-align: center; padding: 10px; border-radius: 12px; font-weight: 600; transition: 0.3s;
-}
-.restaurant-card:hover .btn-go { background: var(--primary-brand); color: white; }
-
-/* ==========================================================================
-   5. MENU RISTORANTE (PAGINA MENU)
-   (Stili per le card dei piatti)
-   ========================================================================== */
-.card-style {
-    background: var(--white); border-radius: 20px; overflow: hidden;
-    box-shadow: 0 10px 25px rgba(112, 144, 176, 0.08); transition: all 0.3s ease;
-    border: 1px solid #eee; display: flex; flex-direction: column;
-}
-
-.dish-image { height: 160px; width: 100%; object-fit: cover; }
-.dish-body { padding: 20px; flex-grow: 1; display: flex; flex-direction: column; }
-.dish-title { font-size: 18px; font-weight: 700; color: var(--primary-dark); margin-bottom: 5px; }
-.dish-desc { font-size: 13px; color: #707EAE; margin-bottom: 15px; line-height: 1.4; flex-grow: 1; }
-.dish-footer { display: flex; justify-content: space-between; align-items: center; margin-top: auto; }
-.price-tag { font-size: 18px; font-weight: 700; color: var(--success); }
-.btn-add {
-    background: var(--bg-light); color: var(--primary-brand);
-    padding: 8px 16px; border-radius: 12px; font-weight: 600; border: none; cursor: pointer; transition: 0.3s;
-    display: flex; align-items: center; gap: 5px;
-}
-.btn-add:hover { background: var(--primary-brand); color: white; }
-
-/* ==========================================================================
-   6. STORICO ORDINI (PAGINA HISTORY)
-   (Card riepilogo ordini passati)
-   ========================================================================== */
-.order-card { padding: 25px; display: flex; flex-direction: column; justify-content: space-between; }
-.order-header { display: flex; justify-content: space-between; margin-bottom: 15px; }
-.order-id { font-size: 13px; color: var(--text-grey); font-weight: 500; }
-.order-rest-name { font-size: 18px; font-weight: 700; color: var(--primary-dark); margin-bottom: 5px; }
-.order-date { font-size: 13px; color: var(--text-grey); display: flex; gap: 5px; align-items: center; }
-.order-footer { margin-top: 20px; border-top: 1px solid #f0f0f0; padding-top: 15px; display: flex; justify-content: space-between; align-items: center; }
-
-/* ==========================================================================
-   7. PROFILO UTENTE
-   (Layout griglia profilo, Avatar, Lista informazioni)
-   ========================================================================== */
-.profile-wrapper { display: grid; grid-template-columns: 350px 1fr; gap: 30px; margin-top: -40px; position: relative; z-index: 10;}
-.avatar-box { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 40px 20px; }
-.avatar-circle {
-    width: 100px; height: 100px; background: linear-gradient(135deg, #FF9F43 0%, #FF6B6B 100%);
-    color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-    font-size: 36px; font-weight: 700; margin-bottom: 15px;
-    box-shadow: 0 10px 20px rgba(255, 107, 107, 0.3); border: 4px solid white;
-}
-.info-list { width: 100%; margin-top: 20px; text-align: left; }
-.info-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f0f0f0; font-size: 14px; color: #707EAE; }
-.info-row b { color: var(--primary-dark); }
-
-/* ==========================================================================
-   8. FORM E INPUT (CONDIVISI)
-   (Usati in Profilo, Help, Checkout)
-   ========================================================================== */
-.form-box { padding: 30px; }
-.form-title { font-size: 18px; font-weight: 700; color: var(--primary-dark); margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #f0f0f0; }
-.input-group { margin-bottom: 20px; }
-.input-group label { display: block; font-size: 13px; font-weight: 600; color: var(--primary-dark); margin-bottom: 8px; }
-.input-group input {
-    width: 100%; padding: 12px; border: 1px solid #E0E5F2; border-radius: 12px;
-    font-size: 14px; background: #F9FAFB; transition: 0.3s;
-}
-.input-group input:focus { background: white; border-color: var(--accent-orange); outline: none; }
-.btn-save {
-    background: var(--primary-brand); color: white; border: none; padding: 12px 24px;
-    border-radius: 12px; font-weight: 600; cursor: pointer; transition: 0.3s;
-}
-.btn-save:hover { background: var(--accent-orange); transform: translateY(-2px); }
-
-/* ==========================================================================
-   9. UTILITÀ, BADGE E ALERT
-   (Elementi grafici condivisi)
-   ========================================================================== */
-/* Badge Stato Ordine */
-.status-badge { padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
-.status-badge.completed, .status-badge.active { background: #E6FAF5; color: var(--success); }
-.status-badge.pending { background: #FFF8E6; color: var(--accent-orange); }
-.status-badge.cancelled { background: #FFEEED; color: var(--accent-red); }
-
-.msg-box { padding: 15px; border-radius: 12px; margin-bottom: 25px; font-size: 14px; font-weight: 500; }
-.msg-box.success { background: #E6FAF5; color: var(--success); border: 1px solid var(--success); }
-.msg-box.error { background: #FFEEED; color: var(--accent-red); border: 1px solid var(--accent-red); }
-
-.empty-state {
-    grid-column: 1 / -1; text-align: center; padding: 50px; background: white; border-radius: 20px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-}
-.empty-icon { font-size: 40px; color: #ddd; margin-bottom: 15px; }
-.empty-title { color: var(--primary-dark); font-size: 20px; margin-bottom: 5px; font-weight: 700; }
-.empty-text { color: var(--text-grey); }
-
-.btn-support-float {
-    position: fixed; bottom: 30px; right: 30px;
-    background: var(--primary-dark); color: white; width: 60px; height: 60px;
-    border-radius: 50%; display: flex; align-items: center; justify-content: center;
-    font-size: 24px; box-shadow: 0 10px 25px rgba(43, 54, 116, 0.4);
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    z-index: 2000; border: 2px solid white;
-}
-.btn-support-float:hover {
-    background: var(--accent-orange); transform: scale(1.1) rotate(15deg);
-    box-shadow: 0 15px 35px rgba(255, 159, 67, 0.4);
-}
-
-/* ==========================================================================
-   10. PAGINA ASSISTENZA (HELP)
-   (Layout griglia, FAQ a fisarmonica, Textarea)
-   ========================================================================== */
-.help-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
-
-details { background: white; border-radius: 15px; margin-bottom: 15px; border: 1px solid #eee; overflow: hidden; transition: 0.3s; }
-details[open] { border-color: var(--accent-orange); box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
-
-summary {
-    padding: 20px; cursor: pointer; font-weight: 600; color: var(--primary-dark);
-    list-style: none; display: flex; justify-content: space-between; align-items: center;
-}
-summary::after {
-    content: '+'; font-size: 20px; font-weight: bold; color: #A3AED0; transition: 0.3s;
-}
-details[open] summary::after { content: '-'; color: var(--accent-orange); }
-
-.faq-answer {
-    padding: 0 20px 20px 20px; color: #707EAE; font-size: 14px; line-height: 1.6;
-    border-top: 1px solid #f9f9f9; padding-top: 15px;
-}
-
-textarea {
-    width: 100%; padding: 15px; border: 1px solid #E0E5F2; border-radius: 12px;
-    background: var(--bg-light); font-family: 'Poppins', sans-serif;
-    resize: vertical; min-height: 120px; transition: 0.3s;
-}
-textarea:focus { outline: none; border-color: var(--accent-orange); background: white; }
-
-.contact-icon-box {
-    width: 60px; height: 60px; background: #E6FAF5; color: #05CD99;
-    border-radius: 50%; display: flex; align-items: center; justify-content: center;
-    font-size: 24px; margin-bottom: 20px;
-}
-
-/* ==========================================================================
-   11. PAGINA CONFERMA AGGIUNTA CARRELLO (ADD_TO_CART)
-   ========================================================================== */
-.confirmation-box {
-    background: white;
-    border-radius: 20px;
-    padding: 50px 30px;
-    text-align: center;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-    max-width: 600px;
-    margin: -50px auto 0 auto;
-    position: relative;
-    z-index: 10;
-}
-
-.success-icon-circle {
-    width: 80px; height: 80px; background: #E6FAF5; color: #05CD99;
-    border-radius: 50%; display: flex; align-items: center; justify-content: center;
-    font-size: 40px; margin: 0 auto 20px auto;
-}
-
-.added-item-name {
-    font-size: 22px; font-weight: 700; color: var(--primary-dark); margin-bottom: 5px;
-}
-
-.cart-summary {
-    background: #F9FAFB; border-radius: 15px; padding: 20px;
-    margin: 30px 0; display: flex; justify-content: space-between; align-items: center;
-}
-
-.cart-total-label { font-size: 14px; color: var(--text-grey); }
-.cart-total-value { font-size: 24px; font-weight: 700; color: var(--primary-dark); }
-
-.action-buttons {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
-}
-
-.btn-continue {
-    background: #F4F7FE; color: var(--primary-brand);
-    padding: 15px; border-radius: 15px; font-weight: 600;
-    transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px;
-}
-.btn-continue:hover { background: #e0e7ff; }
-
-.btn-checkout {
-    background: var(--primary-brand); color: white;
-    padding: 15px; border-radius: 15px; font-weight: 600;
-    transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px;
-    box-shadow: 0 10px 20px rgba(26, 77, 78, 0.2);
-}
-.btn-checkout:hover { background: var(--accent-orange); transform: translateY(-3px); }
-
-/* ==========================================================================
-   12. MEDIA QUERIES (RESPONSIVE)
-   ========================================================================== */
-@media (max-width: 900px) {
-    .profile-wrapper,
-    .help-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
-@media (max-width: 768px) {
-    .top-navbar { padding: 15px 20px; }
-    .nav-links span { display: none; }
-    .hero-section { padding: 40px 20px 80px 20px; }
-    .main-container { padding: 0 20px 40px 20px; }
-}
-
-@media (max-width: 600px) {
-    .action-buttons {
-        grid-template-columns: 1fr;
-    }
-}
-
-/* ==========================================================================
-   11. PAGINA CONFERMA AGGIUNTA CARRELLO (ADD_TO_CART)
-   ========================================================================== */
-.confirmation-box {
-    background: white;
-    border-radius: 20px;
-    padding: 50px 30px;
-    text-align: center;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-    max-width: 600px;
-    margin: -50px auto 0 auto; 
-    position: relative;
-    z-index: 10;
-}
-
-.success-icon-circle {
-    width: 80px; height: 80px; background: #E6FAF5; color: #05CD99;
-    border-radius: 50%; display: flex; align-items: center; justify-content: center;
-    font-size: 40px; margin: 0 auto 20px auto;
-}
-
-.added-item-name {
-    font-size: 22px; font-weight: 700; color: var(--primary-dark); margin-bottom: 5px;
-}
-
-.cart-summary {
-    background: #F9FAFB; border-radius: 15px; padding: 20px;
-    margin: 30px 0; display: flex; justify-content: space-between; align-items: center;
-}
-
-.cart-total-label { font-size: 14px; color: var(--text-grey); }
-.cart-total-value { font-size: 24px; font-weight: 700; color: var(--primary-dark); }
-
-.action-buttons {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
-}
-
-.btn-continue {
-    background: #F4F7FE; color: var(--primary-brand);
-    padding: 15px; border-radius: 15px; font-weight: 600;
-    transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px;
-}
-.btn-continue:hover { background: #e0e7ff; }
-
-.btn-checkout {
-    background: var(--primary-brand); color: white;
-    padding: 15px; border-radius: 15px; font-weight: 600;
-    transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px;
-    box-shadow: 0 10px 20px rgba(26, 77, 78, 0.2);
-}
-.btn-checkout:hover { background: var(--accent-orange); transform: translateY(-3px); }
-
-/* ==========================================================================
-   13. PAGINA CHECKOUT
-   ========================================================================== */
-.checkout-layout {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 30px;
-}
-
-.checkout-form {
-    padding: 30px;
-}
-
-.checkout-summary {
-    background: #F9FAFB;
-    padding: 30px;
-    border-left: 1px solid #eee;
-    border-radius: 0 20px 20px 0; 
-}
-
-.checkout-section-title {
-    margin-top: 0;
-    font-size: 18px; 
-    font-weight: 700; 
-    color: var(--primary-dark);
-    margin-bottom: 20px;
-}
-
-.checkout-select {
-    width: 100%;
-    padding: 12px;
-    border: 1px solid #E0E5F2;
-    border-radius: 12px;
-    background: #F9FAFB;
-    font-size: 14px;
-    color: #333;
-    outline: none;
-    transition: 0.3s;
-    appearance: none; 
-    background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%231A4D4E%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
-    background-repeat: no-repeat;
-    background-position: right 15px top 50%;
-    background-size: 12px auto;
-}
-
-.checkout-select:focus {
-    border-color: var(--accent-orange);
-    background-color: white;
-}
-
-.pickup-info {
-    background: #E6FAF5;
-    color: var(--success);
-    padding: 15px;
-    border-radius: 10px;
-    margin-bottom: 20px;
+    margin-bottom: 50px;
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
     display: flex;
     align-items: center;
     gap: 10px;
+}
+
+.nav-links {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.sidebar a {
+    color: #a8c5c6;
+    padding: 12px 15px;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-radius: 12px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.sidebar a:hover,
+.sidebar a.active {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+    transform: translateX(5px);
+}
+
+.btn-logout-sidebar {
+    margin-top: auto;
+    background-color: rgba(217, 48, 37, 0.1);
+    color: #ff8a80 !important;
+    border: 1px solid rgba(217, 48, 37, 0.2);
+    padding: 12px 15px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 500;
+    transition: 0.3s;
+}
+
+.btn-logout-sidebar:hover {
+    background-color: #d93025;
+    color: white !important;
+}
+
+/* ==========================================================================
+   3. LAYOUT CONTENT SHIFT (Fondamentale!)
+   Sposta il contenuto a destra della sidebar
+   ========================================================================== */
+.main-content {
+    margin-left: var(--sidebar-width);
+    padding: 30px 40px;
+    min-height: 100vh;
+}
+
+/* Header della pagina (Titolo + Data) */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 35px;
+}
+
+.page-header h1 {
+    font-size: 34px;
+    font-weight: 700;
+    color: var(--primary-dark);
+}
+
+.page-header p {
+    font-size: 14px;
+    font-weight: 500;
+    color: #707EAE;
+    margin-bottom: 5px;
+}
+
+.header-date {
+    background: white;
+    padding: 10px 20px;
+    border-radius: 30px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    font-weight: 600;
+    color: var(--primary-brand);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* ==========================================================================
+   4. DASHBOARD (Cards & Grid)
+   ========================================================================== */
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 25px;
+}
+
+.card {
+    background: white;
+    border-radius: 20px;
+    padding: 25px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease;
+    border: 1px solid transparent;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    border-color: #E0E5F2;
+}
+
+.card h2 {
+    font-size: 22px;
+    color: var(--primary-dark);
+    margin: 15px 0 5px 0;
+}
+
+.subtitle {
+    color: var(--text-grey);
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+.stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 20px;
+}
+
+.revenue {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--primary-brand);
+}
+
+.revenue span {
+    font-size: 12px;
+    color: var(--text-grey);
+    font-weight: 400;
+}
+
+.mini-chart {
+    display: flex;
+    gap: 4px;
+    align-items: flex-end;
+    height: 40px;
+}
+
+.bar {
+    width: 6px;
+    background-color: #E0E5F2;
+    border-radius: 3px;
+}
+
+.bar.active {
+    background-color: var(--primary-brand);
+}
+
+.btn-manage {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #F4F7FE;
+    color: var(--primary-brand);
+    padding: 12px 15px;
+    border-radius: 12px;
     font-weight: 600;
     font-size: 14px;
+    transition: 0.2s;
 }
 
-.summary-row {
+.btn-manage:hover {
+    background: #E0E5F2;
+}
+
+.card-add {
     display: flex;
-    justify-content: space-between;
-    padding: 12px 0;
-    border-bottom: 1px dashed #E0E5F2;
-    font-size: 14px;
-    color: var(--text-grey);
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border: 2px dashed #E0E5F2;
+    background: transparent;
+    cursor: pointer;
+    min-height: 250px;
 }
 
-.qty-highlight {
-    color: var(--primary-brand);
-    font-weight: 700;
-    margin-right: 5px;
+.card-add:hover {
+    border-color: var(--primary-brand);
+    background: rgba(26, 77, 78, 0.03);
 }
 
-.summary-total {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 25px;
-    font-size: 20px;
-    font-weight: 700;
-    color: var(--primary-brand);
-    border-top: 2px solid #E0E5F2;
-    padding-top: 20px;
-}
-
-.btn-confirm {
-    width: 100%;
+.icon-plus {
+    width: 50px;
+    height: 50px;
     background: var(--primary-brand);
     color: white;
-    border: none;
-    padding: 16px;
-    border-radius: 12px;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    margin-top: 25px;
-    transition: 0.3s;
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
-    box-shadow: 0 4px 10px rgba(26, 77, 78, 0.2);
+    font-size: 24px;
+    margin-bottom: 15px;
 }
 
-.btn-confirm:hover {
-    background: var(--accent-orange);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(255, 159, 67, 0.3);
+.text-add {
+    font-weight: 700;
+    color: var(--primary-brand);
+    font-size: 18px;
 }
 
-@media (max-width: 768px) {
-    .checkout-layout {
-        grid-template-columns: 1fr;
-    }
-    .checkout-summary {
-        border-left: none;
-        border-top: 1px solid #eee;
-        border-radius: 0 0 20px 20px;
-    }
+.card-icon {
+    width: 40px; 
+    height: 40px; 
+    background: #E6FAF5; 
+    color: var(--success); 
+    border-radius: 50%; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
 }
 
 /* ==========================================================================
-   14. CONTROLLI QUANTITÀ (CHECKOUT)
+   5. STATISTICHE (KPI e Grafici)
    ========================================================================== */
-.qty-control-box {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+.kpi-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 25px;
+    margin-bottom: 30px;
+}
+
+.kpi-card {
     background: white;
-    padding: 5px 10px;
-    border-radius: 8px;
-    border: 1px solid #E0E5F2;
-}
-
-.btn-qty {
+    padding: 20px;
+    border-radius: 20px;
     display: flex;
     align-items: center;
-    justify-content: center;
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    font-size: 12px;
-    transition: 0.2s;
-    color: white;
-    text-decoration: none;
+    gap: 20px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.03);
 }
 
-.btn-qty.minus {
-    background-color: #A3AED0;
-}
-.btn-qty.minus:hover {
-    background-color: #FF6B6B;
-}
-
-.btn-qty.plus {
-    background-color: #05CD99;
-}
-.btn-qty.plus:hover {
-    background-color: #04b183;
-}
-
-.btn-remove-item {
-    color: #FF6B6B;
-    font-size: 14px;
-    margin-left: 10px;
-    cursor: pointer;
-    transition: 0.2s;
-}
-.btn-remove-item:hover {
-    color: #d63031;
-}
-
-.item-name-checkout {
-    flex-grow: 1;
-    font-weight: 500;
-    color: var(--primary-dark);
-    margin-left: 10px;
-}
-
-/* ==========================================================================
-   15. FLOATING CART BUTTON (Tasto Carrello Galleggiante)
-   ========================================================================== */
-.floating-cart-btn {
-    position: fixed;
-    bottom: 30px;
-    right: 30px;
-    width: 65px;
-    height: 65px;
-    background: var(--primary-dark); 
-    color: white;
+.kpi-icon {
+    width: 56px;
+    height: 56px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    text-decoration: none;
-    box-shadow: 0 10px 25px rgba(43, 54, 116, 0.4);
-    z-index: 2000; 
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    border: 3px solid white;
     font-size: 24px;
 }
 
-.floating-cart-btn:hover {
-    background: var(--accent-orange);
-    transform: scale(1.1) rotate(-5deg);
-    color: white;
-    box-shadow: 0 15px 35px rgba(255, 159, 67, 0.5);
+.icon-money { background: #E6FAF5; color: #05CD99; }
+.icon-cart { background: #F4F7FE; color: #4318FF; }
+.icon-avg { background: #FFF8E6; color: #FFB547; }
+
+.kpi-info h4 { font-size: 14px; color: #A3AED0; margin-bottom: 5px; font-weight: 500; }
+.kpi-info h2 { font-size: 24px; color: var(--primary-dark); margin: 0; font-weight: 700; }
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 30px;
 }
 
-.cart-count-badge {
-    position: absolute;
-    top: -5px;
-    right: -5px;
-    background-color: var(--accent-red);
-    color: white;
-    font-size: 12px;
-    font-weight: 700;
-    width: 26px;
-    height: 26px;
+.chart-card, .top-list-card {
+    background: white;
+    padding: 25px;
+    border-radius: 20px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.03);
+}
+
+.chart-container { height: 350px; position: relative; }
+
+.top-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 0;
+    border-bottom: 1px solid #F4F7FE;
+}
+.top-item:last-child { border-bottom: none; }
+
+.rank-circle {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 12px; margin-right: 15px;
+}
+.rank-1 { background: #FFD700; color: #fff; }
+.rank-2 { background: #C0C0C0; color: #fff; }
+.rank-3 { background: #CD7F32; color: #fff; }
+.rank-circle { background: #F4F7FE; color: var(--primary-dark); } 
+
+/* ==========================================================================
+   6. PROFILO UTENTE
+   ========================================================================== */
+.profile-wrapper { display: flex; gap: 30px; align-items: flex-start; }
+.avatar-box { flex: 1; text-align: center; padding: 40px; background: white; border-radius: 20px; }
+.form-box { flex: 2; padding: 40px; background: white; border-radius: 20px; }
+
+.avatar-circle {
+    width: 100px; height: 100px; background: #1A4D4E; color: white;
+    font-size: 40px; display: flex; align-items: center; justify-content: center;
+    border-radius: 50%; margin: 0 auto 20px auto;
+}
+
+.status-badge {
+    padding: 5px 15px; border-radius: 20px; font-size: 12px; font-weight: 600;
+    text-transform: uppercase;
+}
+.status-badge.active { background: #E6FAF5; color: #05CD99; }
+
+.info-list { margin-top: 30px; text-align: left; }
+.info-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f0f0f0; font-size: 14px; color: #A3AED0; }
+.info-row b { color: var(--primary-dark); }
+
+.input-group { margin-bottom: 20px; }
+.input-group label { display: block; font-size: 14px; color: var(--primary-dark); margin-bottom: 8px; font-weight: 500; }
+.input-group input {
+    width: 100%; padding: 12px; border: 1px solid #E0E5F2; border-radius: 10px;
+    background: #fff; transition: 0.3s;
+}
+.input-group input:focus { border-color: var(--primary-brand); outline: none; }
+
+.btn-save {
+    background: var(--primary-brand); color: white; padding: 12px 25px;
+    border: none; border-radius: 10px; font-weight: 600; cursor: pointer; transition: 0.3s;
+}
+.btn-save:hover { background: var(--accent-orange); }
+
+.msg-box { padding: 15px; border-radius: 10px; margin-bottom: 20px; }
+.msg-box.success { background: #E6FAF5; color: #05CD99; }
+.msg-box.error { background: #FFEEED; color: var(--accent-red); }
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .dashboard-grid { grid-template-columns: 1fr; }
+    .profile-wrapper { flex-direction: column; }
+    .main-content { margin-left: 0; padding: 20px; padding-top: 80px; } 
+    .sidebar { width: 100%; height: auto; position: fixed; top: 0; padding: 15px; } 
+}
+
+/* ==========================================================================
+   7. FORM CREAZIONE RISTORANTE (style_ristoratori.css)
+   ========================================================================== */
+.form-container {
+    background: white;
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    width: 100%;
+    max-width: 600px;
+}
+
+.form-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.icon-header {
+    width: 60px;
+    height: 60px;
+    background: #E6FAF5;
+    color: #05CD99;
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 50%;
-    border: 2px solid white;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    font-size: 24px;
+    margin: 0 auto 15px auto;
 }
 
-.status-badge.accepted { 
-    background: #E0F7FA; 
-    color: #006064; 
-    border: 1px solid #B2EBF2;
+.form-header h1 {
+    font-size: 24px;
+    color: var(--primary-dark);
+    margin-bottom: 5px;
 }
 
-.status-badge.rejected { 
-    background: #FFEBEE; 
-    color: #C62828; 
-    border: 1px solid #FFCDD2;
-} 
+.form-header p {
+    color: var(--text-grey);
+    font-size: 14px;
+}
 
-        body { background: #F4F7FE; font-family: 'Inter', sans-serif; padding: 20px; }
-        .admin-nav { background: #fff; padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); border-radius: 10px; margin-bottom: 30px; }
-        .logo { font-size: 20px; font-weight: 800; color: #1A4D4E; text-decoration: none; }
-        .btn-back { padding: 10px 20px; background: #E0E5F2; color: #2B3674; text-decoration: none; border-radius: 10px; font-weight: 600; }
-        
-        .container { max-width: 1000px; margin: 0 auto; }
-        .page-title { font-size: 24px; font-weight: 700; color: #2B3674; margin-bottom: 20px; }
-        
-        .order-card { background: white; border-radius: 15px; padding: 25px; margin-bottom: 25px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-left: 5px solid #1A4D4E; }
-        .order-header { display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding-bottom: 15px; margin-bottom: 15px; }
-        .order-id { font-weight: 800; color: #2B3674; font-size: 18px; }
-        .order-meta { font-size: 13px; color: #A3AED0; margin-top: 5px; }
-        
-        .info-grid { margin-bottom: 20px; }
-        .info-box label { font-size: 11px; font-weight: 700; color: #A3AED0; text-transform: uppercase; }
-        .info-box p { font-size: 15px; color: #1B2559; margin-top: 5px; font-weight: 500; }
-        
-        .items-table { width: 100%; border-collapse: collapse; background: #F9FAFB; border-radius: 8px; overflow: hidden; }
-        .items-table td { padding: 10px 15px; font-size: 14px; border-bottom: 1px solid #eee; color: #2B3674; }
-        .items-table tr:last-child td { border-bottom: none; }
-        
-        .footer { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee; }
-        .total { font-size: 20px; font-weight: 700; color: #1A4D4E; }
-        .status { padding: 6px 15px; border-radius: 20px; background: #FFF8E6; color: #FFB547; font-weight: 700; font-size: 12px; text-transform: uppercase; }
-   
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 600;
+    color: var(--primary-dark);
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-wrapper i {
+    position: absolute;
+    left: 15px;
+    color: #A3AED0;
+    font-size: 14px;
+}
+
+.input-wrapper input,
+.input-wrapper textarea {
+    width: 100%;
+    padding: 12px 15px 12px 40px; /* Spazio per l'icona */
+    border: 1px solid #E0E5F2;
+    border-radius: 12px;
+    font-size: 14px;
+    color: #2B3674;
+    background: #F9FAFB;
+    transition: all 0.3s ease;
+    font-family: 'Inter', sans-serif;
+}
+
+.input-wrapper input:focus,
+.input-wrapper textarea:focus {
+    border-color: var(--primary-brand);
+    background: white;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(26, 77, 78, 0.1);
+}
+
+.input-wrapper textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.textarea-wrapper i {
+    top: 0; /* Allinea l'icona in alto per la textarea */
+}
+
+/* Bottoni */
+.form-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 30px;
+    gap: 15px;
+}
+
+.btn-submit {
+    background: var(--primary-brand);
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    flex: 1;
+    transition: 0.3s;
+}
+
+.btn-submit:hover {
+    background: var(--accent-orange);
+    transform: translateY(-2px);
+}
+
+.btn-cancel {
+    background: transparent;
+    color: var(--text-grey);
+    text-decoration: none;
+    font-weight: 500;
+    padding: 12px 20px;
+    transition: 0.3s;
+}
+
+.btn-cancel:hover {
+    color: var(--primary-dark);
+}
+
+/* Alert */
+.alert {
+    padding: 15px;
+    border-radius: 12px;
+    font-size: 14px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.alert-error {
+    background: #FFEEED;
+    color: var(--accent-red);
+    border: 1px solid #FFD5D2;
+}
+
+.alert-success {
+    background: #E6FAF5;
+    color: var(--success);
+    border: 1px solid #C0F0E4;
+}
+
+/* ==========================================================================
+   8. GESTIONE RISTORANTE (Layout e Stili Specifici)
+   ========================================================================== */
+
+/* Layout Griglia: Menu (2/3) e Ordini (1/3) */
+.management-grid {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    gap: 30px;
+}
+
+/* Stili Lista Menu */
+.menu-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 0;
+    border-bottom: 1px solid #F4F7FE;
+}
+.menu-item:last-child { border-bottom: none; }
+
+.dish-info h4 {
+    margin: 0 0 5px 0;
+    color: var(--primary-dark);
+    font-size: 16px;
+}
+
+.dish-info p {
+    margin: 0;
+    color: #A3AED0;
+    font-size: 13px;
+}
+
+.dish-actions {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.dish-price {
+    font-weight: 700;
+    color: var(--success);
+}
+
+.btn-icon-delete {
+    background: #FFEEED;
+    color: var(--accent-red);
+    border: none;
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.2s;
+}
+.btn-icon-delete:hover { background: var(--accent-red); color: white; }
+
+
+/* Stili Card Ordine */
+.order-card {
+    border: 1px solid #E0E5F2;
+    border-radius: 15px;
+    padding: 15px;
+    margin-bottom: 15px;
+    background: #F9FAFB;
+}
+
+.order-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 10px;
+}
+
+.order-user {
+    font-weight: 700;
+    color: var(--primary-dark);
+    display: block;
+}
+
+.order-time {
+    font-size: 12px;
+    color: #A3AED0;
+}
+
+.order-total {
+    font-size: 14px;
+    color: var(--primary-brand);
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px dashed #E0E5F2;
+}
+
+.order-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-action {
+    border: none;
+    padding: 8px 0;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    width: 100%;
+    transition: 0.2s;
+}
+
+.btn-accept { background: #E6FAF5; color: #05CD99; }
+.btn-accept:hover { background: #05CD99; color: white; }
+
+.btn-reject { background: #FFEEED; color: var(--accent-red); }
+.btn-reject:hover { background: var(--accent-red); color: white; }
+
+.btn-complete { background: var(--primary-brand); color: white; }
+.btn-complete:hover { background: var(--primary-dark); }
+
+/* Badge Stati */
+.status-pending { background: #FFF8E6; color: #FFB547; }
+.status-accepted { background: #E0F7FA; color: #006064; }
+.status-completed { background: #E6FAF5; color: #05CD99; }
+.status-cancelled { background: #FFEEED; color: #C62828; }
+
+/* Responsive */
+@media (max-width: 900px) {
+    .management-grid { grid-template-columns: 1fr; }
+}

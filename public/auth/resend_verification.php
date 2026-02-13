@@ -2,7 +2,7 @@
 if(session_status() !== PHP_SESSION_ACTIVE) session_start();
 
 require_once "../../config/db.php";
-require_once "../../models/EmailVerificationModel.php"; // Nuovo Modello
+require_once "../../models/EmailVerificationModel.php";
 
 $email = isset($_GET['email']) ? trim($_GET['email']) : '';
 
