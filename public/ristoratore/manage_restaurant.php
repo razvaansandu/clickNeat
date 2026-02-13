@@ -33,47 +33,52 @@ if (!$restaurant) {
 $msg = "";
 $msg_type = "";
 
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_dish'])) {
+if (isset($_POST['add_dish'])) {
     $name = trim($_POST['name']);
     $desc = trim($_POST['description']);
     $price = $_POST['price'];
-    $categoria = $_POST['categoria'];
+    $cat_select = $_POST['categoria_select'] ?? 'altro';
+    $cat_custom = trim($_POST['categoria_custom'] ?? '');
+    $categoria = !empty($cat_custom) ? $cat_custom : $cat_select;
+    $image_url = null;
 
-    if (!empty($name) && !empty($price)) {
-        $sql = "INSERT INTO menu_items (restaurant_id, name, description, price, categoria) VALUES (?, ?, ?, ?, ?)";
-        if ($stmt = mysqli_prepare($link, $sql)) {
-            mysqli_stmt_bind_param($stmt, "issss", $restaurant_id, $name, $desc, $price, $categoria);
-            mysqli_stmt_execute($stmt);
-            $msg = "Piatto aggiunto al menu!";
+    $badWords = getBadWords();
+    $isForbidden = false;
+    foreach ($badWords as $word) {
+        if (preg_match("/\b" . preg_quote($word, '/') . "\b/i", $categoria)) {
+            $isForbidden = true;
+            break;
+        }
+    }
+
+    if ($isForbidden) {
+        $msg = "Linguaggio inappropriato rilevato nella categoria.";
+        $msg_type = "error";
+    } elseif (!empty($name) && !empty($price)) {
+        if ($menuModel->create($restaurant_id, $name, $desc, $price, $categoria, $image_url)) {
+            $msg = "Piatto aggiunto con successo!";
             $msg_type = "success";
-            mysqli_stmt_close($stmt);
+        } else {
+            $msg = "Errore nell'inserimento.";
+            $msg_type = "error";
         }
     }
 }
 
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete_dish'])) {
-    $dish_id = $_POST['dish_id'];
-    $sql = "DELETE FROM menu_items WHERE id = ? AND restaurant_id = ?";
-    if ($stmt = mysqli_prepare($link, $sql)) {
-        mysqli_stmt_bind_param($stmt, "ii", $dish_id, $restaurant_id);
-        mysqli_stmt_execute($stmt);
-        $msg = "Piatto eliminato.";
-        $msg_type = "success";
-        mysqli_stmt_close($stmt);
-    }
-}
-
-    if (isset($_POST['update_order'])) {
-        $order_id = $_POST['order_id'];
-        $new_status = $_POST['status'];
-        if ($orderModel->updateStatus($order_id, $new_status)) {
-            header("Refresh:0");
-        }
-    }
-}
 
 $menu_items = $menuModel->getByRestaurant($restaurant_id);
 $orders = $orderModel->getByRestaurantId($restaurant_id);
+function getBadWords() {
+    $jsonPath = __DIR__ . "/../../config/cursed_words.json";
+    
+    if (file_exists($jsonPath)) {
+        $jsonData = file_get_contents($jsonPath);
+        $data = json_decode($jsonData, true);
+        return is_array($data) ? $data : ($data['words'] ?? []);
+    }
+    
+    return [];
+}
 ?>
 
 <!DOCTYPE html>
@@ -133,23 +138,34 @@ $orders = $orderModel->getByRestaurantId($restaurant_id);
                             <i class="fa-solid fa-align-left" style="top: 15px;"></i>
                             <textarea name="description" placeholder="Descrizione e ingredienti..." rows="2" style="min-height: 80px;"></textarea>
                         </div>
-                        <textarea name="description" placeholder="Ingredienti..." rows="2" style="margin-bottom:10px;"></textarea>
-                        <div>
-                            <label>Categoria del piatto:</label>
-                            <select name="categoria" required>
-                                <option value="pizza">Pizza</option>
-                                <option value="pasta">Pasta</option>
-                                <option value="panino">panino</option>
-                                <option value="orientale">Orientale</option>
-                                <option value="altro">Altro</option>
-                            </select>
-                            <div class="form-group">
-    <label for="categoria"></label>
-    <input type="text" id="categoria" name="categoria" placeholder="Scrivi la tua categoria..." required>
-</div>
-                        </div>
-                        <button type="submit" class="btn-add">Salva Piatto</button>
+                         <form method="POST" id="form-piatto">
+                            <input type="hidden" name="add_dish" value="1">
+                        <label style="display:block; margin-bottom:8px; font-weight:600; color: #2B3674;">Categoria Piatto</label>
+                        <select name="categoria_select" id="piatto_select" style="width:100%; padding:12px; border-radius:8px; border:1px solid #d1d9e2; margin-bottom:12px; transition: 0.3s;">
+                            <option value="pizza">Pizza</option>
+                            <option value="pasta">Pasta</option>
+                            <option value="panino">Panino</option>
+                            <option value="orientale">Orientale</option>
+                            <option value="altro" selected>Altro</option>
+                        </select>
+
+                    <div style="text-align: center; margin-bottom: 12px; color: #a3aed0; font-size: 12px; font-weight: bold;">
+                     — OPPURE CREANE UNA NUOVA —
+                     </div>
+
+                     <div class="input-wrapper">
+                    <i class="fa-solid fa-plus-circle"></i>
+                    <input type="text" name="categoria_custom" id="piatto_custom" placeholder="Scrivi una nuova categoria..." style="transition: 0.3s;">
+                    </div>
+            
+                  <small id="status-help" style="color: #4318FF; font-size: 11px; margin-top: 5px; display: block; height: 15px;"></small>
+        
+
+                    <button type="submit" class="btn-add" style="margin-top: 20px;">Salva Piatto</button>
                     </form>
+
+                    </div>
+
                 </div>
 
                 <div class="card">
@@ -254,7 +270,50 @@ $orders = $orderModel->getByRestaurantId($restaurant_id);
 
         </div>
     </div>
+<script>
+    const inputCustom = document.getElementById('piatto_custom');
+    const selectDefault = document.getElementById('piatto_select');
+    const statusHelp = document.getElementById('status-help');
+    const btnSave = document.querySelector('.btn-add');
+    const badWords = <?php echo json_encode(getBadWords()); ?>;
 
+    inputCustom.addEventListener('input', function() {
+        const val = this.value.trim().toLowerCase();
+        
+        const found = badWords.some(word => {
+            const regex = new RegExp("\\b" + word + "\\b", "i");
+            return regex.test(val);
+        });
+
+        if (found) {
+            this.style.borderColor = "#ea4335";
+            statusHelp.innerHTML = "<i class='fa-solid fa-ban'></i> Termine non consentito";
+            statusHelp.style.color = "#ea4335";
+            btnSave.disabled = true;
+            btnSave.style.opacity = "0.5";
+            return; 
+        }
+
+        if (val.length > 0) {
+            selectDefault.disabled = true;
+            selectDefault.style.opacity = "0.5";
+            statusHelp.innerHTML = "<i class='fa-solid fa-keyboard'></i> Categoria personalizzata attiva";
+            statusHelp.style.color = "#4318FF";
+            btnSave.disabled = false;
+            btnSave.style.opacity = "1";
+        } else {
+            selectDefault.disabled = false;
+            selectDefault.style.opacity = "1";
+            statusHelp.innerHTML = "";
+            btnSave.disabled = false;
+            btnSave.style.opacity = "1";
+        }
+        this.style.borderColor = "#d1d9e2";
+    });
+    document.querySelector('form').addEventListener('submit', function() {
+        selectDefault.disabled = false;
+    });
+</script>
 </body>
 
 </html>
