@@ -735,3 +735,13 @@ textarea:focus { outline: none; border-color: var(--accent-orange); background: 
     font-size: 14px;
     font-family: 'Poppins', sans-serif;
 }
+
+.card-add {
+    padding: 25px 40px !important;
+    min-height: auto !important;
+    max-width: 350px;
+    margin: 0 auto 20px auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
