@@ -1,33 +1,32 @@
 <?php
-require_once "../../config/db.php";
-require_once "../config/google_config.php";
+if(session_status() !== PHP_SESSION_ACTIVE) session_start();
+
+require_once "../../config/db.php";          
+require_once "../../config/google_config.php"; 
+require_once "../../models/RegisterModel.php"; 
+
 $register_url = getGoogleLoginUrl();
+$registerModel = new RegisterModel($db); 
 
-
-function generate_csrf_token()
-{
+function generate_csrf_token() {
     if (empty($_SESSION['csrf_token'])) {
         $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
     }
     return $_SESSION['csrf_token'];
 }
 
-function verify_csrf_token($token)
-{
+function verify_csrf_token($token) {
     return isset($_SESSION['csrf_token']) && hash_equals($_SESSION['csrf_token'], $token);
 }
-
 
 $username_err = $email_err = $password_err = $confirm_password_err = $ruolo_err = "";
 $username = $email = $ruolo = "";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
-
     if (!isset($_POST['csrf_token']) || !verify_csrf_token($_POST['csrf_token'])) {
-        die("Errore CSRF token");
+        die("Errore di sicurezza (CSRF token non valido).");
     }
-
 
     if (empty(trim($_POST["username"]))) {
         $username_err = "Inserisci un username.";
@@ -36,46 +35,26 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     } elseif (strlen(trim($_POST["username"])) > 50) {
         $username_err = "L'username è troppo lungo.";
     } else {
-        $sql = "SELECT id FROM users WHERE username = ?";
-        if ($stmt = mysqli_prepare($link, $sql)) {
-            mysqli_stmt_bind_param($stmt, "s", $param_username);
-            $param_username = trim($_POST["username"]);
-            if (mysqli_stmt_execute($stmt)) {
-                mysqli_stmt_store_result($stmt);
-                if (mysqli_stmt_num_rows($stmt) == 1) {
-                    $username_err = "Questo username è già in uso.";
-                } else {
-                    $username = trim($_POST["username"]);
-                }
-            }
-            mysqli_stmt_close($stmt);
+
+        if ($registerModel->findByUsernameOrEmail(trim($_POST["username"]))) {
+
+             $username_err = "Questo username (o email associata) è già in uso.";
+        } else {
+            $username = trim($_POST["username"]);
         }
     }
-
 
     if (empty(trim($_POST["email"]))) {
         $email_err = "Inserisci un'email.";
     } elseif (!filter_var(trim($_POST["email"]), FILTER_VALIDATE_EMAIL)) {
         $email_err = "Email non valida.";
-    } elseif (strlen(trim($_POST["email"])) > 100) {
-        $email_err = "Email troppo lunga.";
     } else {
-        $sql = "SELECT id FROM users WHERE email = ?";
-        if ($stmt = mysqli_prepare($link, $sql)) {
-            mysqli_stmt_bind_param($stmt, "s", $param_email);
-            $param_email = trim($_POST["email"]);
-            if (mysqli_stmt_execute($stmt)) {
-                mysqli_stmt_store_result($stmt);
-                if (mysqli_stmt_num_rows($stmt) == 1) {
-                    $email_err = "Questa email è già registrata.";
-                } else {
-                    $email = trim($_POST["email"]);
-                }
-            }
-            mysqli_stmt_close($stmt);
+        if ($registerModel->findByUsernameOrEmail(trim($_POST["email"]))) {
+            $email_err = "Questa email è già registrata.";
+        } else {
+            $email = trim($_POST["email"]);
         }
     }
-
 
     if (empty($_POST["ruolo"])) {
         $ruolo_err = "Seleziona un ruolo.";
@@ -85,11 +64,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $ruolo = $_POST["ruolo"];
     }
 
-
+    $password_plain = "";
     if (empty(trim($_POST["password"]))) {
         $password_err = "Inserisci una password.";
-    } elseif (strlen(trim($_POST["password"])) < PASSWORD_MIN_LENGTH) {
-        $password_err = "La password deve avere almeno " . PASSWORD_MIN_LENGTH . " caratteri.";
+    } elseif (strlen(trim($_POST["password"])) < 8) {
+        $password_err = "La password deve avere almeno 8 caratteri.";
     } elseif (!preg_match('/[A-Z]/', $_POST["password"])) {
         $password_err = "La password deve contenere almeno una lettera maiuscola.";
     } elseif (!preg_match('/[a-z]/', $_POST["password"])) {
@@ -99,85 +78,61 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     } elseif (!preg_match('/[!@#$%^&*()_+\-=\[\]{};:\'",.<>?]/', $_POST["password"])) {
         $password_err = "La password deve contenere almeno un carattere speciale.";
     } else {
-        $password = trim($_POST["password"]);
+        $password_plain = trim($_POST["password"]);
     }
-
 
     if (empty(trim($_POST["confirm_password"]))) {
         $confirm_password_err = "Conferma la password.";
     } else {
         $confirm_password = trim($_POST["confirm_password"]);
-        if (empty($password_err) && ($password != $confirm_password)) {
+        if (empty($password_err) && ($password_plain != $confirm_password)) {
             $confirm_password_err = "Le password non coincidono.";
         }
     }
 
-
     if (empty($username_err) && empty($email_err) && empty($password_err) && empty($confirm_password_err) && empty($ruolo_err)) {
-        $sql = "INSERT INTO users (username, email, password, ruolo) VALUES (?, ?, ?, ?)";
+        
+        $verify_token = $registerModel->register($username, $email, $password_plain, $ruolo);
 
-        if ($stmt = mysqli_prepare($link, $sql)) {
-            mysqli_stmt_bind_param($stmt, "ssss", $param_username, $param_email, $param_password, $param_ruolo);
-            $param_username = $username;
-            $param_email = $email;
-            $param_password = password_hash($password, PASSWORD_DEFAULT, ['cost' => 12]);
-            $param_ruolo = $ruolo;
+        if ($verify_token) {
+            
+            $mail = require __DIR__ . "/../../src/mailer.php";
 
-            if (mysqli_stmt_execute($stmt)) {
-                $user_id = mysqli_insert_id($link);
+            try {
+                $mail->addAddress($email);
+                $mail->Subject = "Verifica la tua email - ClickNeat";
+                
+                $verify_link = "http://localhost:8000/auth/verify_email.php?token=$verify_token";
 
+                $mail->Body = <<<END
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                    <h2 style="color: #1e3c72;">Benvenuto su ClickNeat, $username!</h2>
+                    <p>Grazie per esserti registrato. Per completare la registrazione, verifica la tua email cliccando sul pulsante qui sotto:</p>
+                    <a href="$verify_link" 
+                       style="display: inline-block; padding: 15px 30px; background: linear-gradient(135deg, #1e3c72, #7e22ce); 
+                       color: white; text-decoration: none; border-radius: 10px; font-weight: bold; margin: 20px 0;">
+                       Verifica Email
+                    </a>
+                    <p style="color: #666; font-size: 13px;">Se non ti sei registrato, ignora questa email.</p>
+                </div>
+                END;
 
-                $verify_token = bin2hex(random_bytes(16));
-                $verify_token_hash = hash("sha256", $verify_token);
-
-
-                $sql2 = "UPDATE users SET email_verify_token = ? WHERE id = ?";
-                if ($stmt2 = mysqli_prepare($link, $sql2)) {
-                    mysqli_stmt_bind_param($stmt2, "si", $verify_token_hash, $user_id);
-                    mysqli_stmt_execute($stmt2);
-                    mysqli_stmt_close($stmt2);
-                }
-
-
-                $mail = require __DIR__ . "/../src/mailer.php";
-
-                try {
-                    $mail->setFrom("clickneat2026@gmail.com", "ClickNeat");
-                    $mail->addAddress($email);
-                    $mail->Subject = "Verifica la tua email - ClickNeat";
-                    $mail->Body = <<<END
-                    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-                        <h2 style="color: #1e3c72;">Benvenuto su ClickNeat, $username!</h2>
-                        <p>Grazie per esserti registrato. Per completare la registrazione, verifica la tua email cliccando sul pulsante qui sotto:</p>
-                        <a href="http://localhost/verify_email.php?token=$verify_token" 
-                           style="display: inline-block; padding: 15px 30px; background: linear-gradient(135deg, #1e3c72, #7e22ce); 
-                           color: white; text-decoration: none; border-radius: 10px; font-weight: bold; margin: 20px 0;">
-                           Verifica Email
-                        </a>
-                        <p style="color: #666; font-size: 13px;">Se non ti sei registrato, ignora questa email.</p>
-                        <p style="color: #666; font-size: 13px;">Questo link scadrà tra 24 ore.</p>
-                    </div>
-                    END;
-
-                    $mail->send();
-                } catch (Exception $e) {
-
-                }
-
-                header("location: email_sent.php?email=" . urlencode($email));
-                exit();
-            } else {
-                echo "Qualcosa è andato storto. Riprova.";
+                $mail->send();
+            } catch (Exception $e) {
             }
-            mysqli_stmt_close($stmt);
+
+            header("location: login.php?registered=1");
+            exit();
+
+        } else {
+            echo "<div class='alert'>Si è verificato un errore durante la creazione dell'account. Riprova.</div>";
         }
     }
-
-    mysqli_close($link);
 }
 
 $csrf_token = generate_csrf_token();
 ?>
+
 <!DOCTYPE html>
 <html lang="it">
 
@@ -185,7 +140,9 @@ $csrf_token = generate_csrf_token();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registrazione - ClickNeat</title>
-    <link rel="stylesheet" href="../css/style.css?v=1.0">
+    <link rel="stylesheet" href="../../css/style.css?v=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 
 <body>
@@ -254,34 +211,33 @@ $csrf_token = generate_csrf_token();
             </div>
 
             <div style="display: flex; justify-content: center; width: 100%; margin-top: 15px;">
-
-                <button type="button" class="gsi-material-button"
-                    onclick="window.location.href='<?php echo $register_url; ?>'">
-                    <div class="gsi-material-button-state"></div>
-                    <div class="gsi-material-button-content-wrapper">
-                        <div class="gsi-material-button-icon">
-                            <svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"
-                                xmlns:xlink="http://www.w3.org/1999/xlink" style="display: block;">
-                                <path fill="#EA4335"
-                                    d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z">
-                                </path>
-                                <path fill="#4285F4"
-                                    d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z">
-                                </path>
-                                <path fill="#FBBC05"
-                                    d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z">
-                                </path>
-                                <path fill="#34A853"
-                                    d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z">
-                                </path>
-                                <path fill="none" d="M0 0h48v48H0z"></path>
-                            </svg>
+                <a href="<?php echo $register_url; ?>" style="text-decoration: none; width: 100%; max-width: 400px;">
+                    <div class="gsi-material-button">
+                        <div class="gsi-material-button-state"></div>
+                        <div class="gsi-material-button-content-wrapper">
+                            <div class="gsi-material-button-icon">
+                                <svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"
+                                    xmlns:xlink="http://www.w3.org/1999/xlink" style="display: block;">
+                                    <path fill="#EA4335"
+                                        d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z">
+                                    </path>
+                                    <path fill="#4285F4"
+                                        d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z">
+                                    </path>
+                                    <path fill="#FBBC05"
+                                        d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z">
+                                    </path>
+                                    <path fill="#34A853"
+                                        d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z">
+                                    </path>
+                                    <path fill="none" d="M0 0h48v48H0z"></path>
+                                </svg>
+                            </div>
+                            <span class="gsi-material-button-contents">Registrati con Google</span>
+                            <span style="display: none;">Registrati con Google</span>
                         </div>
-                        <span class="gsi-material-button-contents">Registrati con Google</span>
-                        <span style="display: none;">Registrati con Google</span>
                     </div>
-                </button>
-
+                </a>
             </div>
 
             <p style="text-align: center; margin-top: 20px;">
@@ -289,7 +245,7 @@ $csrf_token = generate_csrf_token();
             </p>
         </form>
     </div>
-
+    
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const passwordInput = document.querySelector('input[name="password"]');
@@ -344,5 +300,4 @@ $csrf_token = generate_csrf_token();
         });
     </script>
 </body>
-
 </html>

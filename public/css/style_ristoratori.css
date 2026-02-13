@@ -1,0 +1,686 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* ==========================================================================
+   1. GLOBALI & RESET
+   ========================================================================== */
+:root {
+    --primary-dark: #2B3674;
+    --primary-brand: #1A4D4E;
+    --accent-orange: #FF9F43;
+    --accent-red: #FF6B6B;
+    --text-grey: #A3AED0;
+    --bg-light: #F4F7FE;
+    --white: #ffffff;
+    --success: #05CD99;
+    --sidebar-width: 260px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+
+body { 
+    background-color: var(--bg-light); 
+    color: #333;
+    min-height: 100vh;
+}
+
+a { text-decoration: none; color: inherit; }
+
+/* ==========================================================================
+   2. LA TUA SIDEBAR
+   ========================================================================== */
+.sidebar {
+    width: var(--sidebar-width);
+    background: linear-gradient(180deg, #1A4D4E 0%, #153e3f 100%);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    padding: 25px;
+    box-shadow: 4px 0 10px rgba(0, 0, 0, 0.05);
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+}
+
+.brand-logo {
+    margin-bottom: 50px;
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.nav-links {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.sidebar a {
+    color: #a8c5c6;
+    padding: 12px 15px;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-radius: 12px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.sidebar a:hover,
+.sidebar a.active {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+    transform: translateX(5px);
+}
+
+.btn-logout-sidebar {
+    margin-top: auto;
+    background-color: rgba(217, 48, 37, 0.1);
+    color: #ff8a80 !important;
+    border: 1px solid rgba(217, 48, 37, 0.2);
+    padding: 12px 15px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 500;
+    transition: 0.3s;
+}
+
+.btn-logout-sidebar:hover {
+    background-color: #d93025;
+    color: white !important;
+}
+
+/* ==========================================================================
+   3. LAYOUT CONTENT SHIFT (Fondamentale!)
+   Sposta il contenuto a destra della sidebar
+   ========================================================================== */
+.main-content {
+    margin-left: var(--sidebar-width);
+    padding: 30px 40px;
+    min-height: 100vh;
+}
+
+/* Header della pagina (Titolo + Data) */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 35px;
+}
+
+.page-header h1 {
+    font-size: 34px;
+    font-weight: 700;
+    color: var(--primary-dark);
+}
+
+.page-header p {
+    font-size: 14px;
+    font-weight: 500;
+    color: #707EAE;
+    margin-bottom: 5px;
+}
+
+.header-date {
+    background: white;
+    padding: 10px 20px;
+    border-radius: 30px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    font-weight: 600;
+    color: var(--primary-brand);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* ==========================================================================
+   4. DASHBOARD (Cards & Grid)
+   ========================================================================== */
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 25px;
+}
+
+.card {
+    background: white;
+    border-radius: 20px;
+    padding: 25px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease;
+    border: 1px solid transparent;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    border-color: #E0E5F2;
+}
+
+.card h2 {
+    font-size: 22px;
+    color: var(--primary-dark);
+    margin: 15px 0 5px 0;
+}
+
+.subtitle {
+    color: var(--text-grey);
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+.stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 20px;
+}
+
+.revenue {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--primary-brand);
+}
+
+.revenue span {
+    font-size: 12px;
+    color: var(--text-grey);
+    font-weight: 400;
+}
+
+.mini-chart {
+    display: flex;
+    gap: 4px;
+    align-items: flex-end;
+    height: 40px;
+}
+
+.bar {
+    width: 6px;
+    background-color: #E0E5F2;
+    border-radius: 3px;
+}
+
+.bar.active {
+    background-color: var(--primary-brand);
+}
+
+.btn-manage {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #F4F7FE;
+    color: var(--primary-brand);
+    padding: 12px 15px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 14px;
+    transition: 0.2s;
+}
+
+.btn-manage:hover {
+    background: #E0E5F2;
+}
+
+.card-add {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border: 2px dashed #E0E5F2;
+    background: transparent;
+    cursor: pointer;
+    min-height: 250px;
+}
+
+.card-add:hover {
+    border-color: var(--primary-brand);
+    background: rgba(26, 77, 78, 0.03);
+}
+
+.icon-plus {
+    width: 50px;
+    height: 50px;
+    background: var(--primary-brand);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    margin-bottom: 15px;
+}
+
+.text-add {
+    font-weight: 700;
+    color: var(--primary-brand);
+    font-size: 18px;
+}
+
+.card-icon {
+    width: 40px; 
+    height: 40px; 
+    background: #E6FAF5; 
+    color: var(--success); 
+    border-radius: 50%; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+}
+
+/* ==========================================================================
+   5. STATISTICHE (KPI e Grafici)
+   ========================================================================== */
+.kpi-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 25px;
+    margin-bottom: 30px;
+}
+
+.kpi-card {
+    background: white;
+    padding: 20px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.03);
+}
+
+.kpi-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+}
+
+.icon-money { background: #E6FAF5; color: #05CD99; }
+.icon-cart { background: #F4F7FE; color: #4318FF; }
+.icon-avg { background: #FFF8E6; color: #FFB547; }
+
+.kpi-info h4 { font-size: 14px; color: #A3AED0; margin-bottom: 5px; font-weight: 500; }
+.kpi-info h2 { font-size: 24px; color: var(--primary-dark); margin: 0; font-weight: 700; }
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 30px;
+}
+
+.chart-card, .top-list-card {
+    background: white;
+    padding: 25px;
+    border-radius: 20px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.03);
+}
+
+.chart-container { height: 350px; position: relative; }
+
+.top-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 0;
+    border-bottom: 1px solid #F4F7FE;
+}
+.top-item:last-child { border-bottom: none; }
+
+.rank-circle {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 12px; margin-right: 15px;
+}
+.rank-1 { background: #FFD700; color: #fff; }
+.rank-2 { background: #C0C0C0; color: #fff; }
+.rank-3 { background: #CD7F32; color: #fff; }
+.rank-circle { background: #F4F7FE; color: var(--primary-dark); } 
+
+/* ==========================================================================
+   6. PROFILO UTENTE
+   ========================================================================== */
+.profile-wrapper { display: flex; gap: 30px; align-items: flex-start; }
+.avatar-box { flex: 1; text-align: center; padding: 40px; background: white; border-radius: 20px; }
+.form-box { flex: 2; padding: 40px; background: white; border-radius: 20px; }
+
+.avatar-circle {
+    width: 100px; height: 100px; background: #1A4D4E; color: white;
+    font-size: 40px; display: flex; align-items: center; justify-content: center;
+    border-radius: 50%; margin: 0 auto 20px auto;
+}
+
+.status-badge {
+    padding: 5px 15px; border-radius: 20px; font-size: 12px; font-weight: 600;
+    text-transform: uppercase;
+}
+.status-badge.active { background: #E6FAF5; color: #05CD99; }
+
+.info-list { margin-top: 30px; text-align: left; }
+.info-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f0f0f0; font-size: 14px; color: #A3AED0; }
+.info-row b { color: var(--primary-dark); }
+
+.input-group { margin-bottom: 20px; }
+.input-group label { display: block; font-size: 14px; color: var(--primary-dark); margin-bottom: 8px; font-weight: 500; }
+.input-group input {
+    width: 100%; padding: 12px; border: 1px solid #E0E5F2; border-radius: 10px;
+    background: #fff; transition: 0.3s;
+}
+.input-group input:focus { border-color: var(--primary-brand); outline: none; }
+
+.btn-save {
+    background: var(--primary-brand); color: white; padding: 12px 25px;
+    border: none; border-radius: 10px; font-weight: 600; cursor: pointer; transition: 0.3s;
+}
+.btn-save:hover { background: var(--accent-orange); }
+
+.msg-box { padding: 15px; border-radius: 10px; margin-bottom: 20px; }
+.msg-box.success { background: #E6FAF5; color: #05CD99; }
+.msg-box.error { background: #FFEEED; color: var(--accent-red); }
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .dashboard-grid { grid-template-columns: 1fr; }
+    .profile-wrapper { flex-direction: column; }
+    .main-content { margin-left: 0; padding: 20px; padding-top: 80px; } 
+    .sidebar { width: 100%; height: auto; position: fixed; top: 0; padding: 15px; } 
+}
+
+/* ==========================================================================
+   7. FORM CREAZIONE RISTORANTE (style_ristoratori.css)
+   ========================================================================== */
+.form-container {
+    background: white;
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    width: 100%;
+    max-width: 600px;
+}
+
+.form-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.icon-header {
+    width: 60px;
+    height: 60px;
+    background: #E6FAF5;
+    color: #05CD99;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    margin: 0 auto 15px auto;
+}
+
+.form-header h1 {
+    font-size: 24px;
+    color: var(--primary-dark);
+    margin-bottom: 5px;
+}
+
+.form-header p {
+    color: var(--text-grey);
+    font-size: 14px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 600;
+    color: var(--primary-dark);
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-wrapper i {
+    position: absolute;
+    left: 15px;
+    color: #A3AED0;
+    font-size: 14px;
+}
+
+.input-wrapper input,
+.input-wrapper textarea {
+    width: 100%;
+    padding: 12px 15px 12px 40px; /* Spazio per l'icona */
+    border: 1px solid #E0E5F2;
+    border-radius: 12px;
+    font-size: 14px;
+    color: #2B3674;
+    background: #F9FAFB;
+    transition: all 0.3s ease;
+    font-family: 'Inter', sans-serif;
+}
+
+.input-wrapper input:focus,
+.input-wrapper textarea:focus {
+    border-color: var(--primary-brand);
+    background: white;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(26, 77, 78, 0.1);
+}
+
+.input-wrapper textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.textarea-wrapper i {
+    top: 0; /* Allinea l'icona in alto per la textarea */
+}
+
+/* Bottoni */
+.form-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 30px;
+    gap: 15px;
+}
+
+.btn-submit {
+    background: var(--primary-brand);
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    flex: 1;
+    transition: 0.3s;
+}
+
+.btn-submit:hover {
+    background: var(--accent-orange);
+    transform: translateY(-2px);
+}
+
+.btn-cancel {
+    background: transparent;
+    color: var(--text-grey);
+    text-decoration: none;
+    font-weight: 500;
+    padding: 12px 20px;
+    transition: 0.3s;
+}
+
+.btn-cancel:hover {
+    color: var(--primary-dark);
+}
+
+/* Alert */
+.alert {
+    padding: 15px;
+    border-radius: 12px;
+    font-size: 14px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.alert-error {
+    background: #FFEEED;
+    color: var(--accent-red);
+    border: 1px solid #FFD5D2;
+}
+
+.alert-success {
+    background: #E6FAF5;
+    color: var(--success);
+    border: 1px solid #C0F0E4;
+}
+
+/* ==========================================================================
+   8. GESTIONE RISTORANTE (Layout e Stili Specifici)
+   ========================================================================== */
+
+/* Layout Griglia: Menu (2/3) e Ordini (1/3) */
+.management-grid {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    gap: 30px;
+}
+
+/* Stili Lista Menu */
+.menu-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 0;
+    border-bottom: 1px solid #F4F7FE;
+}
+.menu-item:last-child { border-bottom: none; }
+
+.dish-info h4 {
+    margin: 0 0 5px 0;
+    color: var(--primary-dark);
+    font-size: 16px;
+}
+
+.dish-info p {
+    margin: 0;
+    color: #A3AED0;
+    font-size: 13px;
+}
+
+.dish-actions {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.dish-price {
+    font-weight: 700;
+    color: var(--success);
+}
+
+.btn-icon-delete {
+    background: #FFEEED;
+    color: var(--accent-red);
+    border: none;
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.2s;
+}
+.btn-icon-delete:hover { background: var(--accent-red); color: white; }
+
+
+/* Stili Card Ordine */
+.order-card {
+    border: 1px solid #E0E5F2;
+    border-radius: 15px;
+    padding: 15px;
+    margin-bottom: 15px;
+    background: #F9FAFB;
+}
+
+.order-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 10px;
+}
+
+.order-user {
+    font-weight: 700;
+    color: var(--primary-dark);
+    display: block;
+}
+
+.order-time {
+    font-size: 12px;
+    color: #A3AED0;
+}
+
+.order-total {
+    font-size: 14px;
+    color: var(--primary-brand);
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px dashed #E0E5F2;
+}
+
+.order-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-action {
+    border: none;
+    padding: 8px 0;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    width: 100%;
+    transition: 0.2s;
+}
+
+.btn-accept { background: #E6FAF5; color: #05CD99; }
+.btn-accept:hover { background: #05CD99; color: white; }
+
+.btn-reject { background: #FFEEED; color: var(--accent-red); }
+.btn-reject:hover { background: var(--accent-red); color: white; }
+
+.btn-complete { background: var(--primary-brand); color: white; }
+.btn-complete:hover { background: var(--primary-dark); }
+
+/* Badge Stati */
+.status-pending { background: #FFF8E6; color: #FFB547; }
+.status-accepted { background: #E0F7FA; color: #006064; }
+.status-completed { background: #E6FAF5; color: #05CD99; }
+.status-cancelled { background: #FFEEED; color: #C62828; }
+
+/* Responsive */
+@media (max-width: 900px) {
+    .management-grid { grid-template-columns: 1fr; }
+}
