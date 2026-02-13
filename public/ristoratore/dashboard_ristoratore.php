@@ -38,14 +38,21 @@ if (!empty($my_restaurants)) {
     <title>Dashboard - ClickNeat</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="../css/style_ristoratori.css">
+    <link rel="stylesheet" href="../css/style_ristoratori.css"> 
 </head>
 <body>
+ 
+    <div class="mobile-header"> 
+        <!-- Rimosso onclick, gestito da JavaScript -->
+        <button class="hamburger-btn"> 
+            <i class="fa-solid fa-bars" id="menuBtn"></i> 
+        </button>  
+        <span class="mobile-title">Menu</span>
+    </div>
 
     <?php include '../includes/sidebar.php'; ?>
 
     <div class="main-content">
-        
         <div class="page-header">
             <div>
                 <p>Panoramica</p>
@@ -100,5 +107,39 @@ if (!empty($my_restaurants)) {
         </div>
     </div>
 
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const sidebar = document.querySelector('.sidebar');
+        const hamburger = document.querySelector('.hamburger-btn');
+        const closeBtn = document.getElementById('closeSidebarBtn');
+        
+        let overlay = document.querySelector('.sidebar-overlay');
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.classList.add('sidebar-overlay');
+            document.body.appendChild(overlay);
+        }
+
+        function openSidebar() {
+            sidebar.classList.add('active');
+            overlay.classList.add('active');
+        }
+
+        function closeSidebar() {
+            sidebar.classList.remove('active');
+            overlay.classList.remove('active');
+        }
+
+        if (hamburger) {
+            hamburger.addEventListener('click', openSidebar);
+        }
+
+        if (closeBtn) {
+            closeBtn.addEventListener('click', closeSidebar);
+        }
+
+        overlay.addEventListener('click', closeSidebar);
+    });
+    </script>
 </body>
-</html>
+</html> 
