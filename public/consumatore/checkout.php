@@ -64,8 +64,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && (isset($_POST['place_order']) || iss
     <link rel="stylesheet" href="../../css/style_consumatori.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-
-    <script src="https://www.paypal.com/sdk/js?client-id=ATHTb2gXY3GKqi99hQwcNXNVsHisCXgf7iYt5stbRypxjqjEe-qBPaffW9hC9-LEq9ZqgitpD0UYKGkY&currency=EUR"></script>
+    <script src="https://www.paypal.com/sdk/js?client-id=ATHTb2gXY3GKqi99hQwcNXNVsHisCXgf7iYt5stbRypxjqjEe-qBPaffW9hC9-LEq9ZqgitpD0UYKGkY&currency=EUR&disable-funding=card,mybank"></script>
 </head>
 
 <body>
