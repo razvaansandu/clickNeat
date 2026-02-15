@@ -23,15 +23,16 @@ class RistoranteModel {
         return $this->db->selectOne("SELECT * FROM ristoranti WHERE user_id = ?", [$user_id]);
     }
 
-    public function create($user_id, $nome, $indirizzo, $descrizione, $image_url = null) {
-        return $this->db->insert('ristoranti', [
-            'user_id' => $user_id,
-            'nome' => $nome,
-            'indirizzo' => $indirizzo,
-            'descrizione' => $descrizione,
-            'image_url' => $image_url
-        ]);
-    }
+    public function create($proprietario_id, $nome, $indirizzo, $descrizione, $image_path = null) {
+    return $this->db->insert('ristoranti', [
+        'proprietario_id' => $proprietario_id,
+        'nome' => $nome,
+        'indirizzo' => $indirizzo,
+        'descrizione' => $descrizione,
+        'categoria' => 'altro',
+        'image_url' => $image_path
+    ]);
+}
 
     public function update($id, $data) {
         return $this->db->update('ristoranti', $data, 'id = ?', [$id]);
