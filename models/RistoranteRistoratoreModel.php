@@ -25,21 +25,20 @@ class RistoranteRistoratoreModel
             'nome' => $nome,
             'indirizzo' => $indirizzo,
             'descrizione' => $descrizione,
-            'categoria'=>$categoria
+            'categoria' => 'altro',
+            'image_url' => $image_url
         ];
-
-        if ($image_url) {
-            $data['image_url'] = $image_url;
-        }
 
         return $this->db->insert('ristoranti', $data);
     }
 
     public function update($id, $data)
     {
-        if (isset($data['image_url']) && empty($data['image_url'])) {
+
+        if (array_key_exists('image_url', $data) && empty($data['image_url'])) {
             unset($data['image_url']);
         }
+
         return $this->db->update('ristoranti', $data, 'id = ?', [$id]);
     }
 
