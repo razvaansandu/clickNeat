@@ -1,22 +1,28 @@
-<div class="sidebar">
+<?php
+$current_page = basename($_SERVER['PHP_SELF']);
+?>
+<div class="sidebar" id="sidebar">
+    <button class="close-sidebar" id="closeSidebarBtn" aria-label="Chiudi menu">
+        <i class="fa-solid fa-times"></i>
+    </button>
+
     <div class="brand-logo">
-        <i class="fa-solid fa-leaf"></i> ClickNeat
+        <i class="fa-solid fa-utensils"></i> ClickNeat
     </div>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=dashboard_2" />
+
     <div class="nav-links">
-        <a href="dashboard_ristoratore.php"
-            class="<?php echo basename($_SERVER['PHP_SELF']) == 'dashboard_ristoratore.php' ? 'active' : ''; ?>">
-            <span class="material-symbols-outlined">dashboard_2</span></i> Dashboard
+        <a href="dashboard_ristoratore.php" class="<?php echo $current_page == 'dashboard_ristoratore.php' ? 'active' : ''; ?>">
+            <i class="fa-solid fa-chart-pie"></i> Dashboard
         </a>
-        <a href="profile_ristoratore.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'profile_ristoratore.php' ? 'active' : ''; ?>">
-            <i class="fa-solid fa-user"></i> Il mio Profilo
+        <a href="profile_ristoratore.php" class="<?php echo $current_page == 'profile_ristoratore.php' ? 'active' : ''; ?>">
+            <i class="fa-solid fa-user"></i> Profilo
         </a>
-        <a href="stats.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'stats.php' ? 'active' : ''; ?>">
-            <i class="fa-solid fa-chart-pie"></i> Statistiche
+        <a href="stats.php" class="<?php echo $current_page == 'stats.php' ? 'active' : ''; ?>">
+            <i class="fa-solid fa-chart-simple"></i> Statistiche
         </a>
     </div>
 
     <a href="../auth/logout.php" class="btn-logout-sidebar">
-        <i class="fa-solid fa-right-from-bracket"></i> Esci
+        <i class="fa-solid fa-sign-out-alt"></i> Logout
     </a>
 </div>

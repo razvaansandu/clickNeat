@@ -97,7 +97,7 @@ try {
                     } elseif ($stato_db == 'completed') {
                         $badgeClass = 'completed';
                         $icona = '<i class="fa-solid fa-check-double"></i>';
-                        $testo_stato = 'Consegnato';
+                        $testo_stato = 'Ritirato';
                     } elseif ($stato_db == 'cancelled' || $stato_db == 'rejected') {
                         $badgeClass = 'cancelled';
                         $icona = '<i class="fa-solid fa-xmark"></i>';
