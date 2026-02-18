@@ -1,6 +1,4 @@
 <?php
-if(session_status() !== PHP_SESSION_ACTIVE) session_start();
-
 require_once "../../config/db.php";
 require_once "../../models/RistoranteRistoratoreModel.php";
 
@@ -13,22 +11,57 @@ $error = "";
 $success = "";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    
+
     $nome = trim($_POST["nome"]);
     $indirizzo = trim($_POST["indirizzo"]);
     $descrizione = trim($_POST["descrizione"]);
     $proprietario_id = $_SESSION["id"];
 
+    $image_path = null;
+
     if (empty($nome) || empty($indirizzo)) {
-        $error = "Per favore, inserisci almeno il nome e l'indirizzo del locale.";
+        $error = "Per favore, inserisci almeno il nome e l'indirizzo.";
     } else {
-        $ristoranteModel = new RistoranteModel($db);
-        
-        if ($ristoranteModel->create($proprietario_id, $nome, $indirizzo, $descrizione)) {
-            $success = "Ristorante creato con successo! Verrai reindirizzato...";
-            header("refresh:2;url=dashboard_ristoratore.php");
-        } else {
-            $error = "Qualcosa è andato storto. Riprova più tardi.";
+
+        if (isset($_FILES['immagine_ristorante']) && $_FILES['immagine_ristorante']['error'] === 0) {
+
+            $upload_dir = '../assets/';
+
+            if (!is_dir($upload_dir)) {
+                mkdir($upload_dir, 0777, true);
+            }
+
+            $file_name = $_FILES['immagine_ristorante']['name'];
+            $file_tmp = $_FILES['immagine_ristorante']['tmp_name'];
+
+            $file_ext = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
+            $allowed = ['jpg', 'jpeg', 'png', 'webp'];
+
+            if (in_array($file_ext, $allowed)) {
+
+                $new_file_name = uniqid('rest_') . '.' . $file_ext;
+
+                $dest_path = $upload_dir . $new_file_name;
+
+                if (move_uploaded_file($file_tmp, $dest_path)) {
+                    $image_path = "assets/" . $new_file_name;
+                } else {
+                    $error = "Errore nel caricamento dell'immagine sul server.";
+                }
+            } else {
+                $error = "Formato non valido. Usa JPG, PNG o WEBP.";
+            }
+        }
+
+        if (empty($error)) {
+            $ristoranteModel = new RistoranteRistoratoreModel($db);
+
+            if ($ristoranteModel->create($proprietario_id, $nome, $indirizzo, $descrizione, $image_path)) {
+                $success = "Ristorante creato! Reindirizzamento...";
+                header("refresh:2;url=dashboard_ristoratore.php");
+            } else {
+                $error = "Errore database.";
+            }
         }
     }
 }
@@ -36,20 +69,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 <!DOCTYPE html>
 <html lang="it">
+
 <head>
     <meta charset="UTF-8">
     <title>Crea Ristorante - ClickNeat</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=dashboard_2" />
     <link rel="stylesheet" href="../../css/style_ristoratori.css">
 </head>
+
 <body>
 
     <?php include '../includes/sidebar.php'; ?>
 
     <div class="main-content" style="display: flex; align-items: center; justify-content: center;">
-        
+
         <div class="form-container">
             <div class="form-header">
                 <div class="icon-header">
@@ -59,19 +93,26 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <p>Inserisci i dettagli del tuo locale per iniziare.</p>
             </div>
 
-            <?php if($error): ?>
+            <?php if ($error): ?>
                 <div class="alert alert-error">
                     <i class="fa-solid fa-circle-exclamation"></i> <?php echo htmlspecialchars($error); ?>
                 </div>
             <?php endif; ?>
 
-            <?php if($success): ?>
+            <?php if ($success): ?>
                 <div class="alert alert-success">
                     <i class="fa-solid fa-circle-check"></i> <?php echo htmlspecialchars($success); ?>
                 </div>
             <?php endif; ?>
 
-            <form action="" method="POST">
+            <form action="" method="POST" enctype="multipart/form-data">
+
+                <label for="upload-img" class="card card-add">
+                    <div class="icon-plus">+</div>
+                    <div class="text-add" id="file-name">Aggiungi immagine in primo piano</div>
+                </label>
+
+                <input type="file" name="immagine_ristorante" id="upload-img" style="display: none;" accept="image/*">
                 <div class="form-group">
                     <label for="nome">Nome del Locale</label>
                     <div class="input-wrapper">
@@ -92,7 +133,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <label for="descrizione">Descrizione (Opzionale)</label>
                     <div class="input-wrapper textarea-wrapper">
                         <i class="fa-solid fa-pen" style="margin-top: 15px;"></i>
-                        <textarea id="descrizione" name="descrizione" placeholder="Raccontaci brevemente la tua cucina..."></textarea>
+                        <textarea id="descrizione" name="descrizione"
+                            placeholder="Raccontaci brevemente la tua cucina..."></textarea>
                     </div>
                 </div>
 
@@ -105,5 +147,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     </div>
 
+    <script>
+        document.getElementById('upload-img').addEventListener('change', function (e) {
+            var fileName = e.target.files[0].name;
+            document.getElementById('file-name').textContent = "File selezionato: " + fileName;
+            document.querySelector('.icon-plus').style.backgroundColor = '#4CAF50';
+            document.querySelector('.icon-plus').textContent = '✓';
+        });
+    </script>
+
 </body>
+
 </html>

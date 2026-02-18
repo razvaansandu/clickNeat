@@ -17,17 +17,18 @@ $raw_restaurants = $ristoranteModel->getAll();
 
 foreach ($raw_restaurants as $row) {
     
-    $keyword = 'food'; 
     $category = 'Ristorante';
     $nome_lower = strtolower($row['nome']);
     
-    if (strpos($nome_lower, 'pizza') !== false) { $keyword = 'pizza'; $category = 'Pizzeria'; }
-    elseif (strpos($nome_lower, 'burger') !== false) { $keyword = 'burger'; $category = 'Hamburgeria'; }
-    elseif (strpos($nome_lower, 'sushi') !== false) { $keyword = 'sushi'; $category = 'Giapponese'; }
-    elseif (strpos($nome_lower, 'pasta') !== false) { $keyword = 'pasta'; $category = 'Italiano'; }
-    elseif (strpos($nome_lower, 'dolce') !== false) { $keyword = 'cake'; $category = 'Dolci'; }
+    if (strpos($nome_lower, 'pizza') !== false) { $category = 'Pizzeria'; }
+    elseif (strpos($nome_lower, 'burger') !== false) { $category = 'Hamburgeria'; }
+    elseif (strpos($nome_lower, 'sushi') !== false) { $category = 'Giapponese'; }
+    elseif (strpos($nome_lower, 'pasta') !== false) { $category = 'Italiano'; }
+    elseif (strpos($nome_lower, 'dolce') !== false) { $category = 'Dolci'; }
 
-    $row['image_url'] = "https://loremflickr.com/600/400/" . $keyword . "?lock=" . $row['id'];
+    if (!empty($row['image_url'])) 
+        $row['image_url'];
+
     $row['category'] = $category;
     $row['descrizione_breve'] = !empty($row['descrizione']) ? substr($row['descrizione'], 0, 60) . '...' : 'Gustosi piatti preparati con ingredienti freschi.';
     
@@ -121,7 +122,8 @@ foreach ($raw_restaurants as $row) {
         <div class="grid-container" id="restaurantsGrid">
             <?php foreach($restaurants as $rest): ?>
                 <a href="menu.php?id=<?php echo $rest['id']; ?>" class="restaurant-card">
-                    <img src="<?php echo $rest['image_url']; ?>" alt="Cibo" class="card-img-top">
+                    <img src="<?php echo $rest['image_url']; ?>" alt="Cibo" class="card-img-top" style="object-fit: cover; height: 160px; width: 100%;">
+                    
                     <div class="card-body"> 
                         <div class="badge-cat"><?php echo $rest['category']; ?></div>
                         <h3 class="card-title"><?php echo htmlspecialchars($rest['nome']); ?></h3>
@@ -178,7 +180,7 @@ foreach ($raw_restaurants as $row) {
             restaurants.forEach(rest => {
                 html += `
                     <a href="menu.php?id=${rest.id}" class="restaurant-card">
-                        <img src="${rest.image_url}" alt="Cibo" class="card-img-top">
+                        <img src="${rest.image_url}" alt="Cibo" class="card-img-top" style="object-fit: cover; height: 160px; width: 100%;">
                         <div class="card-body"> 
                             <div class="badge-cat">${rest.category}</div>
                             <h3 class="card-title">${escapeHtml(rest.nome)}</h3>
