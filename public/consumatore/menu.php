@@ -31,10 +31,10 @@ $raw_piatti = $menuModel->getByRestaurant($ristorante_id);
 $lista_piatti = [];
 
 foreach ($raw_piatti as $row) {
-    if (empty($row['image_url'])) {
-        $keyword = stripos($row['name'], 'pizza') !== false ? 'pizza' : 'food';
-        $row['image_url'] = "https://loremflickr.com/400/300/" . $keyword . "?lock=" . $row['id'];
+    if (!empty($row['image_url'])) {
+        $row['image_url'] = "/" . htmlspecialchars($row['image_url']);
     }
+    
     $lista_piatti[] = $row;
 }
 
@@ -103,7 +103,7 @@ if (isset($_SESSION['cart']) && !empty($_SESSION['cart']['items'])) {
             <?php if (!empty($lista_piatti)): ?>
                 <?php foreach ($lista_piatti as $piatto): ?>
                     <div class="card-style">
-                        <img src="<?php echo $piatto['image_url']; ?>" class="dish-image" alt="Piatto">
+                        <img src="<?php echo $piatto['image_url']; ?>" class="dish-image" alt="Piatto" style="object-fit: cover; width: 100%; height: 200px;">
 
                         <div class="dish-body">
                             <div class="dish-title"><?php echo htmlspecialchars($piatto['name']); ?></div>
@@ -142,5 +142,4 @@ if (isset($_SESSION['cart']) && !empty($_SESSION['cart']['items'])) {
     <?php endif; ?>
 
 </body>
-
 </html>

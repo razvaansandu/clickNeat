@@ -33,6 +33,7 @@ if (!$restaurant) {
 $msg = "";
 $msg_type = "";
 
+// --- GESTIONE AGGIORNAMENTO ORDINE ---
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_order'])) {
     $order_id = $_POST['order_id'];
     $new_status = $_POST['status'];
@@ -44,6 +45,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_order'])) {
         $msg_type = "error";
     }
 }
+
+// --- GESTIONE AGGIUNTA PIATTO ---
 if (isset($_POST['add_dish'])) {
     $name = trim($_POST['name']);
     $desc = trim($_POST['description']);
@@ -51,7 +54,11 @@ if (isset($_POST['add_dish'])) {
     $cat_select = $_POST['categoria_select'] ?? 'altro';
     $cat_custom = trim($_POST['categoria_custom'] ?? '');
     $categoria = !empty($cat_custom) ? $cat_custom : $cat_select;
+    
+    // Inizializziamo image_url a null
     $image_url = null;
+
+    // Controllo parole vietate
     $badWords = getBadWords();
     $isForbidden = false;
     foreach ($badWords as $word) {
@@ -65,12 +72,43 @@ if (isset($_POST['add_dish'])) {
         $msg = "Linguaggio inappropriato rilevato nella categoria.";
         $msg_type = "error";
     } elseif (!empty($name) && !empty($price)) {
-        if ($menuModel->create($restaurant_id, $name, $desc, $price, $categoria, $image_url)) {
-            $msg = "Piatto aggiunto con successo!";
-            $msg_type = "success";
-        } else {
-            $msg = "Errore nell'inserimento.";
-            $msg_type = "error";
+        
+        if (isset($_FILES['dish_image']) && $_FILES['dish_image']['error'] === 0) {
+            $upload_dir = '../assets/'; 
+            
+            if (!is_dir($upload_dir)) {
+                mkdir($upload_dir, 0777, true);
+            }
+
+            $file_name = $_FILES['dish_image']['name'];
+            $file_tmp = $_FILES['dish_image']['tmp_name'];
+            $file_ext = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
+            $allowed = ['jpg', 'jpeg', 'png', 'webp'];
+
+            if (in_array($file_ext, $allowed)) {
+                $new_file_name = uniqid('dish_') . '.' . $file_ext;
+                $dest_path = $upload_dir . $new_file_name;
+
+                if (move_uploaded_file($file_tmp, $dest_path)) {
+                    $image_url = "assets/" . $new_file_name;
+                } else {
+                    $msg = "Errore caricamento immagine.";
+                    $msg_type = "error";
+                }
+            } else {
+                $msg = "Formato immagine non valido (usa JPG, PNG, WEBP).";
+                $msg_type = "error";
+            }
+        }
+
+        if (empty($msg_type) || $msg_type !== 'error') {
+            if ($menuModel->create($restaurant_id, $name, $desc, $price, $categoria, $image_url)) {
+                $msg = "Piatto aggiunto con successo!";
+                $msg_type = "success";
+            } else {
+                $msg = "Errore nell'inserimento nel database.";
+                $msg_type = "error";
+            }
         }
     }
 }
@@ -112,16 +150,14 @@ function getBadWords() {
                 <p><i class="fa-solid fa-location-dot"></i> <?php echo htmlspecialchars($restaurant['indirizzo']); ?></p>
             </div>
         </div>
-        <div class="page-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
-    <div>
-        <a href="dashboard_ristoratore.php" class="btn-cancel" style="padding-left:0; margin-bottom:10px; display:inline-block;">
-        </a>
-    </div>
-    
-    <a href="modifica_ristorante.php?id=<?php echo $restaurant_id; ?>" class="btn-action">
-        <i class="fa-solid fa-pen-to-square"></i> Modifica Info
-    </a>
-</div>
+
+        <div class="page-header" style="display: flex; justify-content: flex-start; align-items: center; margin-top: -20px; padding-top: 0;">
+            <a href="modifica_ristorante.php?id=<?php echo $restaurant_id; ?>" 
+               style="background: #2B3674; color: white; padding: 12px 24px; border-radius: 30px; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 10px rgba(67, 24, 255, 0.25); transition: all 0.2s ease;">
+                <i class="fa-solid fa-pen-to-square"></i> Modifica Ristorante
+            </a>
+        </div>
+
         <?php if ($msg): ?>
             <div class="msg-box <?php echo $msg_type; ?>">
                 <?php echo htmlspecialchars($msg); ?>
@@ -132,10 +168,16 @@ function getBadWords() {
             <div class="col-menu">
                 <div class="card" style="margin-bottom: 30px;">
                     <h3 style="color: #2B3674; margin-bottom: 20px;">Aggiungi Piatto</h3>
-                    <form method="POST" id="form-piatto">
+                    
+                    <form method="POST" id="form-piatto" enctype="multipart/form-data">
                         <input type="hidden" name="add_dish" value="1">
-
-                        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 15px; margin-bottom: 15px;">
+                        
+                        <label for="upload-img" class="card card-add" style="cursor: pointer;">
+                            <div class="icon-plus">+</div>
+                            <div class="text-add" id="file-name">Aggiungi immagine piatto</div>
+                        </label>
+                        <input type="file" name="dish_image" id="upload-img" style="display: none;" accept="image/*">
+                        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 15px; margin-bottom: 15px; margin-top: 15px;">
                             <div class="input-wrapper">
                                 <i class="fa-solid fa-utensils"></i>
                                 <input type="text" name="name" placeholder="Nome Piatto" required>
@@ -168,9 +210,10 @@ function getBadWords() {
                         </div>
                         <small id="status-help" style="color: #4318FF; font-size: 11px; margin-top: 5px; display: block; height: 15px;"></small>
 
-<button type="submit" class="btn-add" style="display: flex; justify-content: space-between; background: #F4F7FE; color: var(--primary-brand); padding: 6px 7px; border-radius: 12px; font-weight: 500; font-size: 13px; border: 1px solid var(--primary-brand);">
-    Salva Piatto
-</button>                    </form>
+                        <button type="submit" class="btn-add" style="display: flex; justify-content: space-between; background: #F4F7FE; color: var(--primary-brand); padding: 6px 7px; border-radius: 12px; font-weight: 500; font-size: 13px; border: 1px solid var(--primary-brand);">
+                            Salva Piatto
+                        </button>
+                    </form>
                 </div>
 
                 <div class="card">
@@ -186,10 +229,23 @@ function getBadWords() {
                     <?php else: ?>
                         <div class="menu-list">
                             <?php foreach ($menu_items as $item): ?>
-                                <div class="menu-item">
-                                    <div class="dish-info">
-                                        <h4><?php echo htmlspecialchars($item['name']); ?></h4>
-                                        <p><?php echo htmlspecialchars($item['description']); ?></p>
+                                <div class="menu-item" style="display: flex; gap: 15px; align-items: center;">
+                                    
+                                    <div class="dish-img" style="width: 60px; height: 60px; border-radius: 10px; overflow: hidden; background: #f4f7fe; flex-shrink: 0;">
+                                        <?php if (!empty($item['image_url'])): ?>
+                                            <img src="/<?php echo htmlspecialchars($item['image_url']); ?>" alt="Foto piatto" style="width: 100%; height: 100%; object-fit: cover;">
+                                        <?php else: ?>
+                                            <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #A3AED0;">
+                                                <i class="fa-solid fa-utensils"></i>
+                                            </div>
+                                        <?php endif; ?>
+                                    </div>
+                                    
+                                    <div class="dish-info" style="flex: 1;">
+                                        <h4 style="margin: 0; font-size: 16px; color: #2B3674;"><?php echo htmlspecialchars($item['name']); ?></h4>
+                                        <p style="margin: 5px 0 0; font-size: 13px; color: #A3AED0; line-height: 1.4;">
+                                            <?php echo htmlspecialchars($item['description']); ?>
+                                        </p>
                                     </div>
                                     <div class="dish-actions">
                                         <span class="dish-price">€ <?php echo number_format($item['price'], 2); ?></span>
@@ -204,7 +260,6 @@ function getBadWords() {
             <div class="col-orders">
                 <div class="card" style="min-height: 600px;">
                     <h3 style="color: #2B3674; margin-bottom: 20px;">Ordini Recenti</h3>
-
                     <?php if (empty($orders)): ?>
                         <div style="text-align:center; padding:50px 20px;">
                             <i class="fa-solid fa-bell-slash" style="font-size:24px; color:#A3AED0; display:block; margin-bottom:10px;"></i>
@@ -268,6 +323,15 @@ function getBadWords() {
     const statusHelp = document.getElementById('status-help');
     const btnSave = document.querySelector('.btn-add');
     const badWords = <?php echo json_encode(getBadWords()); ?>;
+
+    document.getElementById('upload-img').addEventListener('change', function(e) {
+        if (e.target.files.length > 0) {
+            document.getElementById('file-name').textContent = "Selezionato: " + e.target.files[0].name;
+            document.querySelector('.icon-plus').textContent = '✓';
+            document.querySelector('.icon-plus').style.backgroundColor = '#05CD99';
+            document.querySelector('.icon-plus').style.color = 'white';
+        }
+    });
 
     inputCustom.addEventListener('input', function() {
         const val = this.value.trim().toLowerCase();

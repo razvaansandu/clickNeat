@@ -48,7 +48,7 @@ if (!empty($my_restaurants)) {
         <button class="hamburger-btn">  
             <i class="fa-solid fa-bars" id="menuBtn"></i> 
         </button>  
-        </div>
+    </div>
 
     <?php include '../includes/sidebar.php'; ?>
 
@@ -69,40 +69,37 @@ if (!empty($my_restaurants)) {
             
             <?php foreach($my_restaurants as $rest): ?>
                 <div class="card">
-    <?php 
-    if (!empty($rest['image_url'])) {
-        $percorso_img = "../../image/" . htmlspecialchars($rest['image_url']);
-    } else {
-        $percorso_img = "../../image/placeholder.png";
-    }
-    ?>
-    <img src="<?php echo $percorso_img; ?>" alt="Foto Ristorante" style="width: 100%; height: 150px; object-fit: cover; border-radius: 12px; margin-bottom: 15px;">
+                    
+                    <?php if (!empty($rest['image_url'])): ?>
+                        <img src="<?php echo htmlspecialchars($rest['image_url']); ?>" 
+                             alt="Foto Ristorante" 
+                             style="width: 100%; height: 150px; object-fit: cover; border-radius: 12px; margin-bottom: 15px;">
+                    <?php else: ?>
+                        <div style="width: 100%; height: 150px; background-color: #F4F7FE; border-radius: 12px; margin-bottom: 15px; display: flex; align-items: center; justify-content: center;">
+                            <i class="fa-solid fa-store" style="font-size: 40px; color: #A3AED0;"></i>
+                        </div>
+                    <?php endif; ?>
 
-    <div style="display:flex; justify-content:space-between;">
-        <div class="card-icon"><i class="fa-solid fa-store"></i></div>
-        <div style="color:#A3AED0; cursor:pointer;"></div>
-    </div>
+                    <h2 style="margin-top: 5px;"><?php echo htmlspecialchars($rest['nome']); ?></h2>
+                    <p class="subtitle">Ordini totali: <b><?php echo $rest['total_orders']; ?></b></p>
 
-    <h2><?php echo htmlspecialchars($rest['nome']); ?></h2>
-    <p class="subtitle">Ordini totali: <b><?php echo $rest['total_orders']; ?></b></p>
+                    <div class="stat-row">
+                        <div class="revenue">
+                            € <?php echo number_format($rest['revenue'], 2); ?>
+                            <br><span>Guadagni totali</span>
+                        </div>
+                        
+                        <div class="mini-chart">
+                            <?php foreach($rest['trend_data'] as $key => $val): ?>
+                                <div class="bar <?php echo $key > 2 ? 'active' : ''; ?>" style="height: <?php echo $val; ?>%;"></div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
 
-    <div class="stat-row">
-        <div class="revenue">
-            € <?php echo number_format($rest['revenue'], 2); ?>
-            <br><span>Guadagni totali</span>
-        </div>
-        
-        <div class="mini-chart">
-            <?php foreach($rest['trend_data'] as $key => $val): ?>
-                <div class="bar <?php echo $key > 2 ? 'active' : ''; ?>" style="height: <?php echo $val; ?>%;"></div>
-            <?php endforeach; ?>
-        </div>
-    </div>
-
-    <a href="manage_restaurant.php?id=<?php echo $rest['id']; ?>" class="btn-manage">
-        Gestisci Menu <i class="fa-solid fa-arrow-right"></i>
-    </a>
-</div>
+                    <a href="manage_restaurant.php?id=<?php echo $rest['id']; ?>" class="btn-manage">
+                        Gestisci Menu <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+                </div>
             <?php endforeach; ?>
 
             <a href="create_restaurant.php" style="text-decoration:none;">
@@ -151,4 +148,4 @@ if (!empty($my_restaurants)) {
     });
     </script>
 </body>
-</html> 
+</html>

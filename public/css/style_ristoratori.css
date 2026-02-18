@@ -8,7 +8,7 @@
     --primary-dark: #2B3674;
     --primary-brand: #1A4D4E;
     --accent-orange: #FF9F43;
-    --accent-red: #FF6B6B;
+    -accent-red: #FF6B6B;
     --text-grey: #A3AED0;
     --bg-light: #F4F7FE;
     --white: #ffffff;
@@ -27,7 +27,7 @@ body {
 a { text-decoration: none; color: inherit; }
 
 /* ==========================================================================
-   2. LA TUA SIDEBAR
+   2.SIDEBAR
    ========================================================================== */
 .sidebar {
     width: var(--sidebar-width);
@@ -42,7 +42,7 @@ a { text-decoration: none; color: inherit; }
     top: 0;
     left: 0;
     z-index: 1000;
-    transition: transform 0.3s ease; /* AGGIUNTO: per animazione mobile */
+    transition: transform 0.3s ease;
 }
 
 .brand-logo {
@@ -782,7 +782,7 @@ a { text-decoration: none; color: inherit; }
 }
 @media screen and (max-width: 768px) {
     body {
-        background: red;
+        background: white;
     }
     .sidebar {
         transform: translateX(-100%) !important;
