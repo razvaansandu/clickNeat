@@ -408,10 +408,7 @@ a { text-decoration: none; color: inherit; }
 .input-group input {
     width: 100%; padding: 12px; border: 1px solid #E0E5F2; border-radius: 10px;
     background: #fff; transition: 0.3s;
-} 
-.ahsh{ 
-
-} 
+}
 .input-group input:focus { border-color: var(--primary-brand); outline: none; }
 
 .btn-save {
