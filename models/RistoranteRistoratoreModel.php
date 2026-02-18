@@ -18,7 +18,7 @@ class RistoranteRistoratoreModel
         return $this->db->selectOne("SELECT * FROM ristoranti WHERE id = ? AND proprietario_id = ?", [$id, $owner_id]);
     }
 
-    public function create($user_id, $nome, $indirizzo, $descrizione, $image_url = null)
+    public function create($user_id, $nome, $indirizzo, $descrizione, $categoria, $image_url = null)
     {
         $data = [
             'proprietario_id' => $user_id,
