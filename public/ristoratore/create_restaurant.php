@@ -143,6 +143,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <div class="alert alert-success">
                     <i class="fa-solid fa-circle-check"></i> <?php echo htmlspecialchars($success); ?>
                 </div>
+            <?php endif; ?>  <form action="" method="POST" enctype="multipart/form-data">
 
             <form action="" method="POST" enctype="multipart/form-data">
 
@@ -207,6 +208,5 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         });
     </script>
 
-</body>
-
-</html>
+            </body>
+</HTML>

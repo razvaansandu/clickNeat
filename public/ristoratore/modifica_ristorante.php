@@ -55,7 +55,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_restaurant'])) 
     <div class="main-content">
         <div class="page-header">
             <div>
-                <a href="gestione_ristorante.php?id=<?php echo $restaurant_id; ?>" class="btn-cancel" style="padding-left:0; margin-bottom:10px; display:inline-block;">
+                <a href="manage_restaurant.php?id=<?php echo $restaurant_id; ?>" class="btn-cancel" style="padding-left:0; margin-bottom:10px; display:inline-block;">
                     <i class="fa-solid fa-arrow-left"></i> Torna alla Gestione
                 </a>
                 <h1>Impostazioni Ristorante</h1>
