@@ -33,57 +33,71 @@ if (!$restaurant) {
 $msg = "";
 $msg_type = "";
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-
-    if (isset($_POST['add_dish'])) {
-        $name = trim($_POST['name']);
-        $desc = trim($_POST['description']);
-        $price = $_POST['price'];
-
-        if (!empty($name) && !empty($price)) {
-            if ($menuModel->create($restaurant_id, $name, $desc, $price)) {
-                $msg = "Piatto aggiunto con successo!";
-                $msg_type = "success";
-            } else {
-                $msg = "Errore nell'inserimento.";
-                $msg_type = "error";
-            }
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_order'])) {
+    $order_id = $_POST['order_id'];
+    $new_status = $_POST['status'];
+    if ($orderModel->updateStatus($order_id, $new_status)) {
+        $msg = "Ordine aggiornato con successo!";
+        $msg_type = "success";
+    } else {
+        $msg = "Errore durante l'aggiornamento dell'ordine.";
+        $msg_type = "error";
+    }
+}
+if (isset($_POST['add_dish'])) {
+    $name = trim($_POST['name']);
+    $desc = trim($_POST['description']);
+    $price = $_POST['price'];
+    $cat_select = $_POST['categoria_select'] ?? 'altro';
+    $cat_custom = trim($_POST['categoria_custom'] ?? '');
+    $categoria = !empty($cat_custom) ? $cat_custom : $cat_select;
+    $image_url = null;
+    $badWords = getBadWords();
+    $isForbidden = false;
+    foreach ($badWords as $word) {
+        if (preg_match("/\b" . preg_quote($word, '/') . "\b/i", $categoria)) {
+            $isForbidden = true;
+            break;
         }
     }
 
-    if (isset($_POST['delete_dish'])) {
-        $dish_id = $_POST['dish_id'];
-        if ($menuModel->delete($dish_id)) {
-            $msg = "Piatto eliminato.";
+    if ($isForbidden) {
+        $msg = "Linguaggio inappropriato rilevato nella categoria.";
+        $msg_type = "error";
+    } elseif (!empty($name) && !empty($price)) {
+        if ($menuModel->create($restaurant_id, $name, $desc, $price, $categoria, $image_url)) {
+            $msg = "Piatto aggiunto con successo!";
             $msg_type = "success";
-        }
-    }
-
-    if (isset($_POST['update_order'])) {
-        $order_id = $_POST['order_id'];
-        $new_status = $_POST['status'];
-        if ($orderModel->updateStatus($order_id, $new_status)) {
-            header("Refresh:0");
+        } else {
+            $msg = "Errore nell'inserimento.";
+            $msg_type = "error";
         }
     }
 }
 
 $menu_items = $menuModel->getByRestaurant($restaurant_id);
 $orders = $orderModel->getByRestaurantId($restaurant_id);
+
+function getBadWords() {
+    $jsonPath = __DIR__ . "/../../config/cursed_words.json";
+    if (file_exists($jsonPath)) {
+        $jsonData = file_get_contents($jsonPath);
+        $data = json_decode($jsonData, true);
+        return is_array($data) ? ($data['words'] ?? $data) : [];
+    }
+    return [];
+}
 ?>
 
 <!DOCTYPE html>
 <html lang="it">
-
 <head>
     <meta charset="UTF-8">
     <title>Gestione - <?php echo htmlspecialchars($restaurant['nome']); ?></title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=dashboard_2" />
     <link rel="stylesheet" href="../../css/style_ristoratori.css">
 </head>
-
 <body>
 
     <?php include '../includes/sidebar.php'; ?>
@@ -98,7 +112,16 @@ $orders = $orderModel->getByRestaurantId($restaurant_id);
                 <p><i class="fa-solid fa-location-dot"></i> <?php echo htmlspecialchars($restaurant['indirizzo']); ?></p>
             </div>
         </div>
-
+        <div class="page-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
+    <div>
+        <a href="dashboard_ristoratore.php" class="btn-cancel" style="padding-left:0; margin-bottom:10px; display:inline-block;">
+        </a>
+    </div>
+    
+    <a href="modifica_ristorante.php?id=<?php echo $restaurant_id; ?>" class="btn-action">
+        <i class="fa-solid fa-pen-to-square"></i> Modifica Info
+    </a>
+</div>
         <?php if ($msg): ?>
             <div class="msg-box <?php echo $msg_type; ?>">
                 <?php echo htmlspecialchars($msg); ?>
@@ -106,12 +129,10 @@ $orders = $orderModel->getByRestaurantId($restaurant_id);
         <?php endif; ?>
 
         <div class="management-grid">
-
             <div class="col-menu">
-
                 <div class="card" style="margin-bottom: 30px;">
                     <h3 style="color: #2B3674; margin-bottom: 20px;">Aggiungi Piatto</h3>
-                    <form method="POST">
+                    <form method="POST" id="form-piatto">
                         <input type="hidden" name="add_dish" value="1">
 
                         <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 15px; margin-bottom: 15px;">
@@ -130,7 +151,24 @@ $orders = $orderModel->getByRestaurantId($restaurant_id);
                             <textarea name="description" placeholder="Descrizione e ingredienti..." rows="2" style="min-height: 80px;"></textarea>
                         </div>
 
-                        <button type="submit" class="btn-submit">Salva nel Menu</button>
+                        <label style="display:block; margin-bottom:8px; font-weight:600; color: #2B3674;">Categoria Piatto</label>
+                        <select name="categoria_select" id="piatto_select" style="width:100%; padding:12px; border-radius:8px; border:1px solid #d1d9e2; margin-bottom:12px;">
+                            <option value="pizza">Pizza</option>
+                            <option value="pasta">Pasta</option>
+                            <option value="panino">Panino</option>
+                            <option value="orientale">Orientale</option>
+                            <option value="altro" selected>Altro</option>
+                        </select>
+
+                        <div style="text-align: center; margin-bottom: 12px; color: #a3aed0; font-size: 12px; font-weight: bold;">— OPPURE CREANE UNA NUOVA —</div>
+
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-plus-circle"></i>
+                            <input type="text" name="categoria_custom" id="piatto_custom" placeholder="Scrivi una nuova categoria...">
+                        </div>
+                        <small id="status-help" style="color: #4318FF; font-size: 11px; margin-top: 5px; display: block; height: 15px;"></small>
+
+                        <button type="submit" class="btn-add" style="margin-top: 20px;">Salva Piatto</button>
                     </form>
                 </div>
 
@@ -154,11 +192,6 @@ $orders = $orderModel->getByRestaurantId($restaurant_id);
                                     </div>
                                     <div class="dish-actions">
                                         <span class="dish-price">€ <?php echo number_format($item['price'], 2); ?></span>
-                                        <form method="POST" onsubmit="return confirm('Eliminare questo piatto?');">
-                                            <input type="hidden" name="delete_dish" value="1">
-                                            <input type="hidden" name="dish_id" value="<?php echo $item['id']; ?>">
-                                            <button type="submit" class="btn-icon-delete"><i class="fa-solid fa-trash"></i></button>
-                                        </form>
                                     </div>
                                 </div>
                             <?php endforeach; ?>
@@ -173,10 +206,8 @@ $orders = $orderModel->getByRestaurantId($restaurant_id);
 
                     <?php if (empty($orders)): ?>
                         <div style="text-align:center; padding:50px 20px;">
-                            <div style="width:60px; height:60px; background:#F4F7FE; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 20px auto;">
-                                <i class="fa-solid fa-bell-slash" style="font-size:24px; color:#A3AED0;"></i>
-                            </div>
-                            <p style="color:#A3AED0;">Nessun ordine ricevuto per questo locale.</p>
+                            <i class="fa-solid fa-bell-slash" style="font-size:24px; color:#A3AED0; display:block; margin-bottom:10px;"></i>
+                            <p style="color:#A3AED0;">Nessun ordine ricevuto.</p>
                         </div>
                     <?php else: ?>
                         <div class="orders-list">
@@ -204,26 +235,20 @@ $orders = $orderModel->getByRestaurantId($restaurant_id);
                                         Totale: <b>€ <?php echo number_format($order['total_amount'], 2); ?></b>
                                     </div>
 
-                                    <div class="order-actions">
+                                    <div class="order-actions" style="display: flex; gap: 10px; margin-top: 15px;">
                                         <?php if ($status == 'pending'): ?>
-                                            <form method="POST" style="flex:1;">
+                                            <form method="POST" style="width: 100%;">
                                                 <input type="hidden" name="update_order" value="1">
                                                 <input type="hidden" name="order_id" value="<?php echo $order['id']; ?>">
                                                 <input type="hidden" name="status" value="accepted">
-                                                <button type="submit" class="btn-action btn-accept">Accetta</button>
-                                            </form>
-                                            <form method="POST" style="flex:1;">
-                                                <input type="hidden" name="update_order" value="1">
-                                                <input type="hidden" name="order_id" value="<?php echo $order['id']; ?>">
-                                                <input type="hidden" name="status" value="cancelled">
-                                                <button type="submit" class="btn-action btn-reject">Rifiuta</button>
+                                                <button type="submit" class="btn-action btn-accept" style="width: 100%;">Accetta</button>
                                             </form>
                                         <?php elseif ($status == 'accepted'): ?>
-                                            <form method="POST" style="width:100%;">
+                                            <form method="POST" style="width: 100%;">
                                                 <input type="hidden" name="update_order" value="1">
                                                 <input type="hidden" name="order_id" value="<?php echo $order['id']; ?>">
                                                 <input type="hidden" name="status" value="completed">
-                                                <button type="submit" class="btn-action btn-complete">Concludi Ordine</button>
+                                                <button type="submit" class="btn-action btn-complete" style="width: 100%;">Concludi Ordine</button>
                                             </form>
                                         <?php endif; ?>
                                     </div>
@@ -233,10 +258,50 @@ $orders = $orderModel->getByRestaurantId($restaurant_id);
                     <?php endif; ?>
                 </div>
             </div>
-
         </div>
     </div>
 
-</body>
+<script>
+    const inputCustom = document.getElementById('piatto_custom');
+    const selectDefault = document.getElementById('piatto_select');
+    const statusHelp = document.getElementById('status-help');
+    const btnSave = document.querySelector('.btn-add');
+    const badWords = <?php echo json_encode(getBadWords()); ?>;
 
+    inputCustom.addEventListener('input', function() {
+        const val = this.value.trim().toLowerCase();
+        const found = badWords.some(word => {
+            const regex = new RegExp("\\b" + word + "\\b", "i");
+            return regex.test(val);
+        });
+
+        if (found) {
+            this.style.borderColor = "#ea4335";
+            statusHelp.innerHTML = "<i class='fa-solid fa-ban'></i> Termine non consentito";
+            statusHelp.style.color = "#ea4335";
+            btnSave.disabled = true;
+            btnSave.style.opacity = "0.5";
+            return; 
+        }
+
+        if (val.length > 0) {
+            selectDefault.disabled = true;
+            selectDefault.style.opacity = "0.5";
+            statusHelp.innerHTML = "<i class='fa-solid fa-keyboard'></i> Categoria personalizzata attiva";
+            statusHelp.style.color = "#4318FF";
+        } else {
+            selectDefault.disabled = false;
+            selectDefault.style.opacity = "1";
+            statusHelp.innerHTML = "";
+        }
+        btnSave.disabled = false;
+        btnSave.style.opacity = "1";
+        this.style.borderColor = "#d1d9e2";
+    });
+
+    document.getElementById('form-piatto').addEventListener('submit', function() {
+        selectDefault.disabled = false;
+    });
+</script>
+</body>
 </html>

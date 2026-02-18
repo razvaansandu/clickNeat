@@ -62,31 +62,40 @@ if (!empty($my_restaurants)) {
             
             <?php foreach($my_restaurants as $rest): ?>
                 <div class="card">
-                    <div style="display:flex; justify-content:space-between;">
-                        <div class="card-icon"><i class="fa-solid fa-store"></i></div>
-                        <div style="color:#A3AED0; cursor:pointer;"></div>
-                    </div>
+    <?php 
+    if (!empty($rest['image_url'])) {
+        $percorso_img = "../../image/" . htmlspecialchars($rest['image_url']);
+    } else {
+        $percorso_img = "../../image/placeholder.png";
+    }
+    ?>
+    <img src="<?php echo $percorso_img; ?>" alt="Foto Ristorante" style="width: 100%; height: 150px; object-fit: cover; border-radius: 12px; margin-bottom: 15px;">
 
-                    <h2><?php echo htmlspecialchars($rest['nome']); ?></h2>
-                    <p class="subtitle">Ordini totali: <b><?php echo $rest['total_orders']; ?></b></p>
+    <div style="display:flex; justify-content:space-between;">
+        <div class="card-icon"><i class="fa-solid fa-store"></i></div>
+        <div style="color:#A3AED0; cursor:pointer;"></div>
+    </div>
 
-                    <div class="stat-row">
-                        <div class="revenue">
-                            € <?php echo number_format($rest['revenue'], 2); ?>
-                            <br><span>Guadagni totali</span>
-                        </div>
-                        
-                        <div class="mini-chart">
-                            <?php foreach($rest['trend_data'] as $key => $val): ?>
-                                <div class="bar <?php echo $key > 2 ? 'active' : ''; ?>" style="height: <?php echo $val; ?>%;"></div>
-                            <?php endforeach; ?>
-                        </div>
-                    </div>
+    <h2><?php echo htmlspecialchars($rest['nome']); ?></h2>
+    <p class="subtitle">Ordini totali: <b><?php echo $rest['total_orders']; ?></b></p>
 
-                    <a href="manage_restaurant.php?id=<?php echo $rest['id']; ?>" class="btn-manage">
-                        Gestisci Menu <i class="fa-solid fa-arrow-right"></i>
-                    </a>
-                </div>
+    <div class="stat-row">
+        <div class="revenue">
+            € <?php echo number_format($rest['revenue'], 2); ?>
+            <br><span>Guadagni totali</span>
+        </div>
+        
+        <div class="mini-chart">
+            <?php foreach($rest['trend_data'] as $key => $val): ?>
+                <div class="bar <?php echo $key > 2 ? 'active' : ''; ?>" style="height: <?php echo $val; ?>%;"></div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+
+    <a href="manage_restaurant.php?id=<?php echo $rest['id']; ?>" class="btn-manage">
+        Gestisci Menu <i class="fa-solid fa-arrow-right"></i>
+    </a>
+</div>
             <?php endforeach; ?>
 
             <a href="create_restaurant.php" style="text-decoration:none;">
