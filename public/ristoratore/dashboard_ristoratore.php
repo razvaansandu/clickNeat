@@ -1,5 +1,6 @@
 <?php
 if(session_status() !== PHP_SESSION_ACTIVE) session_start();
+$current_page = basename($_SERVER['PHP_SELF']);
 
 require_once "../../config/db.php";
 require_once "../../models/RistoranteRistoratoreModel.php";
