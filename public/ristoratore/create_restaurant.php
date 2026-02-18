@@ -21,6 +21,7 @@ $error = "";
 $success = "";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+
     $nome = trim($_POST["nome"]);
     $indirizzo = trim($_POST["indirizzo"]);
     $descrizione = trim($_POST["descrizione"]);
@@ -41,19 +42,51 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if (!$isForbidden) $valid_categories[] = $cat;
     }
 
-    $categoria_string = implode(", ", $valid_categories);
+    $image_path = null;
+
     if (empty($nome) || empty($indirizzo)) {
-        $error = "Nome e Indirizzo sono obbligatori.";
-    } elseif (empty($valid_categories)) {
-        $error = "Inserisci almeno una categoria valida.";
+        $error = "Per favore, inserisci almeno il nome e l'indirizzo.";
     } else {
-        $proprietario_id = $_SESSION["id"];
-        $ristoranteModel = new RistoranteRistoratoreModel($db);
-        if ($ristoranteModel->create($proprietario_id, $nome, $indirizzo, $descrizione, $categoria_string)) {
-            $success = "Ristorante creato con successo!";
-            header("refresh:2;url=dashboard_ristoratore.php");
-        } else {
-            $error = "Errore durante il salvataggio. Controlla la connessione.";
+
+        if (isset($_FILES['immagine_ristorante']) && $_FILES['immagine_ristorante']['error'] === 0) {
+
+            $upload_dir = '../assets/';
+
+            if (!is_dir($upload_dir)) {
+                mkdir($upload_dir, 0777, true);
+            }
+
+            $file_name = $_FILES['immagine_ristorante']['name'];
+            $file_tmp = $_FILES['immagine_ristorante']['tmp_name'];
+
+            $file_ext = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
+            $allowed = ['jpg', 'jpeg', 'png', 'webp'];
+
+            if (in_array($file_ext, $allowed)) {
+
+                $new_file_name = uniqid('rest_') . '.' . $file_ext;
+
+                $dest_path = $upload_dir . $new_file_name;
+
+                if (move_uploaded_file($file_tmp, $dest_path)) {
+                    $image_path = "assets/" . $new_file_name;
+                } else {
+                    $error = "Errore nel caricamento dell'immagine sul server.";
+                }
+            } else {
+                $error = "Formato non valido. Usa JPG, PNG o WEBP.";
+            }
+        }
+
+        if (empty($error)) {
+            $ristoranteModel = new RistoranteRistoratoreModel($db);
+
+            if ($ristoranteModel->create($proprietario_id, $nome, $indirizzo, $descrizione, $image_path)) {
+                $success = "Ristorante creato! Reindirizzamento...";
+                header("refresh:2;url=dashboard_ristoratore.php");
+            } else {
+                $error = "Errore database.";
+            }
         }
     }
 }
@@ -61,6 +94,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 <!DOCTYPE html>
 <html lang="it">
+
 <head>
     <meta charset="UTF-8">
     <title>Crea Ristorante - ClickNeat</title>
@@ -84,22 +118,43 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         .alert-success { background: #F0FFF4; color: #38A169; }
     </style>
 </head>
+
 <body>
     <?php include '../includes/sidebar.php'; ?>
 
-    <div class="main-content" style="display: flex; align-items: center; justify-content: center; padding: 40px;">
-        <div class="form-container" style="max-width: 550px; width: 100%;">
-            <div class="form-header" style="text-align: center; margin-bottom: 25px;">
+    <div class="main-content" style="display: flex; align-items: center; justify-content: center;">
+
+        <div class="form-container">
+            <div class="form-header">
+                <div class="icon-header">
+                    <i class="fa-solid fa-store"></i>
+                </div>
                 <h1>Nuovo Ristorante</h1>
                 <p>Inserisci i dettagli e aggiungi fino a 15 categorie</p>
             </div>
 
-            <?php if($error): ?> <div class="alert alert-error"><i class="fa-solid fa-circle-exclamation"></i> <?php echo $error; ?></div> <?php endif; ?>
-            <?php if($success): ?> <div class="alert alert-success"><i class="fa-solid fa-check-circle"></i> <?php echo $success; ?></div> <?php endif; ?>
+            <?php if ($error): ?>
+                <div class="alert alert-error">
+                    <i class="fa-solid fa-circle-exclamation"></i> <?php echo htmlspecialchars($error); ?>
+                </div>
+            <?php endif; ?>
 
-            <form action="" method="POST" id="main-form">
-                <div class="form-group" style="margin-bottom: 15px;">
-                    <label>Nome Locale</label>
+            <?php if ($success): ?>
+                <div class="alert alert-success">
+                    <i class="fa-solid fa-circle-check"></i> <?php echo htmlspecialchars($success); ?>
+                </div>
+            <?php endif; ?>  <form action="" method="POST" enctype="multipart/form-data">
+
+            <form action="" method="POST" enctype="multipart/form-data">
+
+                <label for="upload-img" class="card card-add">
+                    <div class="icon-plus">+</div>
+                    <div class="text-add" id="file-name">Aggiungi immagine in primo piano</div>
+                </label>
+
+                <input type="file" name="immagine_ristorante" id="upload-img" style="display: none;" accept="image/*">
+                <div class="form-group">
+                    <label for="nome">Nome del Locale</label>
                     <div class="input-wrapper">
                         <i class="fa-solid fa-utensils"></i>
                         <input type="text" name="nome" placeholder="Nome del ristorante" required>
@@ -129,8 +184,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <div class="form-group" style="margin-bottom: 20px;">
                     <label>Descrizione</label>
                     <div class="input-wrapper textarea-wrapper">
-                        <i class="fa-solid fa-pen" style="top:15px;"></i>
-                        <textarea name="descrizione" placeholder="Descrivi brevemente il locale..."></textarea>
+                        <i class="fa-solid fa-pen" style="margin-top: 15px;"></i>
+                        <textarea id="descrizione" name="descrizione"
+                            placeholder="Raccontaci brevemente la tua cucina..."></textarea>
                     </div>
                 </div>
 
@@ -138,60 +194,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <a href="dashboard_ristoratore.php" class="btn-cancel" style="flex:1; text-align:center;">Annulla</a>
                     <button type="submit" class="btn-submit" style="flex:2;">Salva Ristorante</button>
                 </div>
+                
             </form>
         </div>
     </div>
 
     <script>
-        const tagInput = document.getElementById('tag-input');
-        const tagContainer = document.getElementById('tag-container');
-        const hiddenContainer = document.getElementById('hidden-inputs');
-        const tagCountDisplay = document.getElementById('tag-count');
-        const statusHelp = document.getElementById('status-help');
-        const tags = new Set();
-        const maxTags = 15;
-        const badWords = <?php echo json_encode(getBadWords()); ?>;
-
-        function renderTags() {
-            document.querySelectorAll('.tag').forEach(t => t.remove());
-            hiddenContainer.innerHTML = '';
-            tags.forEach(tag => {
-                const span = document.createElement('span');
-                span.className = 'tag';
-                span.innerHTML = `${tag} <i class="fa-solid fa-xmark" onclick="removeTag('${tag}')"></i>`;
-                tagContainer.insertBefore(span, tagInput);
-
-                const hidden = document.createElement('input');
-                hidden.type = 'hidden';
-                hidden.name = 'categories[]';
-                hidden.value = tag;
-                hiddenContainer.appendChild(hidden);
-            });
-            tagCountDisplay.innerText = `${tags.size}/${maxTags}`;
-            tagInput.disabled = tags.size >= maxTags;
-        }
-
-        function removeTag(tag) { tags.delete(tag); renderTags(); }
-
-        tagInput.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                const val = this.value.trim();
-                if (!val || tags.size >= maxTags) return;
-
-                const isBad = badWords.some(word => new RegExp("\\b" + word + "\\b", "i").test(val.toLowerCase()));
-                if (isBad) {
-                    statusHelp.innerText = "Parola non ammessa!";
-                    statusHelp.style.color = "#ea4335";
-                    return;
-                }
-
-                tags.add(val);
-                this.value = '';
-                statusHelp.innerText = "";
-                renderTags();
-            }
+        document.getElementById('upload-img').addEventListener('change', function (e) {
+            var fileName = e.target.files[0].name;
+            document.getElementById('file-name').textContent = "File selezionato: " + fileName;
+            document.querySelector('.icon-plus').style.backgroundColor = '#4CAF50';
+            document.querySelector('.icon-plus').textContent = '✓';
         });
     </script>
-</body>
-</html>
+
+            </body>
+</HTML>

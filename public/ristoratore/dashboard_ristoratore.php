@@ -1,5 +1,6 @@
 <?php
 if(session_status() !== PHP_SESSION_ACTIVE) session_start();
+$current_page = basename($_SERVER['PHP_SELF']);
 
 require_once "../../config/db.php";
 require_once "../../models/RistoranteRistoratoreModel.php";
@@ -35,17 +36,23 @@ if (!empty($my_restaurants)) {
 <html lang="it">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - ClickNeat</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="../css/style_ristoratori.css">
+    <link rel="stylesheet" href="../css/style_ristoratori.css"> 
 </head>
 <body>
+ 
+    <div class="mobile-header">  
+        <button class="hamburger-btn">  
+            <i class="fa-solid fa-bars" id="menuBtn"></i> 
+        </button>  
+        </div>
 
     <?php include '../includes/sidebar.php'; ?>
 
     <div class="main-content">
-        
         <div class="page-header">
             <div>
                 <p>Panoramica</p>
@@ -62,31 +69,40 @@ if (!empty($my_restaurants)) {
             
             <?php foreach($my_restaurants as $rest): ?>
                 <div class="card">
-                    <div style="display:flex; justify-content:space-between;">
-                        <div class="card-icon"><i class="fa-solid fa-store"></i></div>
-                        <div style="color:#A3AED0; cursor:pointer;"></div>
-                    </div>
+    <?php 
+    if (!empty($rest['image_url'])) {
+        $percorso_img = "../../image/" . htmlspecialchars($rest['image_url']);
+    } else {
+        $percorso_img = "../../image/placeholder.png";
+    }
+    ?>
+    <img src="<?php echo $percorso_img; ?>" alt="Foto Ristorante" style="width: 100%; height: 150px; object-fit: cover; border-radius: 12px; margin-bottom: 15px;">
 
-                    <h2><?php echo htmlspecialchars($rest['nome']); ?></h2>
-                    <p class="subtitle">Ordini totali: <b><?php echo $rest['total_orders']; ?></b></p>
+    <div style="display:flex; justify-content:space-between;">
+        <div class="card-icon"><i class="fa-solid fa-store"></i></div>
+        <div style="color:#A3AED0; cursor:pointer;"></div>
+    </div>
 
-                    <div class="stat-row">
-                        <div class="revenue">
-                            € <?php echo number_format($rest['revenue'], 2); ?>
-                            <br><span>Guadagni totali</span>
-                        </div>
-                        
-                        <div class="mini-chart">
-                            <?php foreach($rest['trend_data'] as $key => $val): ?>
-                                <div class="bar <?php echo $key > 2 ? 'active' : ''; ?>" style="height: <?php echo $val; ?>%;"></div>
-                            <?php endforeach; ?>
-                        </div>
-                    </div>
+    <h2><?php echo htmlspecialchars($rest['nome']); ?></h2>
+    <p class="subtitle">Ordini totali: <b><?php echo $rest['total_orders']; ?></b></p>
 
-                    <a href="manage_restaurant.php?id=<?php echo $rest['id']; ?>" class="btn-manage">
-                        Gestisci Menu <i class="fa-solid fa-arrow-right"></i>
-                    </a>
-                </div>
+    <div class="stat-row">
+        <div class="revenue">
+            € <?php echo number_format($rest['revenue'], 2); ?>
+            <br><span>Guadagni totali</span>
+        </div>
+        
+        <div class="mini-chart">
+            <?php foreach($rest['trend_data'] as $key => $val): ?>
+                <div class="bar <?php echo $key > 2 ? 'active' : ''; ?>" style="height: <?php echo $val; ?>%;"></div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+
+    <a href="manage_restaurant.php?id=<?php echo $rest['id']; ?>" class="btn-manage">
+        Gestisci Menu <i class="fa-solid fa-arrow-right"></i>
+    </a>
+</div>
             <?php endforeach; ?>
 
             <a href="create_restaurant.php" style="text-decoration:none;">
@@ -100,5 +116,39 @@ if (!empty($my_restaurants)) {
         </div>
     </div>
 
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const sidebar = document.querySelector('.sidebar');
+        const hamburger = document.querySelector('.hamburger-btn');
+        const closeBtn = document.getElementById('closeSidebarBtn');
+        
+        let overlay = document.querySelector('.sidebar-overlay');
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.classList.add('sidebar-overlay');
+            document.body.appendChild(overlay);
+        }
+
+        function openSidebar() {
+            sidebar.classList.add('active');
+            overlay.classList.add('active');
+        }
+
+        function closeSidebar() {
+            sidebar.classList.remove('active');
+            overlay.classList.remove('active');
+        }
+
+        if (hamburger) {
+            hamburger.addEventListener('click', openSidebar);
+        }
+
+        if (closeBtn) {
+            closeBtn.addEventListener('click', closeSidebar);
+        }
+
+        overlay.addEventListener('click', closeSidebar);
+    });
+    </script>
 </body>
-</html>
+</html> 

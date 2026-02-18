@@ -72,6 +72,7 @@ if ($userData) {
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Il mio Profilo - Ristoratore</title>
     <link rel="stylesheet" href="../../css/style_ristoratori.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -79,6 +80,26 @@ if ($userData) {
 </head>
 
 <body>
+
+    <style>
+    @media screen and (max-width: 768px) {
+        .main-content {
+            padding: 15px !important;
+        }
+        .profile-wrapper {
+            flex-direction: column !important;
+        }
+        .card-style {
+            width: calc(100% - 0px) !important;
+            margin: 0 auto !important;
+        }
+    }
+    </style>
+    <div class="mobile-header">  
+        <button class="hamburger-btn">  
+            <i class="fa-solid fa-bars"></i> 
+        </button>  
+    </div>
 
     <?php include '../includes/sidebar.php'; ?>
 
@@ -88,13 +109,20 @@ if ($userData) {
             <div class="msg-box <?php echo $msg_type; ?>"><?php echo htmlspecialchars($msg); ?></div>
         <?php endif; ?>
 
+        <div class="page-header">
+            <div>
+                <p>Area Personale</p>
+                <h1>Il mio Profilo</h1>
+            </div>
+        </div>
+
         <div class="profile-wrapper">
 
             <div class="card-style avatar-box">
                 <div class="avatar-circle">
                     <?php echo strtoupper(substr($username, 0, 1)); ?>
                 </div>
-                <h2 style="color: #2B3674; font-size: 20px;"><?php echo htmlspecialchars($username); ?></h2>
+                <h2 style="color: #2B3674; font-size: 20px; text-align: center;"><?php echo htmlspecialchars($username); ?></h2>
                 <span class="status-badge active" style="margin-top:5px;">Ristoratore</span>
 
                 <div class="info-list">
@@ -112,7 +140,7 @@ if ($userData) {
             <div class="card-style form-box">
                 <div class="form-title" style="margin-bottom: 20px; font-weight:700; color:#2B3674; border-bottom:1px solid #eee; padding-bottom:10px;">Modifica Dati Personali</div>
                 <form method="POST" action="">
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
                         <div class="input-group">
                             <label>Username</label>
                             <input type="text" name="username" value="<?php echo htmlspecialchars($username); ?>" required>
@@ -135,7 +163,7 @@ if ($userData) {
                         <label>Password Attuale</label>
                         <input type="password" name="old_password" required>
                     </div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
                         <div class="input-group">
                             <label>Nuova Password</label>
                             <input type="password" name="new_password" required>
@@ -148,6 +176,41 @@ if ($userData) {
             </div>
         </div>
     </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const sidebar = document.querySelector('.sidebar');
+        const hamburger = document.querySelector('.hamburger-btn');
+        const closeBtn = document.getElementById('closeSidebarBtn');
+        
+        let overlay = document.querySelector('.sidebar-overlay');
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.classList.add('sidebar-overlay');
+            document.body.appendChild(overlay);
+        }
+
+        function openSidebar() {
+            sidebar.classList.add('active');
+            overlay.classList.add('active');
+        }
+
+        function closeSidebar() {
+            sidebar.classList.remove('active');
+            overlay.classList.remove('active');
+        }
+
+        if (hamburger) {
+            hamburger.addEventListener('click', openSidebar);
+        }
+
+        if (closeBtn) {
+            closeBtn.addEventListener('click', closeSidebar);
+        }
+
+        overlay.addEventListener('click', closeSidebar);
+    });
+    </script>
 
 </body>
 
