@@ -168,8 +168,9 @@ function getBadWords() {
                         </div>
                         <small id="status-help" style="color: #4318FF; font-size: 11px; margin-top: 5px; display: block; height: 15px;"></small>
 
-                        <button type="submit" class="btn-add" style="margin-top: 20px;">Salva Piatto</button>
-                    </form>
+<button type="submit" class="btn-add" style="display: flex; justify-content: space-between; background: #F4F7FE; color: var(--primary-brand); padding: 6px 7px; border-radius: 12px; font-weight: 500; font-size: 13px; border: 1px solid var(--primary-brand);">
+    Salva Piatto
+</button>                    </form>
                 </div>
 
                 <div class="card">
