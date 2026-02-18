@@ -135,8 +135,9 @@ if (isset($_SESSION['cart']) && !empty($_SESSION['cart']['items'])) {
     </div>
 
     <?php if ($total_qty > 0): ?>
-        <a href="checkout.php" class="floating-cart-btn" title="Vai al carrello">
-            <i class="fa-solid fa-cart-shopping"></i>
+        <a href="checkout.php" class="floating-cart-btn" title="Vai al carrello"> 
+                        <i class="fa-solid fa-cart-shopping"> </i>
+ 
             <span class="cart-count-badge"><?php echo $total_qty; ?></span>
         </a>
     <?php endif; ?>

@@ -139,12 +139,12 @@ $orders = $orderModel->getByRestaurantId($restaurant_id);
                         <h3 style="color: #2B3674; margin:0;">Il tuo Menu</h3>
                         <span style="background:#E6FAF5; color:#05CD99; padding:5px 12px; border-radius:15px; font-weight:600; font-size:12px;">
                             <?php echo count($menu_items); ?> Piatti
-                        </span>
-                    </div>
+                        </span> 
+                    </div> 
 
                     <?php if (empty($menu_items)): ?>
                         <p style="text-align:center; color:#A3AED0; padding: 20px;">Ancora nessun piatto.</p>
-                    <?php else: ?>
+                    <?php else: ?> 
                         <div class="menu-list">
                             <?php foreach ($menu_items as $item): ?>
                                 <div class="menu-item">
@@ -239,4 +239,4 @@ $orders = $orderModel->getByRestaurantId($restaurant_id);
 
 </body>
 
-</html>
+</html> 

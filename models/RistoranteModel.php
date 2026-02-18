@@ -22,7 +22,7 @@ class RistoranteModel {
     public function getByUserId($user_id) {
         return $this->db->selectOne("SELECT * FROM ristoranti WHERE user_id = ?", [$user_id]);
     }
-
+          
     public function create($user_id, $nome, $indirizzo, $descrizione, $image_url = null) {
         return $this->db->insert('ristoranti', [
             'user_id' => $user_id,
@@ -37,4 +37,4 @@ class RistoranteModel {
         return $this->db->update('ristoranti', $data, 'id = ?', [$id]);
     }
 }
-?>
+?> 
