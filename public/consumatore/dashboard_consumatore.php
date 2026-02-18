@@ -2,6 +2,8 @@
 require_once "../../config/db.php";
 require_once "../../models/RistoranteModel.php";
 
+if (session_status() !== PHP_SESSION_ACTIVE) session_start();
+
 if (!isset($_SESSION["loggedin"]) || $_SESSION["ruolo"] !== 'consumatore') {
     header("location: login.php");
     exit;
@@ -17,24 +19,55 @@ $raw_restaurants = $ristoranteModel->getAll();
 
 foreach ($raw_restaurants as $row) {
     
-    $category = 'Ristorante';
+    if (!empty($row['image_url'])) {
+        $row['image_url'] = "/" . htmlspecialchars($row['image_url']);
+    } else {
+        $keyword_img = stripos($row['nome'], 'pizza') !== false ? 'pizza' : 'restaurant';
+        $row['image_url'] = "https://loremflickr.com/600/400/" . $keyword_img . "?lock=" . $row['id'];
+    }
+
+    $db_cat = strtolower($row['categoria'] ?? ''); 
     $nome_lower = strtolower($row['nome']);
-    
-    if (strpos($nome_lower, 'pizza') !== false) { $category = 'Pizzeria'; }
-    elseif (strpos($nome_lower, 'burger') !== false) { $category = 'Hamburgeria'; }
-    elseif (strpos($nome_lower, 'sushi') !== false) { $category = 'Giapponese'; }
-    elseif (strpos($nome_lower, 'pasta') !== false) { $category = 'Italiano'; }
-    elseif (strpos($nome_lower, 'dolce') !== false) { $category = 'Dolci'; }
+    $desc_lower = strtolower($row['descrizione'] ?? '');
 
-    if (!empty($row['image_url'])) 
-        $row['image_url'];
+    $keywords_array = [$nome_lower, $db_cat, $desc_lower];
 
-    $row['category'] = $category;
+    if (strpos($db_cat, 'giapponese') !== false || strpos($nome_lower, 'sushi') !== false) {
+        $keywords_array[] = 'sushi';
+        $keywords_array[] = 'asian';
+        $display_cat = 'Giapponese';
+    } 
+    elseif (strpos($db_cat, 'pizza') !== false || strpos($nome_lower, 'pizza') !== false) {
+        $keywords_array[] = 'pizza';
+        $keywords_array[] = 'italiano';
+        $display_cat = 'Pizzeria';
+    }
+    elseif (strpos($db_cat, 'panino') !== false || strpos($nome_lower, 'burger') !== false || strpos($nome_lower, 'hamburger') !== false) {
+        $keywords_array[] = 'burger';
+        $keywords_array[] = 'hamburger';
+        $keywords_array[] = 'americano';
+        $display_cat = 'Hamburgeria';
+    }
+    elseif (strpos($db_cat, 'pasta') !== false || strpos($nome_lower, 'trattoria') !== false) {
+        $keywords_array[] = 'pasta';
+        $keywords_array[] = 'primi';
+        $display_cat = 'Italiano';
+    }
+    elseif (strpos($db_cat, 'dolci') !== false || strpos($nome_lower, 'gelat') !== false || strpos($nome_lower, 'pasticceria') !== false) {
+        $keywords_array[] = 'dolci';
+        $keywords_array[] = 'dessert';
+        $display_cat = 'Dolci';
+    }
+    else {
+        $display_cat = ucfirst($row['categoria'] ?: 'Ristorante');
+    }
+
+    $row['category_label'] = $display_cat;
+    $row['search_keywords'] = implode(' ', array_unique($keywords_array)); // Stringa nascosta per il filtro
     $row['descrizione_breve'] = !empty($row['descrizione']) ? substr($row['descrizione'], 0, 60) . '...' : 'Gustosi piatti preparati con ingredienti freschi.';
     
     $restaurants[] = $row;
 }
-
 ?>
 
 <!DOCTYPE html>
@@ -52,9 +85,8 @@ foreach ($raw_restaurants as $row) {
             <i class="fa-solid fa-leaf" style="color: #05CD99;"></i> ClickNeat
         </a> 
         <div class="searchBar">
-            <input type="text" placeholder="Cerca ristoranti..." id="searchInput" />
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                 class="bi bi-search" viewBox="0 0 16 16">
+            <input type="text" placeholder="Cerca ristoranti, pizza, sushi..." id="searchInput" />
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
                 <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
             </svg>
         </div>
@@ -120,35 +152,7 @@ foreach ($raw_restaurants as $row) {
         </div>
 
         <div class="grid-container" id="restaurantsGrid">
-            <?php foreach($restaurants as $rest): ?>
-                <a href="menu.php?id=<?php echo $rest['id']; ?>" class="restaurant-card">
-                    <img src="<?php echo $rest['image_url']; ?>" alt="Cibo" class="card-img-top" style="object-fit: cover; height: 160px; width: 100%;">
-                    
-                    <div class="card-body"> 
-                        <div class="badge-cat"><?php echo $rest['category']; ?></div>
-                        <h3 class="card-title"><?php echo htmlspecialchars($rest['nome']); ?></h3>
-                        <div class="card-info">
-                            <i class="fa-solid fa-location-dot"></i> 
-                            <?php echo htmlspecialchars($rest['indirizzo']); ?>
-                        </div> 
-                        <div style="font-size: 13px; color: #707EAE; margin-bottom: 15px; line-height: 1.4;">
-                            <?php echo htmlspecialchars($rest['descrizione_breve']); ?>
-                        </div>
-                        <div class="btn-go">
-                            Vedi Menu <i class="fa-solid fa-arrow-right"></i>
-                        </div>
-                    </div>
-                </a>
-            <?php endforeach; ?>
-
-            <?php if(empty($restaurants)): ?>
-                <div class="empty-state" id="noResults">
-                    <i class="fa-solid fa-shop empty-icon"></i>
-                    <h3 class="empty-title">Nessun ristorante trovato</h3>
-                    <p class="empty-text">Prova a cercare un'altra categoria o ristorante.</p>
-                </div>
-            <?php endif; ?>
-        </div>
+            </div>
     </div>
 
     <script>
@@ -182,7 +186,7 @@ foreach ($raw_restaurants as $row) {
                     <a href="menu.php?id=${rest.id}" class="restaurant-card">
                         <img src="${rest.image_url}" alt="Cibo" class="card-img-top" style="object-fit: cover; height: 160px; width: 100%;">
                         <div class="card-body"> 
-                            <div class="badge-cat">${rest.category}</div>
+                            <div class="badge-cat">${rest.category_label}</div>
                             <h3 class="card-title">${escapeHtml(rest.nome)}</h3>
                             <div class="card-info">
                                 <i class="fa-solid fa-location-dot"></i> 
@@ -208,21 +212,20 @@ foreach ($raw_restaurants as $row) {
             let filtered = allRestaurants;
             
             if (category !== 'all') {
-                filtered = filtered.filter(rest => 
-                    rest.category.toLowerCase().includes(category.toLowerCase())
-                );
+                filtered = filtered.filter(rest => {
+                    return rest.search_keywords.includes(category.toLowerCase());
+                });
             }
             
-            if (searchTerm.trim().length >= 2) {
+            if (searchTerm.trim().length >= 1) {
                 const term = searchTerm.toLowerCase();
                 filtered = filtered.filter(rest => 
-                    rest.nome.toLowerCase().includes(term) ||
-                    rest.indirizzo.toLowerCase().includes(term) ||
-                    rest.descrizione.toLowerCase().includes(term)
+                    rest.search_keywords.includes(term) ||
+                    rest.indirizzo.toLowerCase().includes(term)
                 );
                 sectionTitle.textContent = `Risultati per "${searchTerm}"`;
             } else if (category !== 'all') {
-                sectionTitle.textContent = `${category.charAt(0).toUpperCase() + category.slice(1)}`;
+                sectionTitle.textContent = category.charAt(0).toUpperCase() + category.slice(1);
             } else {
                 sectionTitle.textContent = 'Ristoranti Popolari';
                 if (searchTerm === '') {
@@ -232,14 +235,15 @@ foreach ($raw_restaurants as $row) {
             
             renderRestaurants(filtered);
         }
-                let searchTimeout;
+
+        let searchTimeout;
         input.addEventListener('input', function() {
             clearTimeout(searchTimeout);
             const searchTerm = this.value.trim();
             
             searchTimeout = setTimeout(() => {
                 filterRestaurants(searchTerm, currentCategory);
-            }, 1);  
+            }, 100);  
         });
         
         categoryPills.forEach(pill => {
@@ -249,11 +253,14 @@ foreach ($raw_restaurants as $row) {
                 
                 currentCategory = this.dataset.category;
                 
-                filterRestaurants(input.value.trim(), currentCategory);
+                input.value = ''; 
+                
+                filterRestaurants('', currentCategory);
             });
         });
         
         function escapeHtml(text) {
+            if (!text) return "";
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
