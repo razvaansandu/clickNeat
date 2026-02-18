@@ -820,3 +820,65 @@ a { text-decoration: none; color: inherit; }
         display: none !important;
     }
 }
+@media screen and (max-width: 768px) {
+    .main-content {
+        margin-left: 0 !important;
+        padding: 15px !important;
+        width: 100% !important;
+        overflow-x: hidden !important;
+    }
+
+    .profile-wrapper {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 20px !important;
+        width: 100% !important;
+        margin: 0 !important;
+    }
+
+    .card-style {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 20px !important;
+        box-sizing: border-box !important;
+        float: none !important;
+        position: relative !important;
+        left: 0 !important;
+        right: 0 !important;
+    }
+
+    .avatar-box {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    .form-box {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    .info-list {
+        width: 100% !important;
+    }
+
+    .info-row {
+        width: 100% !important;
+        display: flex !important;
+        flex-wrap: wrap !important;
+    }
+
+    .input-group {
+        width: 100% !important;
+    }
+
+    .input-group input {
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    [style*="grid-template-columns"] {
+        grid-template-columns: 1fr !important;
+    }
+}

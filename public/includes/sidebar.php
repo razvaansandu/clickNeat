@@ -2,7 +2,6 @@
 // sidebar.php
 ?>
 <div class="sidebar" id="sidebar">
-    <!-- Pulsante di chiusura (visibile solo su mobile) -->
     <button class="close-sidebar" id="closeSidebarBtn" aria-label="Chiudi menu">
         <i class="fa-solid fa-times"></i>
     </button>
@@ -18,8 +17,8 @@
         <a href="profile_ristoratore.php">
             <i class="fa-solid fa-user"></i> Profilo
         </a>
-        <a href="ordini_ristoratore.php">
-            <i class="fa-solid fa-clock"></i> Ordini
+        <a href="stats.php">
+            <i class="fa-solid fa-clock"></i> Statistiche
         </a>
     </div>
 
