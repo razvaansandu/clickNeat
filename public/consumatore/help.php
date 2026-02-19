@@ -1,5 +1,5 @@
 <?php
-if(session_status() !== PHP_SESSION_ACTIVE) session_start();
+if (session_status() !== PHP_SESSION_ACTIVE) session_start();
 
 require_once "../../config/db.php";
 
@@ -47,14 +47,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['send_help'])) {
 <html lang="it">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Assistenza - ClickNeat</title>
     <link rel="stylesheet" href="../../css/style_consumatori.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
 
+    <!-- Navbar Desktop -->
     <nav class="top-navbar">
-        <a href="dashboard_consumatore.php" class="brand-logo"><i class="fa-solid fa-leaf" style="color: #05CD99;"></i> ClickNeat</a>
+        <a href="dashboard_consumatore.php" class="brand-logo">
+            <i class="fa-solid fa-leaf" style="color: #05CD99;"></i> ClickNeat
+        </a>
         <div class="nav-links">
             <a href="dashboard_consumatore.php" class="nav-item"><i class="fa-solid fa-house"></i> <span>Home</span></a>
             <a href="storico.php" class="nav-item"><i class="fa-solid fa-clock-rotate-left"></i> <span>Ordini</span></a>
@@ -63,6 +67,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['send_help'])) {
             <a href="../auth/logout.php" class="btn-logout-nav"><i class="fa-solid fa-right-from-bracket"></i> Esci</a>
         </div>
     </nav>
+
+    <!-- Header Mobile (fisso in alto) -->
+    <div class="mobile-header-fixed">
+        <div class="mobile-top-row">
+            <a href="dashboard_consumatore.php" class="brand-logo">
+                <i class="fa-solid fa-leaf" style="color: #05CD99;"></i> ClickNeat
+            </a>
+            <a href="../auth/logout.php" class="mobile-logout">
+                <i class="fa-solid fa-right-from-bracket"></i>
+            </a>
+        </div>
+        <!-- Non c'è barra di ricerca in questa pagina -->
+    </div>
 
     <header class="hero-section">
         <div class="hero-content">
@@ -125,5 +142,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['send_help'])) {
         </div>
     </div>
 
+    <nav class="bottom-nav">
+        <a href="dashboard_consumatore.php" class="nav-item-bottom">
+            <i class="fa-solid fa-house"></i>
+            <span>Home</span> 
+        </a>
+        <a href="storico.php" class="nav-item-bottom">
+            <i class="fa-solid fa-clock-rotate-left"></i>
+            <span>Ordini</span>
+        </a>
+        <a href="profile_consumatore.php" class="nav-item-bottom">
+            <i class="fa-solid fa-user"></i>
+            <span>Profilo</span>
+        </a>
+        <a href="help.php" class="nav-item-bottom active">
+            <i class="fa-solid fa-circle-question"></i>
+            <span>Aiuto</span>
+        </a>
+    </nav>
+
 </body>
-</html>
+</html> 
