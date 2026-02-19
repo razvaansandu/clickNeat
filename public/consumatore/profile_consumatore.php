@@ -72,6 +72,7 @@ $created_at = $userData['created_at'];
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Il mio Profilo - ClickNeat</title>
     <link rel="stylesheet" href="../../css/style_consumatori.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -100,6 +101,7 @@ $created_at = $userData['created_at'];
 
 <body>
 
+    <!-- Navbar desktop -->
     <nav class="top-navbar">
         <a href="dashboard_consumatore.php" class="brand-logo">
             <i class="fa-solid fa-leaf" style="color: #05CD99;"></i> ClickNeat
@@ -123,6 +125,35 @@ $created_at = $userData['created_at'];
         </div>
     </nav>
 
+    <!-- Header mobile (fisso) senza barra di ricerca -->
+    <div class="mobile-header-fixed">
+        <div class="mobile-top-row">
+            <a href="dashboard_consumatore.php" class="brand-logo">
+                <i class="fa-solid fa-leaf" style="color: #05CD99;"></i> ClickNeat
+            </a>
+            <a href="../auth/logout.php" class="mobile-logout">
+                <i class="fa-solid fa-right-from-bracket"></i>
+            </a>
+        </div>
+        <!-- Nessuna barra di ricerca -->
+    </div>
+
+    <!-- Navigazione inferiore mobile -->
+    <nav class="bottom-nav">
+        <a href="dashboard_consumatore.php" class="nav-item-bottom <?php echo basename($_SERVER['PHP_SELF']) == 'dashboard_consumatore.php' ? 'active' : ''; ?>">
+            <i class="fa-solid fa-house"></i><span>Home</span>
+        </a>
+        <a href="storico.php" class="nav-item-bottom <?php echo basename($_SERVER['PHP_SELF']) == 'storico.php' ? 'active' : ''; ?>">
+            <i class="fa-solid fa-clock-rotate-left"></i><span>Ordini</span>
+        </a>
+        <a href="profile_consumatore.php" class="nav-item-bottom <?php echo basename($_SERVER['PHP_SELF']) == 'profile_consumatore.php' ? 'active' : ''; ?>">
+            <i class="fa-solid fa-user"></i><span>Profilo</span>
+        </a>
+        <a href="help.php" class="nav-item-bottom <?php echo basename($_SERVER['PHP_SELF']) == 'help.php' ? 'active' : ''; ?>">
+            <i class="fa-solid fa-circle-question"></i><span>Aiuto</span>
+        </a>
+    </nav>
+
     <header class="hero-section">
         <div class="hero-content">
             <div class="hero-title">
@@ -140,9 +171,10 @@ $created_at = $userData['created_at'];
             </div>
         <?php endif; ?>
 
-        <div class="profile-wrapper" style="display: flex; gap: 30px; flex-wrap: wrap;">
+        <!-- Profile wrapper usa le regole CSS (grid) -->
+        <div class="profile-wrapper">
 
-            <div class="card-style avatar-box" style="flex: 1; min-width: 300px; padding: 30px; text-align: center;">
+            <div class="card-style avatar-box" style="padding: 30px; text-align: center;">
                 <div class="avatar-circle" style="width: 100px; height: 100px; background: #E0E5F2; border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; font-size: 40px; color: #2B3674; font-weight: bold;">
                     <?php echo strtoupper(substr($username, 0, 1)); ?>
                 </div>
@@ -165,7 +197,7 @@ $created_at = $userData['created_at'];
                 </div>
             </div>
 
-            <div class="card-style form-box" style="flex: 2; min-width: 300px; padding: 30px;">
+            <div class="card-style form-box" style="padding: 30px;">
 
                 <div class="form-title" style="color: #2B3674; font-size: 18px; font-weight: 700; margin-bottom: 20px;">Modifica Dati Personali</div>
                 <form method="POST" action="profile_consumatore.php">
@@ -212,4 +244,4 @@ $created_at = $userData['created_at'];
     </div>
 </body>
 
-</html>
+</html> 

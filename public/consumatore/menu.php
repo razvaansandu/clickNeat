@@ -50,7 +50,8 @@ if (isset($_SESSION['cart']) && !empty($_SESSION['cart']['items'])) {
 <html lang="it">
 
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8"> 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
     <title>Menu - <?php echo htmlspecialchars($ristorante['nome']); ?></title>
     <link rel="stylesheet" href="../../css/style_consumatori.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -117,7 +118,7 @@ if (isset($_SESSION['cart']) && !empty($_SESSION['cart']['items'])) {
                                     <input type="hidden" name="piatto_id" value="<?php echo $piatto['id']; ?>">
                                     <input type="hidden" name="ristorante_id" value="<?php echo $ristorante_id; ?>">
                                     <button type="submit" class="btn-add">
-                                        Aggiungi <i class="fa-solid fa-plus"></i>
+                                        Aggiungi <i class="fa-solid fa-plus"></i> 
                                     </button>
                                 </form>
                             </div>
@@ -132,14 +133,14 @@ if (isset($_SESSION['cart']) && !empty($_SESSION['cart']['items'])) {
                 </div>
             <?php endif; ?>
         </div>
-    </div>
+    </div> 
 
     <?php if ($total_qty > 0): ?>
         <a href="checkout.php" class="floating-cart-btn" title="Vai al carrello">
             <i class="fa-solid fa-cart-shopping"></i>
             <span class="cart-count-badge"><?php echo $total_qty; ?></span>
-        </a>
+        </a> 
     <?php endif; ?>
 
 </body>
-</html>
+</html> 

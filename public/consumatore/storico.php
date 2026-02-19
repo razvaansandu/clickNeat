@@ -16,9 +16,7 @@ $error_message = "";
 
 try {
     $orderModel = new OrderModel($db);
-
     $orders = $orderModel->getByUserId($user_id);
-
 } catch (Exception $e) {
     $error_message = "Errore nel recupero ordini: " . $e->getMessage();
 }
@@ -29,6 +27,7 @@ try {
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>I miei Ordini - ClickNeat</title>
     <link rel="stylesheet" href="../../css/style_consumatori.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -38,6 +37,7 @@ try {
 
 <body>
 
+    <!-- Navbar desktop -->
     <nav class="top-navbar">
         <a href="dashboard_consumatore.php" class="brand-logo">
             <i class="fa-solid fa-leaf" style="color: #05CD99;"></i> ClickNeat
@@ -59,6 +59,35 @@ try {
                 <i class="fa-solid fa-right-from-bracket"></i> Esci
             </a>
         </div>
+    </nav>
+
+    <!-- Header mobile (fisso) senza barra di ricerca -->
+    <div class="mobile-header-fixed">
+        <div class="mobile-top-row">
+            <a href="dashboard_consumatore.php" class="brand-logo">
+                <i class="fa-solid fa-leaf" style="color: #05CD99;"></i> ClickNeat
+            </a>
+            <a href="../auth/logout.php" class="mobile-logout">
+                <i class="fa-solid fa-right-from-bracket"></i>
+            </a>
+        </div>
+        <!-- Nessuna barra di ricerca -->
+    </div>
+
+    <!-- Navigazione inferiore mobile -->
+    <nav class="bottom-nav">
+        <a href="dashboard_consumatore.php" class="nav-item-bottom <?php echo basename($_SERVER['PHP_SELF']) == 'dashboard_consumatore.php' ? 'active' : ''; ?>">
+            <i class="fa-solid fa-house"></i><span>Home</span>
+        </a>
+        <a href="storico.php" class="nav-item-bottom <?php echo basename($_SERVER['PHP_SELF']) == 'storico.php' ? 'active' : ''; ?>">
+            <i class="fa-solid fa-clock-rotate-left"></i><span>Ordini</span>
+        </a>
+        <a href="profile_consumatore.php" class="nav-item-bottom <?php echo basename($_SERVER['PHP_SELF']) == 'profile_consumatore.php' ? 'active' : ''; ?>">
+            <i class="fa-solid fa-user"></i><span>Profilo</span>
+        </a>
+        <a href="help.php" class="nav-item-bottom <?php echo basename($_SERVER['PHP_SELF']) == 'help.php' ? 'active' : ''; ?>">
+            <i class="fa-solid fa-circle-question"></i><span>Aiuto</span>
+        </a>
     </nav>
 
     <header class="hero-section">
@@ -110,7 +139,7 @@ try {
                                 <span class="order-id">Ordine #<?php echo $ordine['id']; ?></span>
 
                                 <span class="status-badge <?php echo $badgeClass; ?>">
-                                    <?php echo $icona; ?>         <?php echo htmlspecialchars($testo_stato); ?>
+                                    <?php echo $icona; ?> <?php echo htmlspecialchars($testo_stato); ?>
                                 </span>
                             </div>
 
@@ -157,4 +186,4 @@ try {
 
 </body>
 
-</html>
+</html> 

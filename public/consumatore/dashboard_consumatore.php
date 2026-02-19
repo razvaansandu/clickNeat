@@ -63,7 +63,7 @@ foreach ($raw_restaurants as $row) {
     }
 
     $row['category_label'] = $display_cat;
-    $row['search_keywords'] = implode(' ', array_unique($keywords_array)); // Stringa nascosta per il filtro
+    $row['search_keywords'] = implode(' ', array_unique($keywords_array));
     $row['descrizione_breve'] = !empty($row['descrizione']) ? substr($row['descrizione'], 0, 60) . '...' : 'Gustosi piatti preparati con ingredienti freschi.';
     
     $restaurants[] = $row;
@@ -73,14 +73,15 @@ foreach ($raw_restaurants as $row) {
 <!DOCTYPE html>
 <html lang="it">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8"> 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
     <title>Dashboard - ClickNeat</title>
     <link rel="stylesheet" href="../css/style_consumatori.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body> 
 
-    <nav class="top-navbar">
+    <nav class="top-navbar"> 
         <a href="dashboard_consumatore.php" class="brand-logo">
             <i class="fa-solid fa-leaf" style="color: #05CD99;"></i> ClickNeat
         </a> 
@@ -107,7 +108,41 @@ foreach ($raw_restaurants as $row) {
                 <i class="fa-solid fa-right-from-bracket"></i> Esci
             </a>
         </div>
-    </nav>
+    </nav> 
+
+    <div class="mobile-header-fixed">
+        <div class="mobile-top-row">
+            <a href="dashboard_consumatore.php" class="brand-logo">
+                <i class="fa-solid fa-leaf" style="color: #05CD99;"></i> ClickNeat
+            </a>
+            <a href="../auth/logout.php" class="mobile-logout">
+                <i class="fa-solid fa-right-from-bracket"></i>
+            </a>
+        </div>
+        <div class="mobile-search-bar"> 
+            <input type="text" placeholder="Cerca ristoranti, pizza, sushi..." id="searchInputMobile" />
+            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+        </div>
+    </div> 
+ 
+    <nav class="bottom-nav">
+        <a href="dashboard_consumatore.php" class="nav-item-bottom active">
+            <i class="fa-solid fa-house"></i>
+            <span>Home</span> 
+        </a>
+        <a href="storico.php" class="nav-item-bottom">
+            <i class="fa-solid fa-clock-rotate-left"></i>
+            <span>Ordini</span>
+        </a>
+        <a href="profile_consumatore.php" class="nav-item-bottom">
+            <i class="fa-solid fa-user"></i>
+            <span>Profilo</span>
+        </a>
+        <a href="help.php" class="nav-item-bottom">
+            <i class="fa-solid fa-circle-question"></i>
+            <span>Aiuto</span>
+        </a>  
+    </nav> 
 
     <header class="hero-section">
         <div class="hero-content">
@@ -152,7 +187,8 @@ foreach ($raw_restaurants as $row) {
         </div>
 
         <div class="grid-container" id="restaurantsGrid">
-            </div>
+            <!-- I ristoranti vengono inseriti qui da JavaScript -->
+        </div>
     </div>
 
     <script>
@@ -161,6 +197,7 @@ foreach ($raw_restaurants as $row) {
 
     document.addEventListener('DOMContentLoaded', function() {
         const input = document.getElementById('searchInput');
+        const mobileInput = document.getElementById('searchInputMobile');
         const gridContainer = document.getElementById('restaurantsGrid');
         const sectionTitle = document.getElementById('sectionTitle');
         const resultsCount = document.getElementById('resultsCount');
@@ -237,14 +274,28 @@ foreach ($raw_restaurants as $row) {
         }
 
         let searchTimeout;
-        input.addEventListener('input', function() {
-            clearTimeout(searchTimeout);
-            const searchTerm = this.value.trim();
-            
-            searchTimeout = setTimeout(() => {
-                filterRestaurants(searchTerm, currentCategory);
-            }, 100);  
-        });
+
+        // Event listener per input desktop
+        if (input) {
+            input.addEventListener('input', function() {
+                clearTimeout(searchTimeout);
+                const searchTerm = this.value.trim();
+                searchTimeout = setTimeout(() => {
+                    filterRestaurants(searchTerm, currentCategory);
+                }, 100);
+            });
+        }
+
+        // Event listener per input mobile
+        if (mobileInput) {
+            mobileInput.addEventListener('input', function() {
+                clearTimeout(searchTimeout);
+                const searchTerm = this.value.trim();
+                searchTimeout = setTimeout(() => {
+                    filterRestaurants(searchTerm, currentCategory);
+                }, 100);
+            });
+        }
         
         categoryPills.forEach(pill => {
             pill.addEventListener('click', function() {
@@ -253,7 +304,9 @@ foreach ($raw_restaurants as $row) {
                 
                 currentCategory = this.dataset.category;
                 
-                input.value = ''; 
+                // Svuota entrambi gli input
+                if (input) input.value = '';
+                if (mobileInput) mobileInput.value = '';
                 
                 filterRestaurants('', currentCategory);
             });
@@ -270,4 +323,4 @@ foreach ($raw_restaurants as $row) {
     });
     </script>
 </body>
-</html>
+</html>  
