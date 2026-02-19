@@ -101,6 +101,7 @@ $created_at = $restaurant['created_at'] ?? date("Y-m-d");
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Modifica Locale - <?php echo htmlspecialchars($nome); ?></title>
     <link rel="stylesheet" href="../../css/style_ristoratori.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -108,6 +109,12 @@ $created_at = $restaurant['created_at'] ?? date("Y-m-d");
 </head>
 
 <body>
+
+    <div class="mobile-header">  
+        <button class="hamburger-btn">  
+            <i class="fa-solid fa-bars"></i> 
+        </button>  
+    </div>
 
     <?php include '../includes/sidebar.php'; ?>
 
@@ -132,7 +139,7 @@ $created_at = $restaurant['created_at'] ?? date("Y-m-d");
                     <i class="fa-solid fa-shop"></i>
                 </div>
 
-                <h2 style="color: #2B3674; font-size: 20px; margin-top: 15px;"><?php echo htmlspecialchars($nome); ?></h2>
+                <h2 style="color: #2B3674; font-size: 20px; margin-top: 15px; text-align: center;"><?php echo htmlspecialchars($nome); ?></h2>
                 <span class="status-badge active" style="margin-top:5px;"><?php echo htmlspecialchars($categoria); ?></span>
 
                 <div class="info-list">
@@ -158,7 +165,7 @@ $created_at = $restaurant['created_at'] ?? date("Y-m-d");
                             <input type="text" name="nome" value="<?php echo htmlspecialchars($nome); ?>" required>
                         </div>
                         
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;" class="two-columns">
                             <div class="input-group">
                                 <label>Indirizzo</label>
                                 <input type="text" name="indirizzo" value="<?php echo htmlspecialchars($indirizzo); ?>" required>
@@ -208,6 +215,70 @@ $created_at = $restaurant['created_at'] ?? date("Y-m-d");
             </div>
         </div>
     </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const sidebar = document.querySelector('.sidebar');
+        const hamburger = document.querySelector('.hamburger-btn');
+        const closeBtn = document.getElementById('closeSidebarBtn');
+        
+        let overlay = document.querySelector('.sidebar-overlay');
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.classList.add('sidebar-overlay');
+            document.body.appendChild(overlay);
+        }
+
+        function openSidebar() {
+            sidebar.classList.add('active');
+            overlay.classList.add('active');
+        }
+
+        function closeSidebar() {
+            sidebar.classList.remove('active');
+            overlay.classList.remove('active');
+        }
+
+        if (hamburger) {
+            hamburger.addEventListener('click', openSidebar);
+        }
+
+        if (closeBtn) {
+            closeBtn.addEventListener('click', closeSidebar);
+        }
+
+        overlay.addEventListener('click', closeSidebar);
+    });
+    </script>
+
+    <style>
+        @media (max-width: 768px) {
+            .two-columns {
+                grid-template-columns: 1fr !important;
+            }
+            
+            .profile-wrapper {
+                flex-direction: column !important;
+                gap: 20px !important;
+            }
+            
+            .avatar-box, .form-box {
+                width: 100% !important;
+            }
+            
+            .info-row {
+                flex-wrap: wrap !important;
+            }
+            
+            .btn-save {
+                width: 100% !important;
+            }
+            
+            input[type="file"] {
+                width: 100% !important;
+            }
+        }
+    </style>
 
 </body>
 </html>
