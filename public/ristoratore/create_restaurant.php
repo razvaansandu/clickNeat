@@ -98,6 +98,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crea Ristorante - ClickNeat</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -117,10 +118,46 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         .alert { padding: 15px; border-radius: 10px; margin-bottom: 20px; font-weight: 500; }
         .alert-error { background: #FFF5F5; color: #E53E3E; }
         .alert-success { background: #F0FFF4; color: #38A169; }
+        
+        @media screen and (max-width: 768px) {
+            .main-content {
+                padding: 15px !important;
+                margin-left: 0 !important;
+            }
+            
+            .form-container {
+                padding: 20px !important;
+                width: 100% !important;
+            }
+            
+            .form-actions {
+                flex-direction: column !important;
+            }
+            
+            .btn-cancel, .btn-submit {
+                width: 100% !important;
+                text-align: center !important;
+            }
+            
+            .tag-input-container {
+                padding: 8px !important;
+            }
+            
+            .tag {
+                font-size: 12px !important;
+                padding: 4px 10px !important;
+            }
+        }
     </style>
 </head>
 
 <body>
+    <div class="mobile-header">  
+        <button class="hamburger-btn">  
+            <i class="fa-solid fa-bars"></i> 
+        </button>  
+    </div>
+
     <?php include '../includes/sidebar.php'; ?>
 
     <div class="main-content" style="display: flex; align-items: center; justify-content: center;">
@@ -202,6 +239,39 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </div>
 
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebar = document.querySelector('.sidebar');
+            const hamburger = document.querySelector('.hamburger-btn');
+            const closeBtn = document.getElementById('closeSidebarBtn');
+            
+            let overlay = document.querySelector('.sidebar-overlay');
+            if (!overlay) {
+                overlay = document.createElement('div');
+                overlay.classList.add('sidebar-overlay');
+                document.body.appendChild(overlay);
+            }
+
+            function openSidebar() {
+                sidebar.classList.add('active');
+                overlay.classList.add('active');
+            }
+
+            function closeSidebar() {
+                sidebar.classList.remove('active');
+                overlay.classList.remove('active');
+            }
+
+            if (hamburger) {
+                hamburger.addEventListener('click', openSidebar);
+            }
+
+            if (closeBtn) {
+                closeBtn.addEventListener('click', closeSidebar);
+            }
+
+            overlay.addEventListener('click', closeSidebar);
+        });
+
         document.getElementById('upload-img').addEventListener('change', function (e) {
             var fileName = e.target.files[0].name;
             document.getElementById('file-name').textContent = "File selezionato: " + fileName;
