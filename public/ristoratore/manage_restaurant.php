@@ -33,6 +33,7 @@ if (!$restaurant) {
 $msg = "";
 $msg_type = "";
 
+// --- GESTIONE AGGIORNAMENTO ORDINE ---
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_order'])) {
     $order_id = $_POST['order_id'];
     $new_status = $_POST['status'];
@@ -45,6 +46,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_order'])) {
     }
 }
 
+// --- GESTIONE AGGIUNTA PIATTO ---
 if (isset($_POST['add_dish'])) {
     $name = trim($_POST['name']);
     $desc = trim($_POST['description']);
@@ -53,8 +55,10 @@ if (isset($_POST['add_dish'])) {
     $cat_custom = trim($_POST['categoria_custom'] ?? '');
     $categoria = !empty($cat_custom) ? $cat_custom : $cat_select;
     
+    // Inizializziamo image_url a null
     $image_url = null;
 
+    // Controllo parole vietate
     $badWords = getBadWords();
     $isForbidden = false;
     foreach ($badWords as $word) {
@@ -127,61 +131,12 @@ function getBadWords() {
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestione - <?php echo htmlspecialchars($restaurant['nome']); ?></title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../../css/style_ristoratori.css">
-    <style>
-        @media screen and (max-width: 768px) {
-            .management-grid {
-                grid-template-columns: 1fr !important;
-                gap: 20px !important;
-            }
-            
-            [style*="grid-template-columns: 2fr 1fr"] {
-                grid-template-columns: 1fr !important;
-            }
-            
-            .menu-item {
-                flex-direction: column !important;
-                align-items: flex-start !important;
-                gap: 10px !important;
-            }
-            
-            .dish-img {
-                width: 100% !important;
-                height: 150px !important;
-            }
-            
-            .order-header {
-                flex-direction: column !important;
-                gap: 10px !important;
-            }
-            
-            .order-actions {
-                flex-direction: column !important;
-            }
-            
-            .page-header {
-                flex-direction: column !important;
-                align-items: flex-start !important;
-                gap: 15px !important;
-            }
-            
-            .msg-box {
-                width: 100% !important;
-            }
-        }
-    </style>
 </head>
 <body>
-
-    <div class="mobile-header">  
-        <button class="hamburger-btn">  
-            <i class="fa-solid fa-bars"></i> 
-        </button>  
-    </div>
 
     <?php include '../includes/sidebar.php'; ?>
 
@@ -362,89 +317,56 @@ function getBadWords() {
         </div>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const sidebar = document.querySelector('.sidebar');
-            const hamburger = document.querySelector('.hamburger-btn');
-            const closeBtn = document.getElementById('closeSidebarBtn');
-            
-            let overlay = document.querySelector('.sidebar-overlay');
-            if (!overlay) {
-                overlay = document.createElement('div');
-                overlay.classList.add('sidebar-overlay');
-                document.body.appendChild(overlay);
-            }
+<script>
+    const inputCustom = document.getElementById('piatto_custom');
+    const selectDefault = document.getElementById('piatto_select');
+    const statusHelp = document.getElementById('status-help');
+    const btnSave = document.querySelector('.btn-add');
+    const badWords = <?php echo json_encode(getBadWords()); ?>;
 
-            function openSidebar() {
-                sidebar.classList.add('active');
-                overlay.classList.add('active');
-            }
+    document.getElementById('upload-img').addEventListener('change', function(e) {
+        if (e.target.files.length > 0) {
+            document.getElementById('file-name').textContent = "Selezionato: " + e.target.files[0].name;
+            document.querySelector('.icon-plus').textContent = '✓';
+            document.querySelector('.icon-plus').style.backgroundColor = '#05CD99';
+            document.querySelector('.icon-plus').style.color = 'white';
+        }
+    });
 
-            function closeSidebar() {
-                sidebar.classList.remove('active');
-                overlay.classList.remove('active');
-            }
-
-            if (hamburger) {
-                hamburger.addEventListener('click', openSidebar);
-            }
-
-            if (closeBtn) {
-                closeBtn.addEventListener('click', closeSidebar);
-            }
-
-            overlay.addEventListener('click', closeSidebar);
+    inputCustom.addEventListener('input', function() {
+        const val = this.value.trim().toLowerCase();
+        const found = badWords.some(word => {
+            const regex = new RegExp("\\b" + word + "\\b", "i");
+            return regex.test(val);
         });
 
-        const inputCustom = document.getElementById('piatto_custom');
-        const selectDefault = document.getElementById('piatto_select');
-        const statusHelp = document.getElementById('status-help');
-        const btnSave = document.querySelector('.btn-add');
-        const badWords = <?php echo json_encode(getBadWords()); ?>;
+        if (found) {
+            this.style.borderColor = "#ea4335";
+            statusHelp.innerHTML = "<i class='fa-solid fa-ban'></i> Termine non consentito";
+            statusHelp.style.color = "#ea4335";
+            btnSave.disabled = true;
+            btnSave.style.opacity = "0.5";
+            return; 
+        }
 
-        document.getElementById('upload-img').addEventListener('change', function(e) {
-            if (e.target.files.length > 0) {
-                document.getElementById('file-name').textContent = "Selezionato: " + e.target.files[0].name;
-                document.querySelector('.icon-plus').textContent = '✓';
-                document.querySelector('.icon-plus').style.backgroundColor = '#05CD99';
-                document.querySelector('.icon-plus').style.color = 'white';
-            }
-        });
-
-        inputCustom.addEventListener('input', function() {
-            const val = this.value.trim().toLowerCase();
-            const found = badWords.some(word => {
-                const regex = new RegExp("\\b" + word + "\\b", "i");
-                return regex.test(val);
-            });
-
-            if (found) {
-                this.style.borderColor = "#ea4335";
-                statusHelp.innerHTML = "<i class='fa-solid fa-ban'></i> Termine non consentito";
-                statusHelp.style.color = "#ea4335";
-                btnSave.disabled = true;
-                btnSave.style.opacity = "0.5";
-                return; 
-            }
-
-            if (val.length > 0) {
-                selectDefault.disabled = true;
-                selectDefault.style.opacity = "0.5";
-                statusHelp.innerHTML = "<i class='fa-solid fa-keyboard'></i> Categoria personalizzata attiva";
-                statusHelp.style.color = "#4318FF";
-            } else {
-                selectDefault.disabled = false;
-                selectDefault.style.opacity = "1";
-                statusHelp.innerHTML = "";
-            }
-            btnSave.disabled = false;
-            btnSave.style.opacity = "1";
-            this.style.borderColor = "#d1d9e2";
-        });
-
-        document.getElementById('form-piatto').addEventListener('submit', function() {
+        if (val.length > 0) {
+            selectDefault.disabled = true;
+            selectDefault.style.opacity = "0.5";
+            statusHelp.innerHTML = "<i class='fa-solid fa-keyboard'></i> Categoria personalizzata attiva";
+            statusHelp.style.color = "#4318FF";
+        } else {
             selectDefault.disabled = false;
-        });
-    </script>
+            selectDefault.style.opacity = "1";
+            statusHelp.innerHTML = "";
+        }
+        btnSave.disabled = false;
+        btnSave.style.opacity = "1";
+        this.style.borderColor = "#d1d9e2";
+    });
+
+    document.getElementById('form-piatto').addEventListener('submit', function() {
+        selectDefault.disabled = false;
+    });
+</script>
 </body>
 </html>
