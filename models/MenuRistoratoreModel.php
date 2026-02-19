@@ -18,7 +18,7 @@ class MenuRistoratoreModel
         return $this->db->selectOne("SELECT * FROM menu_items WHERE id = ?", [$id]);
     }
 
-    public function create($restaurant_id, $name, $description, $price ,$categoria="altro" ,$image_url= null)
+    public function create($restaurant_id, $name, $description, $price, $categoria = "altro", $image_url = null)
     {
         $final_image = (!empty($image_url)) ? $image_url : null;
         $final_category = (!empty($categoria)) ? $categoria : "altro";
@@ -50,6 +50,19 @@ class MenuRistoratoreModel
     public function delete($id)
     {
         return $this->db->delete('menu_items', 'id = ?', [$id]);
+    }
+    public function update_piatto($id, $data)
+    {
+        return $this->db->update('menu_items', $data, 'id = ?', [$id]);
+    }
+
+    public function delete_piatto($id)
+    {
+        try {
+            return $this->db->delete('menu_items', 'id = ?', [$id]);
+        } catch (\mysqli_sql_exception $e) {
+            return false;
+        }
     }
 }
 ?>

@@ -45,6 +45,91 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_order'])) {
     }
 }
 
+if (isset($_POST['delete_dish'])) {
+    $dish_id = $_POST['dish_id'];
+    
+    if ($menuModel->delete_piatto($dish_id)) {
+        $msg = "Piatto eliminato con successo!";
+        $msg_type = "success";
+    } else {
+        $msg = "Impossibile eliminare: il piatto fa parte di un ordine esistente.";
+        $msg_type = "error";
+    }
+}
+
+if (isset($_POST['edit_dish'])) {
+    $dish_id = $_POST['dish_id'];
+    $name = trim($_POST['name']);
+    $desc = trim($_POST['description']);
+    $price = $_POST['price'];
+    $cat_select = $_POST['categoria_select'] ?? 'altro';
+    $cat_custom = trim($_POST['categoria_custom'] ?? '');
+    $categoria = !empty($cat_custom) ? $cat_custom : $cat_select;
+    
+    $image_url = $_POST['existing_image'] ?? null;
+
+    $badWords = getBadWords();
+    $isForbidden = false;
+    foreach ($badWords as $word) {
+        if (preg_match("/\b" . preg_quote($word, '/') . "\b/i", $categoria)) {
+            $isForbidden = true;
+            break;
+        }
+    }
+
+    if ($isForbidden) {
+        $msg = "Linguaggio inappropriato rilevato nella categoria.";
+        $msg_type = "error";
+    } elseif (!empty($name) && !empty($price)) {
+        
+        if (isset($_FILES['dish_image']) && $_FILES['dish_image']['error'] === 0) {
+            $upload_dir = '../assets/'; 
+            
+            if (!is_dir($upload_dir)) {
+                mkdir($upload_dir, 0777, true);
+            }
+
+            $file_name = $_FILES['dish_image']['name'];
+            $file_tmp = $_FILES['dish_image']['tmp_name'];
+            $file_ext = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
+            $allowed = ['jpg', 'jpeg', 'png', 'webp'];
+
+            if (in_array($file_ext, $allowed)) {
+                $new_file_name = uniqid('dish_') . '.' . $file_ext;
+                $dest_path = $upload_dir . $new_file_name;
+
+                if (move_uploaded_file($file_tmp, $dest_path)) {
+                    $image_url = "assets/" . $new_file_name;
+                } else {
+                    $msg = "Errore caricamento immagine.";
+                    $msg_type = "error";
+                }
+            } else {
+                $msg = "Formato immagine non valido.";
+                $msg_type = "error";
+            }
+        }
+
+        if (empty($msg_type) || $msg_type !== 'error') {
+            $data = [
+                'name' => $name,
+                'description' => $desc,
+                'price' => $price,
+                'categoria' => $categoria,
+                'image_url' => $image_url
+            ];
+            
+            if ($menuModel->update_piatto($dish_id, $data)) {
+                $msg = "Piatto modificato con successo!";
+                $msg_type = "success";
+            } else {
+                $msg = "Errore durante la modifica del piatto.";
+                $msg_type = "error";
+            }
+        }
+    }
+}
+
 if (isset($_POST['add_dish'])) {
     $name = trim($_POST['name']);
     $desc = trim($_POST['description']);
@@ -92,7 +177,7 @@ if (isset($_POST['add_dish'])) {
                     $msg_type = "error";
                 }
             } else {
-                $msg = "Formato immagine non valido (usa JPG, PNG, WEBP).";
+                $msg = "Formato immagine non valido.";
                 $msg_type = "error";
             }
         }
@@ -133,42 +218,54 @@ function getBadWords() {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../../css/style_ristoratori.css">
     <style>
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-content {
+            background: #fff;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
         @media screen and (max-width: 768px) {
             .management-grid {
                 grid-template-columns: 1fr !important;
                 gap: 20px !important;
             }
-            
             [style*="grid-template-columns: 2fr 1fr"] {
                 grid-template-columns: 1fr !important;
             }
-            
             .menu-item {
                 flex-direction: column !important;
                 align-items: flex-start !important;
                 gap: 10px !important;
             }
-            
             .dish-img {
                 width: 100% !important;
                 height: 150px !important;
             }
-            
             .order-header {
                 flex-direction: column !important;
                 gap: 10px !important;
             }
-            
             .order-actions {
                 flex-direction: column !important;
             }
-            
             .page-header {
                 flex-direction: column !important;
                 align-items: flex-start !important;
                 gap: 15px !important;
             }
-            
             .msg-box {
                 width: 100% !important;
             }
@@ -199,7 +296,7 @@ function getBadWords() {
         <div class="page-header" style="display: flex; justify-content: flex-start; align-items: center; margin-top: -20px; padding-top: 0;">
             <a href="modifica_ristorante.php?id=<?php echo $restaurant_id; ?>" 
                style="background: #2B3674; color: white; padding: 12px 24px; border-radius: 30px; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 10px rgba(67, 24, 255, 0.25); transition: all 0.2s ease;">
-                <i class="fa-solid fa-pen-to-square"></i> Modifica Ristorante
+                <i class="fa-solid fa-pen-to-square"></i> Modifica Informazioni Ristorante
             </a>
         </div>
 
@@ -274,11 +371,11 @@ function getBadWords() {
                     <?php else: ?>
                         <div class="menu-list">
                             <?php foreach ($menu_items as $item): ?>
-                                <div class="menu-item" style="display: flex; gap: 15px; align-items: center;">
+                                <div class="menu-item" style="display: flex; gap: 15px; align-items: center; position: relative;">
                                     
                                     <div class="dish-img" style="width: 60px; height: 60px; border-radius: 10px; overflow: hidden; background: #f4f7fe; flex-shrink: 0;">
                                         <?php if (!empty($item['image_url'])): ?>
-                                            <img src="/<?php echo htmlspecialchars($item['image_url']); ?>" alt="Foto piatto" style="width: 100%; height: 100%; object-fit: cover;">
+                                            <img src="/<?php echo htmlspecialchars(ltrim($item['image_url'], '/')); ?>" alt="Foto piatto" style="width: 100%; height: 100%; object-fit: cover;">
                                         <?php else: ?>
                                             <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #A3AED0;">
                                                 <i class="fa-solid fa-utensils"></i>
@@ -291,9 +388,34 @@ function getBadWords() {
                                         <p style="margin: 5px 0 0; font-size: 13px; color: #A3AED0; line-height: 1.4;">
                                             <?php echo htmlspecialchars($item['description']); ?>
                                         </p>
+                                        <span style="display: inline-block; margin-top: 5px; font-size: 11px; background: #f0f0f0; padding: 2px 8px; border-radius: 10px; color: #666;">
+                                            <?php echo htmlspecialchars($item['categoria'] ?? ''); ?>
+                                        </span>
                                     </div>
-                                    <div class="dish-actions">
-                                        <span class="dish-price">€ <?php echo number_format($item['price'], 2); ?></span>
+                                    
+                                    <div class="dish-actions" style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+                                        <span class="dish-price" style="font-weight: bold; color: #2B3674;">€ <?php echo number_format($item['price'], 2); ?></span>
+                                        
+                                        <div style="display: flex; gap: 8px;">
+                                            <button type="button" class="btn-open-edit" 
+                                                data-id="<?php echo $item['id']; ?>"
+                                                data-name="<?php echo htmlspecialchars($item['name']); ?>"
+                                                data-desc="<?php echo htmlspecialchars($item['description']); ?>"
+                                                data-price="<?php echo $item['price']; ?>"
+                                                data-cat="<?php echo htmlspecialchars($item['categoria'] ?? 'altro'); ?>"
+                                                data-img="<?php echo htmlspecialchars($item['image_url'] ?? ''); ?>"
+                                                style="background: none; border: none; color: #4318FF; cursor: pointer; font-size: 14px;">
+                                                <i class="fa-solid fa-pen"></i>
+                                            </button>
+                                            
+                                            <form method="POST" action="" onsubmit="return confirm('Sei sicuro di voler eliminare questo piatto?');" style="margin:0;">
+                                                <input type="hidden" name="delete_dish" value="1">
+                                                <input type="hidden" name="dish_id" value="<?php echo $item['id']; ?>">
+                                                <button type="submit" style="background: none; border: none; color: #E31A1A; cursor: pointer; font-size: 14px;">
+                                                    <i class="fa-solid fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
                                     </div>
                                 </div>
                             <?php endforeach; ?>
@@ -362,6 +484,63 @@ function getBadWords() {
         </div>
     </div>
 
+    <div id="editModal" class="modal-overlay">
+        <div class="modal-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="color: #2B3674; margin: 0;">Modifica Piatto</h3>
+                <button type="button" id="closeEditModal" style="background: none; border: none; font-size: 20px; cursor: pointer; color: #A3AED0;">
+                    <i class="fa-solid fa-times"></i>
+                </button>
+            </div>
+            
+            <form method="POST" enctype="multipart/form-data">
+                <input type="hidden" name="edit_dish" value="1">
+                <input type="hidden" name="dish_id" id="edit_dish_id">
+                <input type="hidden" name="existing_image" id="edit_existing_image">
+
+                <label for="edit-upload-img" class="card card-add" style="cursor: pointer; padding: 10px; min-height: auto;">
+                    <div class="icon-plus" style="width: 30px; height: 30px; font-size: 16px;">+</div>
+                    <div class="text-add" id="edit-file-name" style="font-size: 13px;">Sostituisci Immagine</div>
+                </label>
+                <input type="file" name="dish_image" id="edit-upload-img" style="display: none;" accept="image/*">
+
+                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 15px; margin-bottom: 15px; margin-top: 15px;">
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-utensils"></i>
+                        <input type="text" name="name" id="edit_name" required>
+                    </div>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-euro-sign"></i>
+                        <input type="number" step="0.50" name="price" id="edit_price" required>
+                    </div>
+                </div>
+
+                <div class="input-wrapper textarea-wrapper" style="margin-bottom: 15px;">
+                    <i class="fa-solid fa-align-left" style="top: 15px;"></i>
+                    <textarea name="description" id="edit_desc" rows="2" style="min-height: 80px;"></textarea>
+                </div>
+
+                <label style="display:block; margin-bottom:8px; font-weight:600; color: #2B3674; font-size: 14px;">Categoria</label>
+                <select name="categoria_select" id="edit_piatto_select" style="width:100%; padding:10px; border-radius:8px; border:1px solid #d1d9e2; margin-bottom:12px;">
+                    <option value="pizza">Pizza</option>
+                    <option value="pasta">Pasta</option>
+                    <option value="panino">Panino</option>
+                    <option value="orientale">Orientale</option>
+                    <option value="altro">Altro</option>
+                </select>
+
+                <div class="input-wrapper">
+                    <i class="fa-solid fa-plus-circle"></i>
+                    <input type="text" name="categoria_custom" id="edit_piatto_custom" placeholder="Oppure scrivi categoria personalizzata...">
+                </div>
+
+                <button type="submit" class="btn-save" style="width: 100%; margin-top: 20px; border: none; cursor: pointer;">
+                    Salva Modifiche
+                </button>
+            </form>
+        </div>
+    </div>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const sidebar = document.querySelector('.sidebar');
@@ -385,14 +564,8 @@ function getBadWords() {
                 overlay.classList.remove('active');
             }
 
-            if (hamburger) {
-                hamburger.addEventListener('click', openSidebar);
-            }
-
-            if (closeBtn) {
-                closeBtn.addEventListener('click', closeSidebar);
-            }
-
+            if (hamburger) hamburger.addEventListener('click', openSidebar);
+            if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
             overlay.addEventListener('click', closeSidebar);
         });
 
@@ -404,46 +577,119 @@ function getBadWords() {
 
         document.getElementById('upload-img').addEventListener('change', function(e) {
             if (e.target.files.length > 0) {
-                document.getElementById('file-name').textContent = "Selezionato: " + e.target.files[0].name;
-                document.querySelector('.icon-plus').textContent = '✓';
-                document.querySelector('.icon-plus').style.backgroundColor = '#05CD99';
-                document.querySelector('.icon-plus').style.color = 'white';
+                document.getElementById('file-name').textContent = e.target.files[0].name;
             }
         });
 
-        inputCustom.addEventListener('input', function() {
-            const val = this.value.trim().toLowerCase();
+        document.getElementById('edit-upload-img').addEventListener('change', function(e) {
+            if (e.target.files.length > 0) {
+                document.getElementById('edit-file-name').textContent = e.target.files[0].name;
+            }
+        });
+
+        function checkBadWords(inputElement, selectElement, helpElement, buttonElement) {
+            const val = inputElement.value.trim().toLowerCase();
             const found = badWords.some(word => {
                 const regex = new RegExp("\\b" + word + "\\b", "i");
                 return regex.test(val);
             });
 
             if (found) {
-                this.style.borderColor = "#ea4335";
-                statusHelp.innerHTML = "<i class='fa-solid fa-ban'></i> Termine non consentito";
-                statusHelp.style.color = "#ea4335";
-                btnSave.disabled = true;
-                btnSave.style.opacity = "0.5";
+                inputElement.style.borderColor = "#ea4335";
+                if(helpElement) {
+                    helpElement.innerHTML = "<i class='fa-solid fa-ban'></i> Termine non consentito";
+                    helpElement.style.color = "#ea4335";
+                }
+                buttonElement.disabled = true;
+                buttonElement.style.opacity = "0.5";
                 return; 
             }
 
             if (val.length > 0) {
-                selectDefault.disabled = true;
-                selectDefault.style.opacity = "0.5";
-                statusHelp.innerHTML = "<i class='fa-solid fa-keyboard'></i> Categoria personalizzata attiva";
-                statusHelp.style.color = "#4318FF";
+                selectElement.disabled = true;
+                selectElement.style.opacity = "0.5";
+                if(helpElement) {
+                    helpElement.innerHTML = "<i class='fa-solid fa-keyboard'></i> Categoria personalizzata attiva";
+                    helpElement.style.color = "#4318FF";
+                }
             } else {
-                selectDefault.disabled = false;
-                selectDefault.style.opacity = "1";
-                statusHelp.innerHTML = "";
+                selectElement.disabled = false;
+                selectElement.style.opacity = "1";
+                if(helpElement) helpElement.innerHTML = "";
             }
-            btnSave.disabled = false;
-            btnSave.style.opacity = "1";
-            this.style.borderColor = "#d1d9e2";
-        });
+            buttonElement.disabled = false;
+            buttonElement.style.opacity = "1";
+            inputElement.style.borderColor = "#d1d9e2";
+        }
+
+        if(inputCustom) {
+            inputCustom.addEventListener('input', function() {
+                checkBadWords(this, selectDefault, statusHelp, btnSave);
+            });
+        }
 
         document.getElementById('form-piatto').addEventListener('submit', function() {
             selectDefault.disabled = false;
+        });
+
+        const editModal = document.getElementById('editModal');
+        const closeEditModal = document.getElementById('closeEditModal');
+        const editBtns = document.querySelectorAll('.btn-open-edit');
+
+        editBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.getElementById('edit_dish_id').value = this.dataset.id;
+                document.getElementById('edit_name').value = this.dataset.name;
+                document.getElementById('edit_price').value = this.dataset.price;
+                document.getElementById('edit_desc').value = this.dataset.desc;
+                document.getElementById('edit_existing_image').value = this.dataset.img;
+                document.getElementById('edit-file-name').textContent = "Sostituisci Immagine";
+
+                const cat = this.dataset.cat.toLowerCase();
+                const select = document.getElementById('edit_piatto_select');
+                const custom = document.getElementById('edit_piatto_custom');
+                
+                let found = false;
+                Array.from(select.options).forEach(opt => {
+                    if (opt.value === cat) {
+                        opt.selected = true;
+                        found = true;
+                    }
+                });
+
+                if (!found && cat !== '') {
+                    select.value = 'altro';
+                    custom.value = this.dataset.cat;
+                    select.disabled = true;
+                } else {
+                    custom.value = '';
+                    select.disabled = false;
+                }
+
+                editModal.style.display = 'flex';
+            });
+        });
+
+        closeEditModal.addEventListener('click', function() {
+            editModal.style.display = 'none';
+        });
+
+        window.addEventListener('click', function(e) {
+            if (e.target === editModal) {
+                editModal.style.display = 'none';
+            }
+        });
+        
+        const editCustomInput = document.getElementById('edit_piatto_custom');
+        const editSelect = document.getElementById('edit_piatto_select');
+        const editSubmitBtn = editModal.querySelector('.btn-save');
+        
+        editCustomInput.addEventListener('input', function() {
+            checkBadWords(this, editSelect, null, editSubmitBtn);
+        });
+        
+        editModal.querySelector('form').addEventListener('submit', function() {
+            editSelect.disabled = false;
         });
     </script>
 </body>

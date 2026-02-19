@@ -70,15 +70,13 @@ if (!empty($my_restaurants)) {
             <?php foreach($my_restaurants as $rest): ?>
                 <div class="card">
                     
-                    <?php if (!empty($rest['image_url'])): ?>
-                        <img src="<?php echo htmlspecialchars($rest['image_url']); ?>" 
-                             alt="Foto Ristorante" 
-                             style="width: 100%; height: 150px; object-fit: cover; border-radius: 12px; margin-bottom: 15px;">
-                    <?php else: ?>
-                        <div style="width: 100%; height: 150px; background-color: #F4F7FE; border-radius: 12px; margin-bottom: 15px; display: flex; align-items: center; justify-content: center;">
-                            <i class="fa-solid fa-store" style="font-size: 40px; color: #A3AED0;"></i>
-                        </div>
-                    <?php endif; ?>
+                    <?php 
+                        if (!empty($rest['image_url'])) 
+                            $img_src = "/" . ltrim($rest['image_url'], '/');
+                    ?>
+                    <img src="<?php echo htmlspecialchars($img_src); ?>" 
+                         alt="Foto Ristorante" 
+                         style="width: 100%; height: 150px; object-fit: cover; border-radius: 12px; margin-bottom: 15px;">
 
                     <h2 style="margin-top: 5px;"><?php echo htmlspecialchars($rest['nome']); ?></h2>
                     <p class="subtitle">Ordini totali: <b><?php echo $rest['total_orders']; ?></b></p>
@@ -97,7 +95,7 @@ if (!empty($my_restaurants)) {
                     </div>
 
                     <a href="manage_restaurant.php?id=<?php echo $rest['id']; ?>" class="btn-manage">
-                        Gestisci Menu <i class="fa-solid fa-arrow-right"></i>
+                        Gestisci Ristorante <i class="fa-solid fa-arrow-right"></i>
                     </a>
                 </div>
             <?php endforeach; ?>

@@ -6,6 +6,8 @@ RUN apt-get update && apt-get install -y \
 
 RUN a2enmod rewrite
 
+COPY custom.ini /usr/local/etc/php/conf.d/
+
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 ENV APACHE_DOCUMENT_ROOT /var/www/html/public

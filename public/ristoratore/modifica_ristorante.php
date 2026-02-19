@@ -10,6 +10,12 @@ if (!isset($_SESSION["loggedin"]) || $_SESSION["ruolo"] !== 'ristoratore') {
 }
 
 $restaurant_id = $_GET['id'] ?? null;
+
+if (!$restaurant_id) {
+    header("location: dashboard_ristoratore.php");
+    exit;
+}
+
 $user_id = $_SESSION['id'];
 $ristoranteModel = new RistoranteRistoratoreModel($db);
 $restaurant = $ristoranteModel->getByIdAndOwner($restaurant_id, $user_id);
@@ -30,70 +36,72 @@ if (isset($_POST['delete_restaurant'])) {
         $msg = "Errore durante l'eliminazione del ristorante.";
         $msg_type = "error";
     }
+}
 
-    if (isset($_POST['update_info'])) {
-        $data = [
-            'nome' => trim($_POST['nome']),
-            'indirizzo' => trim($_POST['indirizzo']),
-            'categoria' => trim($_POST['categoria'])
-        ];
+if (isset($_POST['update_info'])) {
+    $data = [
+        'nome' => trim($_POST['nome']),
+        'indirizzo' => trim($_POST['indirizzo']),
+        'categoria' => trim($_POST['categoria']),
+        'descrizione' => trim($_POST['descrizione'])
+    ];
 
-        if ($ristoranteModel->update($restaurant_id, $data)) {
-            $msg = "Informazioni aggiornate con successo!";
-            $msg_type = "success";
-            $restaurant = $ristoranteModel->getByIdAndOwner($restaurant_id, $user_id);
-        } else {
-            $msg = "Errore durante l'aggiornamento.";
-            $msg_type = "error";
-        }
+    if ($ristoranteModel->update($restaurant_id, $data)) {
+        $msg = "Informazioni aggiornate con successo!";
+        $msg_type = "success";
+        $restaurant = $ristoranteModel->getByIdAndOwner($restaurant_id, $user_id);
+    } else {
+        $msg = "Errore durante l'aggiornamento.";
+        $msg_type = "error";
     }
+}
 
-    if (isset($_POST['update_img'])) {
-        if (isset($_FILES['restaurant_image']) && $_FILES['restaurant_image']['error'] === 0) {
-            $upload_dir = '../assets/';
-            
-            if (!is_dir($upload_dir)) {
-                mkdir($upload_dir, 0777, true);
-            }
+if (isset($_POST['update_img'])) {
+    if (isset($_FILES['restaurant_image']) && $_FILES['restaurant_image']['error'] === 0) {
+        $upload_dir = '../assets/';
+        
+        if (!is_dir($upload_dir)) {
+            mkdir($upload_dir, 0777, true);
+        }
 
-            $file_name = $_FILES['restaurant_image']['name'];
-            $file_tmp = $_FILES['restaurant_image']['tmp_name'];
-            $file_ext = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
-            $allowed = ['jpg', 'jpeg', 'png', 'webp'];
+        $file_name = $_FILES['restaurant_image']['name'];
+        $file_tmp = $_FILES['restaurant_image']['tmp_name'];
+        $file_ext = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
+        $allowed = ['jpg', 'jpeg', 'png', 'webp'];
 
-            if (in_array($file_ext, $allowed)) {
-                $new_file_name = uniqid('rest_') . '.' . $file_ext;
-                $dest_path = $upload_dir . $new_file_name;
+        if (in_array($file_ext, $allowed)) {
+            $new_file_name = uniqid('rest_') . '.' . $file_ext;
+            $dest_path = $upload_dir . $new_file_name;
 
-                if (move_uploaded_file($file_tmp, $dest_path)) {
-                    $db_path = "/assets/" . $new_file_name;
-                    
-                    if ($ristoranteModel->update($restaurant_id, ['image_url' => $db_path])) {
-                        $msg = "Immagine di vetrina aggiornata!";
-                        $msg_type = "success";
-                        $restaurant = $ristoranteModel->getByIdAndOwner($restaurant_id, $user_id);
-                    } else {
-                        $msg = "Errore nel salvataggio DB.";
-                        $msg_type = "error";
-                    }
+            if (move_uploaded_file($file_tmp, $dest_path)) {
+                $db_path = "assets/" . $new_file_name;
+                
+                if ($ristoranteModel->update($restaurant_id, ['image_url' => $db_path])) {
+                    $msg = "Immagine di vetrina aggiornata!";
+                    $msg_type = "success";
+                    $restaurant = $ristoranteModel->getByIdAndOwner($restaurant_id, $user_id);
                 } else {
-                    $msg = "Errore upload file (controlla permessi cartella assets).";
+                    $msg = "Errore nel salvataggio DB.";
                     $msg_type = "error";
                 }
             } else {
-                $msg = "Formato non valido. Usa JPG, PNG o WEBP.";
+                $msg = "Errore upload file (controlla permessi cartella assets).";
                 $msg_type = "error";
             }
         } else {
-            $msg = "Seleziona un file valido.";
+            $msg = "Formato non valido. Usa JPG, PNG o WEBP.";
             $msg_type = "error";
         }
+    } else {
+        $msg = "Seleziona un file valido. Ricorda che il file non deve superare gli 8MB.";
+        $msg_type = "error";
     }
 }
 
 $nome = $restaurant['nome'];
 $indirizzo = $restaurant['indirizzo'];
 $categoria = $restaurant['categoria'];
+$descrizione = $restaurant['descrizione'] ?? '';
 $vetrina_url = $restaurant['image_url'] ?? null;
 $created_at = $restaurant['created_at'] ?? date("Y-m-d");
 ?>
@@ -108,6 +116,50 @@ $created_at = $restaurant['created_at'] ?? date("Y-m-d");
     <link rel="stylesheet" href="../../css/style_ristoratori.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=dashboard_2" />
+    <style>
+        .btn-delete-rest {
+            background-color: #FFF0F0;
+            color: #E31A1A;
+            border: 1px solid #FFE0E0;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 14px;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            box-sizing: border-box;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-delete-rest:hover {
+            background-color: #E31A1A;
+            color: #FFFFFF;
+            box-shadow: 0 4px 12px rgba(227, 26, 26, 0.25);
+            transform: translateY(-2px);
+        }
+
+        .textarea-custom {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #E0E5F2;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 14px;
+            resize: vertical;
+            color: #2B3674;
+            background: #fff;
+            box-sizing: border-box;
+        }
+
+        .textarea-custom:focus {
+            outline: none;
+            border-color: #4318FF;
+        }
+    </style>
 </head>
 
 <body>
@@ -156,8 +208,8 @@ $created_at = $restaurant['created_at'] ?? date("Y-m-d");
                 </div>
 
                 <div style="margin-top: 30px; text-align: center;">
-                    <form method="POST" action="" onsubmit="return confirm('Sei sicuro di voler eliminare questo ristorante? Questa azione non può essere annullata.');">
-                        <button type="submit" name="delete_restaurant" style="background: red; color: white; padding: 12px 24px; border: none; border-radius: 30px; font-weight: 600; display: inline-flex; justify-content: center; align-items: center; width: 100%; box-sizing: border-box; gap: 8px; box-shadow: 0 4px 10px rgba(255, 0, 0, 0.25); cursor: pointer; transition: all 0.2s ease;">
+                    <form method="POST" action="modifica_ristorante.php?id=<?php echo $restaurant_id; ?>">
+                        <button type="submit" name="delete_restaurant" class="btn-delete-rest">
                             <i class="fa-solid fa-trash"></i> Elimina Ristorante
                         </button>
                     </form>
@@ -168,7 +220,7 @@ $created_at = $restaurant['created_at'] ?? date("Y-m-d");
                 
                 <div class="form-title" style="margin-bottom: 20px; font-weight:700; color:#2B3674; border-bottom:1px solid #eee; padding-bottom:10px;">Modifica Informazioni</div>
                 
-                <form method="POST" action="">
+                <form method="POST" action="modifica_ristorante.php?id=<?php echo $restaurant_id; ?>">
                     <div style="display: grid; grid-template-columns: 1fr; gap: 20px;">
                         <div class="input-group">
                             <label>Nome Ristorante</label>
@@ -184,6 +236,11 @@ $created_at = $restaurant['created_at'] ?? date("Y-m-d");
                                 <label>Categoria</label>
                                 <input type="text" name="categoria" value="<?php echo htmlspecialchars($categoria); ?>" required>
                             </div>
+                        </div>
+
+                        <div class="input-group">
+                            <label>Descrizione</label>
+                            <textarea name="descrizione" rows="4" class="textarea-custom" required><?php echo htmlspecialchars($descrizione); ?></textarea>
                         </div>
                     </div>
                     
@@ -202,7 +259,7 @@ $created_at = $restaurant['created_at'] ?? date("Y-m-d");
                     <label style="font-size: 14px; color: #2B3674; font-weight: 500; margin-bottom: 8px; display: block;">Anteprima Attuale:</label>
                     <?php if($vetrina_url): ?>
                         <div style="width: 100%; height: 200px; border-radius: 10px; overflow: hidden; border: 1px solid #eee;">
-                            <img src="<?php echo htmlspecialchars($vetrina_url); ?>" alt="Vetrina Ristorante" style="width: 100%; height: 100%; object-fit: cover;">
+                            <img src="/<?php echo htmlspecialchars(ltrim($vetrina_url, '/')); ?>" alt="Vetrina Ristorante" style="width: 100%; height: 100%; object-fit: cover;">
                         </div>
                     <?php else: ?>
                         <div style="width: 100%; height: 150px; background-color: #F4F7FE; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #A3AED0; border: 2px dashed #E0E5F2;">
@@ -211,11 +268,11 @@ $created_at = $restaurant['created_at'] ?? date("Y-m-d");
                     <?php endif; ?>
                 </div>
                 
-                <form method="POST" action="" enctype="multipart/form-data">
+                <form method="POST" action="modifica_ristorante.php?id=<?php echo $restaurant_id; ?>" enctype="multipart/form-data">
                     <div class="input-group">
                         <label>Carica Nuova Foto</label>
                         <input type="file" name="restaurant_image" accept="image/*" required>
-                        <small style="color: #A3AED0;">Questa immagine verrà mostrata nella lista ristoranti. (Consigliato: orizzontale)</small>
+                        <small style="color: #A3AED0;">Questa immagine verrà mostrata nella lista ristoranti. (Consigliato: orizzontale, Max: 8MB)</small>
                     </div>
                     
                     <div style="text-align: right; margin-top: 20px;">

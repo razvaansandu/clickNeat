@@ -8,6 +8,7 @@ if (!isset($_SESSION["loggedin"]) || $_SESSION["ruolo"] !== 'ristoratore') {
     header("location: ../auth/login.php");
     exit;
 }
+
 function getBadWords() {
     $jsonPath = __DIR__ . "/../../config/cursed_words.json";
     if (file_exists($jsonPath)) {
@@ -22,6 +23,7 @@ $success = "";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
+    $proprietario_id = $_SESSION["id"];
     $nome = trim($_POST["nome"]);
     $indirizzo = trim($_POST["indirizzo"]);
     $descrizione = trim($_POST["descrizione"]);
@@ -65,7 +67,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             if (in_array($file_ext, $allowed)) {
 
                 $new_file_name = uniqid('rest_') . '.' . $file_ext;
-
                 $dest_path = $upload_dir . $new_file_name;
 
                 if (move_uploaded_file($file_tmp, $dest_path)) {
@@ -143,7 +144,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <div class="alert alert-success">
                     <i class="fa-solid fa-circle-check"></i> <?php echo htmlspecialchars($success); ?>
                 </div>
-            <?php endif; ?>  <form action="" method="POST" enctype="multipart/form-data">
+            <?php endif; ?>
 
             <form action="" method="POST" enctype="multipart/form-data">
 
@@ -153,6 +154,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 </label>
 
                 <input type="file" name="immagine_ristorante" id="upload-img" style="display: none;" accept="image/*">
+                
                 <div class="form-group">
                     <label for="nome">Nome del Locale</label>
                     <div class="input-wrapper">
@@ -208,5 +210,5 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         });
     </script>
 
-            </body>
-</HTML>
+</body>
+</html>

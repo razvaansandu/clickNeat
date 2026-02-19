@@ -20,10 +20,9 @@ $raw_restaurants = $ristoranteModel->getAll();
 foreach ($raw_restaurants as $row) {
     
     if (!empty($row['image_url'])) {
-        $row['image_url'] = "" . htmlspecialchars($row['image_url']);
+        $row['image_url'] = "/" . htmlspecialchars($row['image_url']);
     } else {
         $keyword_img = stripos($row['nome'], 'pizza') !== false ? 'pizza' : 'restaurant';
-        $row['image_url'] = "https://loremflickr.com/600/400/" . $keyword_img . "?lock=" . $row['id'];
     }
 
     $db_cat = strtolower($row['categoria'] ?? ''); 
