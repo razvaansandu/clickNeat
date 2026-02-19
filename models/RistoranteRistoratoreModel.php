@@ -46,4 +46,9 @@ class RistoranteRistoratoreModel
     {
         return $this->db->selectOne("SELECT * FROM ristoranti WHERE id = ?", [$id]);
     }
+
+    public function delete($id)
+    {
+        return $this->db->delete('ristoranti', 'id = ?', [$id]);
+    }
 }

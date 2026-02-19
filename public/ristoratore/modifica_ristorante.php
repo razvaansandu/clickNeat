@@ -22,7 +22,14 @@ if (!$restaurant) {
 $msg = "";
 $msg_type = "";
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
+if (isset($_POST['delete_restaurant'])) {
+    if ($ristoranteModel->delete($restaurant_id)) {
+        header("Location: dashboard_ristoratore.php");
+        exit;
+    } else {
+        $msg = "Errore durante l'eliminazione del ristorante.";
+        $msg_type = "error";
+    }
 
     if (isset($_POST['update_info'])) {
         $data = [
@@ -42,9 +49,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     if (isset($_POST['update_img'])) {
-        
         if (isset($_FILES['restaurant_image']) && $_FILES['restaurant_image']['error'] === 0) {
-            
             $upload_dir = '../assets/';
             
             if (!is_dir($upload_dir)) {
@@ -57,12 +62,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $allowed = ['jpg', 'jpeg', 'png', 'webp'];
 
             if (in_array($file_ext, $allowed)) {
-                
                 $new_file_name = uniqid('rest_') . '.' . $file_ext;
                 $dest_path = $upload_dir . $new_file_name;
 
                 if (move_uploaded_file($file_tmp, $dest_path)) {
-                    
                     $db_path = "/assets/" . $new_file_name;
                     
                     if ($ristoranteModel->update($restaurant_id, ['image_url' => $db_path])) {
@@ -73,7 +76,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         $msg = "Errore nel salvataggio DB.";
                         $msg_type = "error";
                     }
-
                 } else {
                     $msg = "Errore upload file (controlla permessi cartella assets).";
                     $msg_type = "error";
@@ -151,6 +153,14 @@ $created_at = $restaurant['created_at'] ?? date("Y-m-d");
                         <span>Posizione</span>
                         <b style="font-size: 11px;"><?php echo htmlspecialchars($indirizzo); ?></b>
                     </div>
+                </div>
+
+                <div style="margin-top: 30px; text-align: center;">
+                    <form method="POST" action="" onsubmit="return confirm('Sei sicuro di voler eliminare questo ristorante? Questa azione non può essere annullata.');">
+                        <button type="submit" name="delete_restaurant" style="background: red; color: white; padding: 12px 24px; border: none; border-radius: 30px; font-weight: 600; display: inline-flex; justify-content: center; align-items: center; width: 100%; box-sizing: border-box; gap: 8px; box-shadow: 0 4px 10px rgba(255, 0, 0, 0.25); cursor: pointer; transition: all 0.2s ease;">
+                            <i class="fa-solid fa-trash"></i> Elimina Ristorante
+                        </button>
+                    </form>
                 </div>
             </div>
 
