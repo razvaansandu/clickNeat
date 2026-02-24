@@ -10,23 +10,29 @@ class RistoranteModel
 
     public function getAll()
     {
-        return $this->db->select("SELECT * FROM ristoranti");
+        return $this->db->select("SELECT * FROM ristoranti WHERE deleted_at IS NULL");
     }
 
     public function getById($id)
     {
-        return $this->db->selectOne("SELECT * FROM ristoranti WHERE id = ?", [$id]);
+        return $this->db->selectOne("SELECT * FROM ristoranti WHERE id = ? AND deleted_at IS NULL", [$id]);
     }
 
     public function search($term)
     {
         $term = "%$term%";
-        return $this->db->select("SELECT * FROM ristoranti WHERE nome LIKE ? OR indirizzo LIKE ?", [$term, $term]);
+        return $this->db->select(
+            "SELECT * FROM ristoranti WHERE (nome LIKE ? OR indirizzo LIKE ?) AND deleted_at IS NULL",
+            [$term, $term]
+        );
     }
 
     public function getByUserId($user_id)
     {
-        return $this->db->selectOne("SELECT * FROM ristoranti WHERE proprietario_id = ?", [$user_id]);
+        return $this->db->selectOne(
+            "SELECT * FROM ristoranti WHERE proprietario_id = ? AND deleted_at IS NULL",
+            [$user_id]
+        );
     }
 
     public function create($user_id, $nome, $indirizzo, $descrizione, $image_url = null)

@@ -52,7 +52,6 @@ a {
     background: white;
     color: var(--accent-red);
 }
- /* Stile globale per il pulsante Aggiungi (menu.php) */
 .btn-add {
     background:  var(--primary-brand);
     color: white;
@@ -622,7 +621,6 @@ textarea:focus {
 
 
 @media (max-width: 991px) { 
-    /* Stili per le card del menu (menu.php) */
 .card-style {
     width: 100%;
     margin-bottom: 16px;
@@ -827,7 +825,7 @@ textarea:focus {
     background: var(--white);
     border-radius: 20px;
     display: flex;
-    flex-direction: column; /* verticale */
+    flex-direction: column;
     padding: 0;
     border: 1px solid #f0f5fa;
     box-shadow: var(--shadow-sm);
@@ -880,16 +878,15 @@ textarea:focus {
     font-size: 11px;
     color: var(--accent-orange);
 }
-/* Descrizione (opzionale: mostrala o nascondila) */
 .card-body > div[style*="font-size: 13px"] {
-    display: block; /* Cambia in 'none' se vuoi nasconderla */
+    display: block;
     font-size: 13px;
     color: #707EAE;
     margin-bottom: 15px;
     line-height: 1.4;
 }
 .btn-go {
-    margin-top: auto; /* spinge in fondo */
+    margin-top: auto;
     background: #f5f8ff;
     color: var(--primary-brand);
     font-size: 12px;
@@ -901,7 +898,7 @@ textarea:focus {
     justify-content: center;
     gap: 6px;
     border: none;
-    width: 100%; /* pulsante largo tutta la card */
+    width: 100%;
 }
 .btn-go:active {
     background: var(--primary-brand);

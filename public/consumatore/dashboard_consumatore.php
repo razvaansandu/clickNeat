@@ -186,7 +186,6 @@ foreach ($raw_restaurants as $row) {
         </div>
 
         <div class="grid-container" id="restaurantsGrid">
-            <!-- I ristoranti vengono inseriti qui da JavaScript -->
         </div>
     </div>
 
@@ -274,7 +273,6 @@ foreach ($raw_restaurants as $row) {
 
         let searchTimeout;
 
-        // Event listener per input desktop
         if (input) {
             input.addEventListener('input', function() {
                 clearTimeout(searchTimeout);
@@ -285,7 +283,6 @@ foreach ($raw_restaurants as $row) {
             });
         }
 
-        // Event listener per input mobile
         if (mobileInput) {
             mobileInput.addEventListener('input', function() {
                 clearTimeout(searchTimeout);
@@ -303,7 +300,6 @@ foreach ($raw_restaurants as $row) {
                 
                 currentCategory = this.dataset.category;
                 
-                // Svuota entrambi gli input
                 if (input) input.value = '';
                 if (mobileInput) mobileInput.value = '';
                 

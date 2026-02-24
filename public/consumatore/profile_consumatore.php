@@ -101,7 +101,6 @@ $created_at = $userData['created_at'];
 
 <body>
 
-    <!-- Navbar desktop -->
     <nav class="top-navbar">
         <a href="dashboard_consumatore.php" class="brand-logo">
             <i class="fa-solid fa-leaf" style="color: #05CD99;"></i> ClickNeat
@@ -125,7 +124,6 @@ $created_at = $userData['created_at'];
         </div>
     </nav>
 
-    <!-- Header mobile (fisso) senza barra di ricerca -->
     <div class="mobile-header-fixed">
         <div class="mobile-top-row">
             <a href="dashboard_consumatore.php" class="brand-logo">
@@ -135,10 +133,8 @@ $created_at = $userData['created_at'];
                 <i class="fa-solid fa-right-from-bracket"></i>
             </a>
         </div>
-        <!-- Nessuna barra di ricerca -->
     </div>
 
-    <!-- Navigazione inferiore mobile -->
     <nav class="bottom-nav">
         <a href="dashboard_consumatore.php" class="nav-item-bottom <?php echo basename($_SERVER['PHP_SELF']) == 'dashboard_consumatore.php' ? 'active' : ''; ?>">
             <i class="fa-solid fa-house"></i><span>Home</span>
@@ -171,7 +167,6 @@ $created_at = $userData['created_at'];
             </div>
         <?php endif; ?>
 
-        <!-- Profile wrapper usa le regole CSS (grid) -->
         <div class="profile-wrapper">
 
             <div class="card-style avatar-box" style="padding: 30px; text-align: center;">

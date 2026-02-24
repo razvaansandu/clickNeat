@@ -25,7 +25,6 @@ if (!$restaurant) {
     exit;
 }
 
-// Carica categorie consentite
 $categoriePath = "../../config/categorie.json";
 $categorieSuggerite = [];
 if (file_exists($categoriePath)) {
@@ -33,7 +32,6 @@ if (file_exists($categoriePath)) {
     $categorieSuggerite = json_decode($jsonContent, true) ?? [];
 }
 
-// Carica parole vietate
 $badWords = [];
 $badWordsPath = "../../config/cursed_words.json";
 if (file_exists($badWordsPath)) {
@@ -57,10 +55,9 @@ if (isset($_POST['delete_restaurant'])) {
 if (isset($_POST['update_info'])) {
     $nome = trim($_POST['nome']);
     $indirizzo = trim($_POST['indirizzo']);
-    $categoria = trim($_POST['categoria']); // Verrà dal campo hidden
+    $categoria = trim($_POST['categoria']);
     $descrizione = trim($_POST['descrizione']);
 
-    // Protezione lunghezza
     if (strlen($categoria) > 100) { $categoria = substr($categoria, 0, 100); }
 
     $isForbidden = false;
@@ -141,7 +138,6 @@ $created_at = $restaurant['created_at'] ?? date("Y-m-d");
     <link rel="stylesheet" href="../../css/style_ristoratori.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Stili aggiuntivi solo per questa pagina (non modificano il CSS principale) */
         .category-search-container {
             position: relative;
             margin-bottom: 15px;
@@ -202,7 +198,6 @@ $created_at = $restaurant['created_at'] ?? date("Y-m-d");
             opacity: 0.5;
             cursor: not-allowed;
         }
-        /* Mantieni stili esistenti */
         .btn-delete-rest { background-color: #FFF0F0; color: #E31A1A; border: 1px solid #FFE0E0; padding: 12px 24px; border-radius: 12px; font-weight: 600; width: 100%; cursor: pointer; transition: all 0.3s ease; }
         .btn-delete-rest:hover { background-color: #E31A1A; color: #FFFFFF; }
         .textarea-custom { width: 100%; padding: 12px; border: 1px solid #E0E5F2; border-radius: 8px; font-family: inherit; resize: vertical; box-sizing: border-box; }
@@ -272,11 +267,9 @@ $created_at = $restaurant['created_at'] ?? date("Y-m-d");
                                 <input type="text" name="indirizzo" value="<?php echo htmlspecialchars($indirizzo); ?>" required>
                             </div>
                             
-                            <!-- NUOVO SELEZIONE CATEGORIA -->
                             <div class="input-group">
                                 <label>Categoria <span style="color: #E31A1A;">*</span></label>
                                 
-                                <!-- Container per la ricerca (inizialmente visibile solo se nessuna categoria è selezionata) -->
                                 <div class="category-search-container" id="category_search_container" style="<?php echo empty($categoria) ? 'display:block;' : 'display:none;'; ?>">
                                     <div class="input-wrapper" style="position: relative;">
                                         <i class="fa-solid fa-search"></i>
@@ -288,11 +281,9 @@ $created_at = $restaurant['created_at'] ?? date("Y-m-d");
                                         <i class="fa-solid fa-times-circle" id="clear_search" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: #A3AED0; cursor: pointer; display: none;"></i>
                                     </div>
                                     
-                                    <!-- Dropdown risultati -->
                                     <div id="search_results" class="search-results-dropdown" style="display: none;"></div>
                                 </div>
 
-                                <!-- Categoria selezionata (visibile se già presente o dopo selezione) -->
                                 <div id="selected_category_container" class="selected-category-badge" style="<?php echo empty($categoria) ? 'display:none;' : 'display:flex;'; ?>">
                                     <div style="display: flex; align-items: center; gap: 10px;">
                                         <i class="fa-solid fa-check-circle" style="color: #05CD99; font-size: 18px;"></i>
@@ -306,7 +297,6 @@ $created_at = $restaurant['created_at'] ?? date("Y-m-d");
                                     </button>
                                 </div>
 
-                                <!-- Campo hidden per inviare la categoria -->
                                 <input type="hidden" name="categoria" id="selected_category_hidden" value="<?php echo htmlspecialchars($categoria); ?>" required>
 
                                 <small id="category_help" class="category-help">
@@ -354,16 +344,13 @@ $created_at = $restaurant['created_at'] ?? date("Y-m-d");
     </div> 
 
     <script>
-        // Passa i dati dal PHP al JavaScript
         const foodCategories = <?php echo json_encode($categorieSuggerite); ?>;
         const badWords = <?php echo json_encode($badWords); ?>;
         const currentCategory = <?php echo json_encode($categoria); ?>;
 
-        // Variabili globali
         let searchContainer, selectedContainer, searchInput, resultsDiv, clearBtn, selectedName, selectedHidden, changeBtn, categoryHelp, saveBtn;
 
         document.addEventListener('DOMContentLoaded', function() {
-            // Sidebar functionality
             const sidebar = document.querySelector('.sidebar');
             const hamburger = document.querySelector('.hamburger-btn');
             const closeBtn = document.getElementById('closeSidebarBtn');
@@ -377,7 +364,6 @@ $created_at = $restaurant['created_at'] ?? date("Y-m-d");
             hamburger.addEventListener('click', () => { sidebar.classList.add('active'); overlay.classList.add('active'); });
             [closeBtn, overlay].forEach(el => el && el.addEventListener('click', () => { sidebar.classList.remove('active'); overlay.classList.remove('active'); }));
 
-            // Inizializza il selettore categorie
             initCategorySelector();
         });
 
@@ -393,7 +379,6 @@ $created_at = $restaurant['created_at'] ?? date("Y-m-d");
             categoryHelp = document.getElementById('category_help');
             saveBtn = document.getElementById('save-info-btn');
 
-            // Se esiste già una categoria, disabilita il pulsante salva se contiene parole vietate
             if (currentCategory) {
                 const found = checkBadWordsInString(currentCategory);
                 if (found) {
@@ -403,12 +388,10 @@ $created_at = $restaurant['created_at'] ?? date("Y-m-d");
                     saveBtn.disabled = false;
                 }
             } else {
-                // Nessuna categoria iniziale: pulsante disabilitato
                 saveBtn.disabled = true;
                 saveBtn.style.opacity = '0.5';
             }
 
-            // Gestione input ricerca
             if (searchInput) {
                 searchInput.addEventListener('input', function() {
                     const searchTerm = this.value.trim().toLowerCase();
@@ -442,7 +425,6 @@ $created_at = $restaurant['created_at'] ?? date("Y-m-d");
                     }
                 });
 
-                // Tasto Enter
                 searchInput.addEventListener('keydown', function(e) {
                     if (e.key === 'Enter') {
                         e.preventDefault();
@@ -454,7 +436,6 @@ $created_at = $restaurant['created_at'] ?? date("Y-m-d");
                 });
             }
 
-            // Pulsante clear
             if (clearBtn) {
                 clearBtn.addEventListener('click', function() {
                     searchInput.value = '';
@@ -464,10 +445,8 @@ $created_at = $restaurant['created_at'] ?? date("Y-m-d");
                 });
             }
 
-            // Pulsante Cambia categoria
             if (changeBtn) {
                 changeBtn.addEventListener('click', function() {
-                    // Nascondi il badge selezionato e mostra la ricerca
                     selectedContainer.style.display = 'none';
                     searchContainer.style.display = 'block';
                     selectedHidden.value = '';
@@ -480,7 +459,6 @@ $created_at = $restaurant['created_at'] ?? date("Y-m-d");
                 });
             }
 
-            // Click fuori dal dropdown
             document.addEventListener('click', function(e) {
                 if (searchInput && !searchInput.contains(e.target) && resultsDiv && !resultsDiv.contains(e.target)) {
                     resultsDiv.style.display = 'none';
@@ -519,22 +497,18 @@ $created_at = $restaurant['created_at'] ?? date("Y-m-d");
                 selectedName.textContent = category;
                 selectedHidden.value = category;
                 
-                // Mostra il badge e nasconde la ricerca
                 selectedContainer.style.display = 'flex';
                 searchContainer.style.display = 'none';
                 
-                // Resetta ricerca
                 if (searchInput) {
                     searchInput.value = '';
                     resultsDiv.style.display = 'none';
                     if (clearBtn) clearBtn.style.display = 'none';
                 }
                 
-                // Aggiorna messaggio aiuto
                 categoryHelp.innerHTML = '<i class="fa-solid fa-check-circle" style="color: #05CD99;"></i> Categoria selezionata correttamente';
                 categoryHelp.style.color = '#05CD99';
                 
-                // Controllo parole vietate
                 const found = checkBadWordsInString(category);
                 if (found) {
                     categoryHelp.innerHTML = "<i class='fa-solid fa-ban' style='color: #ea4335;'></i> <span style='color: #ea4335;'>Termine non consentito</span>";
@@ -554,14 +528,12 @@ $created_at = $restaurant['created_at'] ?? date("Y-m-d");
             }
         }
 
-        // Validazione form prima dell'invio
         document.getElementById('form-modifica-ristorante').addEventListener('submit', function(e) {
             const categoriaHidden = document.getElementById('selected_category_hidden');
             if (!categoriaHidden.value) {
                 e.preventDefault();
                 alert('Per favore, seleziona una categoria per il ristorante.');
                 
-                // Evidenzia il campo di ricerca se visibile
                 const searchInput = document.getElementById('category_search');
                 if (searchInput && searchInput.offsetParent !== null) {
                     searchInput.style.borderColor = '#E31A1A';

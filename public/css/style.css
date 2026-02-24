@@ -90,7 +90,6 @@ input[type="password"]:focus {
     transform: translateY(-2px); 
 }
 
-/* Stili per Radio Button (Scelta Ruolo) */
 .radio-group {
     display: flex;
     gap: 30px;
@@ -258,10 +257,6 @@ a:hover {
         font-size: 22px;
     }
 }
-
-/* =========================================
-   GOOGLE SIGN-IN BUTTON STYLES
-   ========================================= */
 
 .gsi-material-button {
     -moz-user-select: none;

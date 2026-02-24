@@ -141,10 +141,8 @@ if (isset($_POST['add_dish'])) {
     $badWords = getBadWords();
     $isForbidden = false;
     
-    // Carica categorie consentite dal JSON
     $allowedCategories = getAllowedCategories();
     
-    // Verifica che la categoria sia tra quelle consentite
     if (!in_array($categoria, $allowedCategories)) {
         $msg = "Categoria non valida. Seleziona una categoria dall'elenco.";
         $msg_type = "error";
@@ -238,7 +236,6 @@ function getAllowedCategories() {
     <link rel="stylesheet" href="../../css/category-selector.css">
   
     <style>
-        /* Stili aggiuntivi specifici per questa pagina */
         @media screen and (max-width: 768px) {
             .management-grid {
                 grid-template-columns: 1fr !important;
@@ -342,12 +339,10 @@ function getAllowedCategories() {
                             <textarea name="description" placeholder="Descrizione e ingredienti..." rows="2" style="min-height: 80px;"></textarea>
                         </div>
 
-                        <!-- NUOVO SISTEMA DI SELEZIONE CATEGORIE -->
                         <label style="display:block; margin-bottom:8px; font-weight:600; color: #2B3674;">
                             Categoria Piatto <span style="color: #E31A1A;">*</span>
                         </label>
 
-                        <!-- Container per la ricerca categorie -->
                         <div class="category-search-container" style="position: relative; margin-bottom: 15px;">
                             <div class="input-wrapper" style="position: relative;">
                                 <i class="fa-solid fa-search"></i>
@@ -359,13 +354,10 @@ function getAllowedCategories() {
                                 <i class="fa-solid fa-times-circle" id="clear_search" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: #A3AED0; cursor: pointer; display: none;"></i>
                             </div>
                             
-                            <!-- Dropdown dei risultati della ricerca -->
                             <div id="search_results" class="search-results-dropdown" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #E0E5F2; border-radius: 8px; max-height: 300px; overflow-y: auto; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
-                                <!-- I risultati verranno inseriti qui via JavaScript -->
                             </div>
                         </div>
 
-                        <!-- Categoria selezionata (mostrata dopo la scelta) -->
                         <div id="selected_category_container" style="display: none;">
                             <div style="background: #E6FAF5; border-radius: 30px; padding: 12px 18px; margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between;">
                                 <div style="display: flex; align-items: center; gap: 10px;">
@@ -381,14 +373,12 @@ function getAllowedCategories() {
                             </div>
                         </div>
 
-                        <!-- Campo hidden per inviare la categoria selezionata -->
                         <input type="hidden" name="categoria" id="selected_category_hidden" value="" required>
 
                         <small id="category_help" style="color: #A3AED0; font-size: 11px; margin-top: 5px; display: block; height: 15px;">
                             <i class="fa-solid fa-info-circle"></i> Cerca e seleziona una categoria dall'elenco
                         </small> 
 
-                        <!-- AGGIUNTA CLASSE "btn-add" AL PULSANTE -->
                         <button type="submit" class="btn-add" style="background: #1A4D4E ; color: white; padding: 6px 7px; border-radius: 12px; font-weight: 500; font-size: 13px; border: 1px solid var(--primary-brand); width: 100px; margin-top: 20px; height:auto">
                             <span>Salva Piatto</span> 
                         </button>
@@ -450,7 +440,7 @@ function getAllowedCategories() {
                                                 <i class="fa-solid fa-pen"></i>
                                             </button>
                                             
-                                            <form method="POST" action="" onsubmit="return confirm('Sei sicuro di voler eliminare questo piatto?');" style="margin:0;">
+                                            <form method="POST" action=""  style="margin:0;">
                                                 <input type="hidden" name="delete_dish" value="1">
                                                 <input type="hidden" name="dish_id" value="<?php echo $item['id']; ?>">
                                                 <button type="submit" style="background: none; border: none; color: #E31A1A; cursor: pointer; font-size: 14px;">
@@ -526,7 +516,6 @@ function getAllowedCategories() {
         </div>
     </div>
 
-    <!-- MODALE DI MODIFICA PIATTO -->
     <div id="editModal" class="modal-overlay"> 
         <div class="modal-content">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
@@ -584,11 +573,9 @@ function getAllowedCategories() {
     </div> 
 
     <script>
-        // Passa le categorie dal PHP al JavaScript
         const foodCategories = <?php echo json_encode(getAllowedCategories()); ?>;
         const badWords = <?php echo json_encode(getBadWords()); ?>;
 
-        // Funzione per controllare parole inappropriate
         function checkBadWords(inputElement, selectElement, something, submitBtn) {
             const value = inputElement.value.trim().toLowerCase();
             const found = badWords.some(word => {
@@ -598,7 +585,6 @@ function getAllowedCategories() {
             if (found) {
                 submitBtn.disabled = true;
                 submitBtn.style.opacity = '0.5';
-                // Puoi aggiungere un messaggio se vuoi
             } else {
                 submitBtn.disabled = false;
                 submitBtn.style.opacity = '1';
@@ -606,7 +592,6 @@ function getAllowedCategories() {
         }
         
         document.addEventListener('DOMContentLoaded', function() {
-            // Sidebar functionality
             const sidebar = document.querySelector('.sidebar');
             const hamburger = document.querySelector('.hamburger-btn');
             const closeBtn = document.getElementById('closeSidebarBtn');
@@ -632,18 +617,15 @@ function getAllowedCategories() {
             if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
             overlay.addEventListener('click', closeSidebar);
             
-            // Inizializza il selettore categorie
             initCategorySelector();
         });
 
-        // Upload immagine
         document.getElementById('upload-img').addEventListener('change', function(e) {
             if (e.target.files.length > 0) {
                 document.getElementById('file-name').textContent = e.target.files[0].name;
             }
         });
 
-        // Sistema di selezione categorie
         function initCategorySelector() {
             const searchInput = document.getElementById('category_search');
             const resultsDiv = document.getElementById('search_results');
@@ -653,17 +635,14 @@ function getAllowedCategories() {
             const selectedHidden = document.getElementById('selected_category_hidden');
             const changeBtn = document.getElementById('change_category_btn');
             const categoryHelp = document.getElementById('category_help');
-            const btnSave = document.querySelector('.btn-add'); // ora esiste grazie alla classe aggiunta
+            const btnSave = document.querySelector('.btn-add');
             
-            // Disabilita il pulsante di salvataggio inizialmente
             btnSave.disabled = true;
             btnSave.style.opacity = '0.5';
             
-            // Gestione input ricerca
             searchInput.addEventListener('input', function() {
                 const searchTerm = this.value.trim().toLowerCase();
                 
-                // Mostra/nascondi il pulsante clear
                 if (searchTerm.length > 0) {
                     clearBtn.style.display = 'block';
                 } else {
@@ -672,11 +651,10 @@ function getAllowedCategories() {
                     return;
                 }
                 
-                // Filtra le categorie
                 if (searchTerm.length >= 1) {
                     const matches = foodCategories.filter(cat => 
                         cat.toLowerCase().includes(searchTerm)
-                    ).slice(0, 10); // Limita a 10 risultati
+                    ).slice(0, 10);
                     
                     if (matches.length > 0) {
                         showSearchResults(matches, searchTerm);
@@ -714,14 +692,12 @@ function getAllowedCategories() {
                 resultsDiv.innerHTML = html;
                 resultsDiv.style.display = 'block';
                 
-                // Aggiungi event listeners agli elementi
                 document.querySelectorAll('.category-result-item').forEach(item => {
                     item.addEventListener('click', function() {
                         const category = this.getAttribute('data-category');
                         selectCategory(category);
                     });
                     
-                    // Hover effects
                     item.addEventListener('mouseenter', function() {
                         this.style.backgroundColor = '#F4F7FE';
                     });
@@ -735,19 +711,15 @@ function getAllowedCategories() {
                 selectedName.textContent = category;
                 selectedHidden.value = category;
                 
-                // Mostra il container della categoria selezionata
                 selectedContainer.style.display = 'block';
                 
-                // Nascondi e resetta la ricerca
                 searchInput.value = '';
                 resultsDiv.style.display = 'none';
                 clearBtn.style.display = 'none';
                 
-                // Aggiorna il messaggio di aiuto
                 categoryHelp.innerHTML = '<i class="fa-solid fa-check-circle" style="color: #05CD99;"></i> Categoria selezionata correttamente';
                 categoryHelp.style.color = '#05CD99';
                 
-                // Controllo bad words
                 const found = badWords.some(word => {
                     const regex = new RegExp("\\b" + word + "\\b", "i");
                     return regex.test(category);
@@ -758,13 +730,11 @@ function getAllowedCategories() {
                     btnSave.disabled = true;
                     btnSave.style.opacity = "0.5";
                 } else {
-                    // Abilita il pulsante di salvataggio
                     btnSave.disabled = false;
                     btnSave.style.opacity = '1';
                 }
             }
             
-            // Pulsante clear
             clearBtn.addEventListener('click', function() {
                 searchInput.value = '';
                 resultsDiv.style.display = 'none';
@@ -772,7 +742,6 @@ function getAllowedCategories() {
                 searchInput.focus();
             });
             
-            // Pulsante Cambia categoria
             changeBtn.addEventListener('click', function() {
                 selectedContainer.style.display = 'none';
                 selectedHidden.value = '';
@@ -784,14 +753,12 @@ function getAllowedCategories() {
                 btnSave.style.opacity = '0.5';
             });
             
-            // Click fuori dal dropdown
             document.addEventListener('click', function(e) {
                 if (!searchInput.contains(e.target) && !resultsDiv.contains(e.target)) {
                     resultsDiv.style.display = 'none';
                 }
             });
             
-            // Tasto Enter
             searchInput.addEventListener('keydown', function(e) {
                 if (e.key === 'Enter') {
                     e.preventDefault();
@@ -803,7 +770,6 @@ function getAllowedCategories() {
             });
         }
 
-        // Validazione form
         document.getElementById('form-piatto').addEventListener('submit', function(e) {
             const selectedHidden = document.getElementById('selected_category_hidden');
             
@@ -811,7 +777,6 @@ function getAllowedCategories() {
                 e.preventDefault();
                 alert('Per favore, seleziona una categoria per il piatto.');
                 
-                // Evidenzia il campo di ricerca
                 document.getElementById('category_search').style.borderColor = '#E31A1A';
                 setTimeout(() => {
                     document.getElementById('category_search').style.borderColor = '#d1d9e2';
@@ -819,7 +784,6 @@ function getAllowedCategories() {
             }
         });
 
-        // Gestione modale modifica piatto
         const editModal = document.getElementById('editModal');
         const closeEditModal = document.getElementById('closeEditModal');
         const editBtns = document.querySelectorAll('.btn-open-edit');
@@ -868,10 +832,9 @@ function getAllowedCategories() {
             }
         });
         
-        // Riferimento al pulsante di salvataggio della modale e gestione parole inappropriate
         const editCustomInput = document.getElementById('edit_piatto_custom');
         const editSelect = document.getElementById('edit_piatto_select');
-        const editSubmitBtn = editModal.querySelector('.btn-save'); // definito ora
+        const editSubmitBtn = editModal.querySelector('.btn-save');
         
         editCustomInput.addEventListener('input', function() {
             checkBadWords(this, editSelect, null, editSubmitBtn);
