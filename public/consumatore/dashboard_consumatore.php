@@ -18,12 +18,12 @@ $raw_restaurants = $ristoranteModel->getAll();
 
 foreach ($raw_restaurants as $row) {
     if (!empty($row['image_url'])) {
-        $row['image_url'] = "/" . htmlspecialchars($row['image_url']);
+        $row['image_url'] = "" . htmlspecialchars($row['image_url']);
     } else {
         $row['image_url'] = "/public/img/placeholder_restaurant.jpg";
     }
 
-    $db_cat = strtolower($row['categoria'] ?? '');
+    $db_cat = strtolower($row['categoria'] ?? ''); 
     $nome_lower = strtolower($row['nome']);
     $desc_lower = strtolower($row['descrizione'] ?? '');
 

@@ -43,7 +43,7 @@ class MenuRistoratoreModel
         $data = [
             'name' => $name,
             'description' => $description,
-            'price' => $price
+            'price' => $price 
         ];
 
         if ($image_url) {

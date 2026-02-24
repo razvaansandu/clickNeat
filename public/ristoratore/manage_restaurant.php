@@ -99,7 +99,7 @@ if (isset($_POST['edit_dish'])) {
                 $dest_path = $upload_dir . $new_file_name;
 
                 if (move_uploaded_file($file_tmp, $dest_path)) {
-                    $image_url = "assets/" . $new_file_name;
+                    $image_url = "" . $new_file_name;
                 } else {
                     $msg = "Errore caricamento immagine.";
                     $msg_type = "error";
@@ -176,7 +176,7 @@ if (isset($_POST['add_dish'])) {
                     $dest_path = $upload_dir . $new_file_name;
 
                     if (move_uploaded_file($file_tmp, $dest_path)) {
-                        $image_url = "assets/" . $new_file_name;
+                        $image_url = "assets" . $new_file_name;
                     } else {
                         $msg = "Errore caricamento immagine.";
                         $msg_type = "error";
@@ -402,7 +402,7 @@ function getAllowedCategories() {
                                     
                                     <div class="dish-img" style="width: 60px; height: 60px; border-radius: 10px; overflow: hidden; background: #f4f7fe; flex-shrink: 0;">
                                         <?php if (!empty($item['image_url'])): ?>
-                                            <img src="/<?php echo htmlspecialchars(ltrim($item['image_url'], '/')); ?>" alt="Foto piatto" style="width: 100%; height: 100%; object-fit: cover;">
+                                            <img src="/<?php echo htmlspecialchars(ltrim($item['image_url'], '')); ?>" alt="Foto piatto" style="width: 100%; height: 100%; object-fit: cover;">
                                         <?php else: ?>
                                             <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #A3AED0;">
                                                 <i class="fa-solid fa-utensils"></i>

@@ -1099,7 +1099,7 @@ textarea:focus {
         top: -50%;
         right: -10%;
         width: 60%;
-        height: 200%;
+        height: 200%; 
         background: rgba(255,255,255,0.1);
         transform: rotate(-15deg);
         pointer-events: none;
