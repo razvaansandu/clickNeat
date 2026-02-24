@@ -39,7 +39,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $action = $_POST['action'] ?? null;
     $owner_id = $_SESSION['id'];
 
-    // Gestione ordini
     if ($order_id && $action === 'accept') {
         if ($orderModel->accept($order_id, $owner_id)) {
             $msg = "Ordine accettato!";
@@ -67,7 +66,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         exit;
     }
 
-    // Elimina piatto
     if (isset($_POST['delete_dish'])) {
         $dish_id = $_POST['dish_id'];
         if ($menuModel->delete_piatto($dish_id)) {
@@ -79,7 +77,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         }
     }
 
-    // Modifica piatto
     if (isset($_POST['edit_dish'])) {
         $dish_id = $_POST['dish_id'];
         $name = trim($_POST['name']);
@@ -143,7 +140,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         }
     }
 
-    // Aggiungi piatto
     if (isset($_POST['add_dish'])) {
         $name = trim($_POST['name']);
         $desc = trim($_POST['description']);
@@ -289,7 +285,6 @@ function getAllowedCategories()
 
         <div class="management-grid">
 
-            <!-- COLONNA MENU -->
             <div class="col-menu">
                 <div class="card" style="margin-bottom: 30px;">
                     <h3 style="color: #2B3674; margin-bottom: 20px;">Aggiungi Piatto</h3>
@@ -421,7 +416,6 @@ function getAllowedCategories()
                 </div>
             </div>
 
-            <!-- COLONNA ORDINI -->
             <div class="col-orders">
                 <div class="card" style="min-height: 600px;">
                     <h3 style="color: #2B3674; margin-bottom: 20px;">Ordini Recenti</h3>
@@ -501,7 +495,6 @@ function getAllowedCategories()
         </div>
     </div>
 
-    <!-- MODAL MODIFICA PIATTO -->
     <div id="editModal" class="modal-overlay">
         <div class="modal-content">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
