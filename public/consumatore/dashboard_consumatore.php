@@ -134,26 +134,26 @@ foreach ($raw_restaurants as $row) {
     </header>
 
     <div class="categories-wrapper">
-        <div class="categories-container">
-            <div class="category-pill active" data-category="all">
-                <i class="fa-solid fa-utensils"></i> Tutti
-            </div>
-            <div class="category-pill" data-category="pizza">
-                <i class="fa-solid fa-pizza-slice"></i> Pizza
-            </div>
-            <div class="category-pill" data-category="burger">
-                <i class="fa-solid fa-burger"></i> Burger
-            </div>
-            <div class="category-pill" data-category="sushi">
-                <i class="fa-solid fa-fish"></i> Sushi
-            </div>
-            <div class="category-pill" data-category="pasta">
-                <i class="fa-solid fa-bowl-food"></i> Pasta
-            </div>
-            <div class="category-pill" data-category="dolci">
-                <i class="fa-solid fa-ice-cream"></i> Dolci
-            </div>
-        </div>
+       <div class="categories-container">
+    <div class="category-pill active" data-category="all">
+        <i class="fa-solid fa-utensils"></i> Tutti
+    </div>
+    <div class="category-pill" data-category="messicano">
+        <i class="fa-solid fa-pizza-slice"></i> Messicano
+    </div>
+    <div class="category-pill" data-category="burger">
+        <i class="fa-solid fa-burger"></i> Burger
+    </div>
+    <div class="category-pill" data-category="giapponese">
+        <i class="fa-solid fa-fish"></i> Sushi
+    </div>
+    <div class="category-pill" data-category="kebab">
+        <i class="fa-solid fa-drumstick-bite"></i> Kebab
+    </div>
+    <div class="category-pill" data-category="pasticceria">
+        <i class="fa-solid fa-seedling"></i> Dolci
+    </div>
+</div>
     </div>
 
     <div class="main-container">
