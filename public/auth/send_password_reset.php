@@ -21,7 +21,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             try {
                 $mail->addAddress($email);
                 $mail->Subject = "Reset Password - ClickNeat";
-                $reset_link = "http://localhost:8000/public/auth/reset_password.php?token=$token";
+                $reset_link = "http://localhost:8000/auth/reset_password.php?token=$token";
                 $mail->Body = "Clicca qui per resettare: <a href='$reset_link'>Reset Password</a>";
                 $mail->send();
             } catch (Exception $e) {}
