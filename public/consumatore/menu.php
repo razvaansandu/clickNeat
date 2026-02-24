@@ -458,7 +458,7 @@ if (isset($_SESSION['cart']) && !empty($_SESSION['cart']['items'])) {
                     <div class="card-style"> 
                         <div class="dish-image-container">
                             <?php if (!empty($piatto['image_url'])): ?>
-                                <img src="/<?php echo $piatto['image_url']; ?>" class="dish-image" alt="<?php echo htmlspecialchars($piatto['name']); ?>">
+                                <img src="/assets/<?php echo $piatto['image_url']; ?>" class="dish-image" alt="<?php echo htmlspecialchars($piatto['name']); ?>">
                             <?php else: ?>
                                 <div class="image-placeholder-neutral">
                                     <i class="fa-solid fa-image"></i> 
