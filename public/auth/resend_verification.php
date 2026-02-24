@@ -27,7 +27,7 @@ if ($user && $user['email_verified'] == 0) {
         try {
             $mail->addAddress($email);
             $mail->Subject = "Verifica la tua email - ClickNeat";
-            $verify_link = "http://localhost:8000/public/auth/verify_email.php?token=$new_token";
+            $verify_link = "http://localhost:8000/auth/verify_email.php?token=$new_token";
 
             $mail->Body = "<h3>Verifica Account</h3>
                            <p>Clicca qui per verificare la tua email:</p>
