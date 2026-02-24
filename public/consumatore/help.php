@@ -54,7 +54,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['send_help'])) {
 </head>
 <body>
 
-    <!-- Navbar Desktop -->
     <nav class="top-navbar">
         <a href="dashboard_consumatore.php" class="brand-logo">
             <i class="fa-solid fa-leaf" style="color: #05CD99;"></i> ClickNeat
@@ -68,7 +67,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['send_help'])) {
         </div>
     </nav>
 
-    <!-- Header Mobile (fisso in alto) -->
     <div class="mobile-header-fixed">
         <div class="mobile-top-row">
             <a href="dashboard_consumatore.php" class="brand-logo">
@@ -78,7 +76,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['send_help'])) {
                 <i class="fa-solid fa-right-from-bracket"></i>
             </a>
         </div>
-        <!-- Non c'è barra di ricerca in questa pagina -->
     </div>
 
     <header class="hero-section">

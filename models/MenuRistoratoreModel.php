@@ -10,12 +10,18 @@ class MenuRistoratoreModel
 
     public function getByRestaurant($restaurant_id)
     {
-        return $this->db->select("SELECT * FROM menu_items WHERE restaurant_id = ?", [$restaurant_id]);
+        return $this->db->select(
+            "SELECT * FROM menu_items WHERE restaurant_id = ? AND deleted_at IS NULL",
+            [$restaurant_id]
+        );
     }
 
     public function getById($id)
     {
-        return $this->db->selectOne("SELECT * FROM menu_items WHERE id = ?", [$id]);
+        return $this->db->selectOne(
+            "SELECT * FROM menu_items WHERE id = ? AND deleted_at IS NULL",
+            [$id]
+        );
     }
 
     public function create($restaurant_id, $name, $description, $price, $categoria = "altro", $image_url = null)
@@ -37,7 +43,7 @@ class MenuRistoratoreModel
         $data = [
             'name' => $name,
             'description' => $description,
-            'price' => $price
+            'price' => $price 
         ];
 
         if ($image_url) {
@@ -47,22 +53,29 @@ class MenuRistoratoreModel
         return $this->db->update('menu_items', $data, 'id = ?', [$id]);
     }
 
-    public function delete($id)
-    {
-        return $this->db->delete('menu_items', 'id = ?', [$id]);
-    }
     public function update_piatto($id, $data)
     {
         return $this->db->update('menu_items', $data, 'id = ?', [$id]);
     }
 
+    public function delete($id)
+    {
+        return $this->db->update(
+            'menu_items',
+            ['deleted_at' => date('Y-m-d H:i:s')],
+            'id = ?',
+            [$id]
+        );
+    }
+
     public function delete_piatto($id)
     {
-        try {
-            return $this->db->delete('menu_items', 'id = ?', [$id]);
-        } catch (\mysqli_sql_exception $e) {
-            return false;
-        }
+        return $this->db->update(
+            'menu_items',
+            ['deleted_at' => date('Y-m-d H:i:s')],
+            'id = ?',
+            [$id]
+        );
     }
 }
 ?>

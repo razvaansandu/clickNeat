@@ -10,12 +10,18 @@ class RistoranteRistoratoreModel
 
     public function getAllByUserId($user_id)
     {
-        return $this->db->select("SELECT * FROM ristoranti WHERE proprietario_id = ?", [$user_id]);
+        return $this->db->select(
+            "SELECT * FROM ristoranti WHERE proprietario_id = ? AND deleted_at IS NULL",
+            [$user_id]
+        );
     }
 
     public function getByIdAndOwner($id, $owner_id)
     {
-        return $this->db->selectOne("SELECT * FROM ristoranti WHERE id = ? AND proprietario_id = ?", [$id, $owner_id]);
+        return $this->db->selectOne(
+            "SELECT * FROM ristoranti WHERE id = ? AND proprietario_id = ? AND deleted_at IS NULL",
+            [$id, $owner_id]
+        );
     }
 
     public function create($user_id, $nome, $indirizzo, $descrizione, $categoria, $image_url = null)
@@ -49,6 +55,19 @@ class RistoranteRistoratoreModel
 
     public function delete($id)
     {
-        return $this->db->delete('ristoranti', 'id = ?', [$id]);
+        $this->db->update(
+            'menu_items',
+            ['deleted_at' => date('Y-m-d H:i:s')],
+            'restaurant_id = ?',
+            [$id]
+        );
+
+        return $this->db->update(
+            'ristoranti',
+            ['deleted_at' => date('Y-m-d H:i:s')],
+            'id = ?',
+            [$id]
+        );
     }
+
 }

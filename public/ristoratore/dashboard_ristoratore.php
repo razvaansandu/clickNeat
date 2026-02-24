@@ -72,7 +72,7 @@ if (!empty($my_restaurants)) {
                     
                     <?php 
                         if (!empty($rest['image_url'])) 
-                            $img_src = "/" . ltrim($rest['image_url'], '/');
+                            $img_src = "" . ltrim($rest['image_url'], '/');
                     ?>
                     <img src="<?php echo htmlspecialchars($img_src); ?>" 
                          alt="Foto Ristorante" 
