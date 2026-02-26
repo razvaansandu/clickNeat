@@ -874,3 +874,101 @@ a { text-decoration: none; color: inherit; }
     box-shadow: 0 10px 25px rgba(0,0,0,0.2);
     position: relative;
 } 
+        @media screen and (max-width: 768px) {
+            .management-grid { grid-template-columns: 1fr !important; gap: 20px !important; }
+            [style*="grid-template-columns: 2fr 1fr"] { grid-template-columns: 1fr !important; }
+            .menu-item { flex-direction: column !important; align-items: flex-start !important; gap: 10px !important; }
+            .dish-img { width: 100% !important; height: 150px !important; }
+            .order-header { flex-direction: column !important; gap: 10px !important; }
+            .order-actions { flex-direction: column !important; }
+            .page-header { flex-direction: column !important; align-items: flex-start !important; gap: 15px !important; }
+            .msg-box { width: 100% !important; }
+            .category-search-container { width: 100% !important; }
+        }
+
+        .allergene-tag {
+            background: #FFFFFF;
+            border: 1px solid #FF6B6B;
+            color: #2B3674;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(255, 107, 107, 0.1);
+        }
+
+        .allergene-tag:hover {
+            background: #FF6B6B;
+            color: white;
+            border-color: #FF6B6B;
+        }
+
+        .allergene-tag i {
+            font-size: 10px;
+            opacity: 0.7;
+        }
+
+        .allergene-tag:hover i {
+            color: white;
+        }
+
+        .allergeni-container, .allergeni-container-edit {
+            background: #F8F9FF;
+            border-radius: 12px;
+            padding: 15px;
+            border: 1px solid #E0E5F2;
+            margin-bottom: 20px;
+        }
+
+        .selected-allergeni-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+            min-height: 60px;
+            background: white;
+            border-radius: 8px;
+            padding: 10px;
+        }
+
+        .category-result-item.allergene-item {
+            padding: 10px 15px;
+        }
+
+        .category-result-item.allergene-item:hover {
+            background: #FFE5E5;
+        }
+
+        .category-result-item.allergene-item i {
+            color: #FF6B6B;
+        }
+
+        .allergeni-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: #FFE5E5;
+            color: #FF6B6B;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            margin-right: 5px;
+            margin-top: 5px;
+        }
+
+        .allergeni-badge i {
+            font-size: 8px;
+        }
+
+        .allergeni-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 8px;
+        }

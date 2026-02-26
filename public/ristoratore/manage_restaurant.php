@@ -86,6 +86,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $cat_custom = trim($_POST['categoria_custom'] ?? '');
         $categoria = !empty($cat_custom) ? $cat_custom : $cat_select;
         $image_url = $_POST['existing_image'] ?? null;
+        $allergeni = $_POST['allergeni'] ?? '[]';
 
         $badWords = getBadWords();
         $isForbidden = false;
@@ -127,7 +128,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     'description' => $desc,
                     'price' => $price,
                     'categoria' => $categoria,
-                    'image_url' => $image_url
+                    'image_url' => $image_url,
+                    'allergeni' => $allergeni
                 ];
                 if ($menuModel->update_piatto($dish_id, $data)) {
                     $msg = "Piatto modificato con successo!";
@@ -145,6 +147,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $desc = trim($_POST['description']);
         $price = $_POST['price'];
         $categoria = trim($_POST['categoria'] ?? '');
+        $allergeni = $_POST['allergeni'] ?? '[]';
         $image_url = null;
 
         $badWords = getBadWords();
@@ -188,7 +191,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 }
 
                 if ($msg_type !== 'error') {
-                    if ($menuModel->create($restaurant_id, $name, $desc, $price, $categoria, $image_url)) {
+                    if ($menuModel->create($restaurant_id, $name, $desc, $price, $categoria, $image_url, $allergeni)) {
                         $msg = "Piatto aggiunto con successo!";
                         $msg_type = "success";
                     } else {
@@ -225,6 +228,17 @@ function getAllowedCategories()
     }
     return [];
 }
+
+function getAllergeni()
+{
+    $jsonPath = __DIR__ . "/../../config/allergeni.json";
+    if (file_exists($jsonPath)) {
+        $jsonData = file_get_contents($jsonPath);
+        $data = json_decode($jsonData, true);
+        return is_array($data) ? $data : [];
+    }
+    return [];
+}
 ?>
 
 <!DOCTYPE html>
@@ -236,7 +250,7 @@ function getAllowedCategories()
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../../css/style_ristoratori.css">
-    <link rel="stylesheet" href="../../css/category-selector.css">
+    
     <style>
         @media screen and (max-width: 768px) {
             .management-grid { grid-template-columns: 1fr !important; gap: 20px !important; }
@@ -248,6 +262,108 @@ function getAllowedCategories()
             .page-header { flex-direction: column !important; align-items: flex-start !important; gap: 15px !important; }
             .msg-box { width: 100% !important; }
             .category-search-container { width: 100% !important; }
+        }
+
+        /* Stili per allergeni */
+        .allergene-tag {
+            background: #FFFFFF;
+            border: 1px solid #FF6B6B;
+            color: #2B3674;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(255, 107, 107, 0.1);
+        }
+
+        .allergene-tag:hover {
+            background: #FF6B6B;
+            color: white;
+            border-color: #FF6B6B;
+        }
+
+        .allergene-tag i {
+            font-size: 10px;
+            opacity: 0.7;
+        }
+
+        .allergene-tag:hover i {
+            color: white;
+        }
+
+        .allergeni-container, .allergeni-container-edit {
+            background: #F8F9FF;
+            border-radius: 12px;
+            padding: 15px;
+            border: 1px solid #E0E5F2;
+            margin-bottom: 20px;
+        }
+
+        .selected-allergeni-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+            min-height: 60px;
+            background: white;
+            border-radius: 8px;
+            padding: 10px;
+        }
+
+        .category-result-item.allergene-item {
+            padding: 10px 15px;
+        }
+
+        .category-result-item.allergene-item:hover {
+            background: #FFE5E5;
+        }
+
+        .category-result-item.allergene-item i {
+            color: #FF6B6B;
+        }
+
+        .allergeni-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: #FFE5E5;
+            color: #FF6B6B;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            margin-right: 5px;
+            margin-top: 5px;
+        }
+
+        .allergeni-badge i {
+            font-size: 8px;
+        }
+
+        .allergeni-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 8px;
+        }
+        
+        .search-results-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #E0E5F2;
+            border-radius: 8px;
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
     </style>
 </head>
@@ -284,12 +400,12 @@ function getAllowedCategories()
         <?php endif; ?>
 
         <div class="management-grid">
-
             <div class="col-menu">
                 <div class="card" style="margin-bottom: 30px;">
                     <h3 style="color: #2B3674; margin-bottom: 20px;">Aggiungi Piatto</h3>
                     <form method="POST" id="form-piatto" enctype="multipart/form-data">
                         <input type="hidden" name="add_dish" value="1">
+                        
                         <label for="upload-img" class="card card-add" style="cursor: pointer;">
                             <div class="icon-plus">+</div>
                             <div class="text-add" id="file-name">Aggiungi immagine piatto</div>
@@ -322,7 +438,7 @@ function getAllowedCategories()
                                 <input type="text" id="category_search" placeholder="Cerca una categoria (es. Pizza, Pasta, Sushi...)" autocomplete="off" style="padding-right: 30px;">
                                 <i class="fa-solid fa-times-circle" id="clear_search" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: #A3AED0; cursor: pointer; display: none;"></i>
                             </div>
-                            <div id="search_results" class="search-results-dropdown" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #E0E5F2; border-radius: 8px; max-height: 300px; overflow-y: auto; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.1);"></div>
+                            <div id="search_results" class="search-results-dropdown" style="display: none;"></div>
                         </div>
 
                         <div id="selected_category_container" style="display: none;">
@@ -345,6 +461,34 @@ function getAllowedCategories()
                             <i class="fa-solid fa-info-circle"></i> Cerca e seleziona una categoria dall'elenco
                         </small>
 
+                        <!-- SEZIONE ALLERGENI -->
+                        <label style="display:block; margin-bottom:8px; font-weight:600; color: #2B3674; margin-top: 20px;">
+                            Allergeni <span style="color: #E31A1A;">*</span>
+                        </label>
+
+                        <div class="allergeni-container">
+                            <div class="allergeni-search-container" style="position: relative; margin-bottom: 10px;">
+                                <div class="input-wrapper" style="position: relative;">
+                                    <i class="fa-solid fa-search"></i>
+                                    <input type="text" id="allergene_search" placeholder="Cerca un allergene..." autocomplete="off" style="padding-right: 30px;">
+                                    <i class="fa-solid fa-times-circle" id="clear_allergene_search" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: #A3AED0; cursor: pointer; display: none;"></i>
+                                </div>
+                                <div id="allergeni_search_results" class="search-results-dropdown" style="display: none;"></div>
+                            </div>
+
+                            <div id="allergeni_selected_container" class="selected-allergeni-grid">
+                                <div style="grid-column: 1/-1; text-align: center; color: #A3AED0; padding: 20px;">
+                                    <i class="fa-solid fa-ban" style="font-size: 24px; margin-bottom: 10px; display: block;"></i>
+                                    Nessun allergene selezionato
+                                </div>
+                            </div>
+                            
+                            <input type="hidden" name="allergeni" id="selected_allergeni_hidden" value="[]">
+                            <small id="allergeni_help" style="color: #A3AED0; font-size: 11px; display: block; margin-top: 5px;">
+                                <i class="fa-solid fa-info-circle"></i> Cerca e clicca per aggiungere allergeni. Clicca sull'allergene per rimuoverlo.
+                            </small>
+                        </div>
+
                         <button type="submit" class="btn-add" style="background: #1A4D4E; color: white; padding: 6px 7px; border-radius: 12px; font-weight: 500; font-size: 13px; border: 1px solid var(--primary-brand); width: 100px; margin-top: 20px; height:auto">
                             <span>Salva Piatto</span>
                         </button>
@@ -363,8 +507,10 @@ function getAllowedCategories()
                         <p style="text-align:center; color:#A3AED0; padding: 20px;">Ancora nessun piatto.</p>
                     <?php else: ?>
                         <div class="menu-list">
-                            <?php foreach ($menu_items as $item): ?>
-                                <div class="menu-item" style="display: flex; gap: 15px; align-items: center; position: relative;">
+                            <?php foreach ($menu_items as $item): 
+                                $allergeni = !empty($item['allergeni']) ? json_decode($item['allergeni'], true) : [];
+                            ?>
+                                <div class="menu-item" style="display: flex; gap: 15px; align-items: flex-start; position: relative;">
                                     <div class="dish-img" style="width: 60px; height: 60px; border-radius: 10px; overflow: hidden; background: #f4f7fe; flex-shrink: 0;">
                                         <?php if (!empty($item['image_url'])): ?>
                                             <img src="/assets/<?php echo htmlspecialchars(ltrim($item['image_url'], '')); ?>" alt="Foto piatto" style="width: 100%; height: 100%; object-fit: cover;">
@@ -385,6 +531,17 @@ function getAllowedCategories()
                                         <p style="margin: 5px 0 0; font-size: 13px; color: #A3AED0; line-height: 1.4;">
                                             <?php echo htmlspecialchars($item['description']); ?>
                                         </p>
+                                        
+                                        <?php if (!empty($allergeni)): ?>
+                                            <div class="allergeni-list">
+                                                <?php foreach ($allergeni as $allergene): ?>
+                                                    <span class="allergeni-badge" title="Allergene">
+                                                        <i class="fa-solid fa-triangle-exclamation"></i>
+                                                        <?php echo htmlspecialchars($allergene); ?>
+                                                    </span>
+                                                <?php endforeach; ?>
+                                            </div>
+                                        <?php endif; ?>
                                     </div>
 
                                     <div class="dish-actions" style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
@@ -397,10 +554,11 @@ function getAllowedCategories()
                                                 data-price="<?php echo $item['price']; ?>"
                                                 data-cat="<?php echo htmlspecialchars($item['categoria'] ?? 'altro'); ?>"
                                                 data-img="<?php echo htmlspecialchars($item['image_url'] ?? ''); ?>"
+                                                data-allergeni='<?php echo htmlspecialchars($item['allergeni'] ?? '[]'); ?>'
                                                 style="background: none; border: none; color: #4318FF; cursor: pointer; font-size: 14px;">
                                                 <i class="fa-solid fa-pen"></i>
                                             </button>
-                                            <form method="POST" style="margin:0;">
+                                            <form method="POST" style="margin:0;" onsubmit="return confirm('Sei sicuro di voler eliminare questo piatto?');">
                                                 <input type="hidden" name="delete_dish" value="1">
                                                 <input type="hidden" name="dish_id" value="<?php echo $item['id']; ?>">
                                                 <button type="submit" style="background: none; border: none; color: #E31A1A; cursor: pointer; font-size: 14px;">
@@ -463,7 +621,6 @@ function getAllowedCategories()
                                                     <i class="fa-solid fa-xmark"></i> Rifiuta
                                                 </button>
                                             </form>
-
                                         <?php elseif ($order['status'] === 'accepted'): ?>
                                             <form method="POST" style="width: 100%;">
                                                 <input type="hidden" name="update_order" value="1">
@@ -474,12 +631,10 @@ function getAllowedCategories()
                                                     <i class="fa-solid fa-flag-checkered"></i> Concludi Ordine
                                                 </button>
                                             </form>
-
                                         <?php elseif ($order['status'] === 'completed'): ?>
                                             <div style="width: 100%; padding: 10px; background-color: #e6faf5; color: #05CD99; border-radius: 10px; font-weight: 600; text-align: center;">
                                                 <i class="fa-solid fa-circle-check"></i> Completato
                                             </div>
-
                                         <?php elseif ($order['status'] === 'rejected'): ?>
                                             <div style="width: 100%; padding: 10px; background-color: #fff0f0; color: #ff4d4d; border-radius: 10px; font-weight: 600; text-align: center;">
                                                 <i class="fa-solid fa-circle-xmark"></i> Rifiutato
@@ -495,15 +650,17 @@ function getAllowedCategories()
         </div>
     </div>
 
+    <!-- MODAL MODIFICA PIATTO -->
     <div id="editModal" class="modal-overlay">
-        <div class="modal-content">
+        <div class="modal-content" style="max-width: 500px; max-height: 90vh; overflow-y: auto;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                 <h3 style="color: #2B3674; margin: 0;">Modifica Piatto</h3>
                 <button type="button" id="closeEditModal" style="background: none; border: none; font-size: 20px; cursor: pointer; color: #A3AED0;">
                     <i class="fa-solid fa-times"></i>
                 </button>
             </div>
-            <form method="POST" enctype="multipart/form-data">
+            
+            <form method="POST" enctype="multipart/form-data" id="edit-form">
                 <input type="hidden" name="edit_dish" value="1">
                 <input type="hidden" name="dish_id" id="edit_dish_id">
                 <input type="hidden" name="existing_image" id="edit_existing_image">
@@ -544,7 +701,32 @@ function getAllowedCategories()
                     <input type="text" name="categoria_custom" id="edit_piatto_custom" placeholder="Oppure scrivi categoria personalizzata...">
                 </div>
 
-                <button type="submit" class="btn-save" style="width: 100%; margin-top: 20px; border: none; cursor: pointer;">
+                <!-- SEZIONE ALLERGENI MODIFICA -->
+                <label style="display:block; margin-bottom:8px; font-weight:600; color: #2B3674; font-size: 14px; margin-top: 15px;">
+                    Allergeni
+                </label>
+
+                <div class="allergeni-container-edit">
+                    <div class="allergeni-search-container" style="position: relative; margin-bottom: 10px;">
+                        <div class="input-wrapper" style="position: relative;">
+                            <i class="fa-solid fa-search"></i>
+                            <input type="text" id="edit_allergene_search" placeholder="Cerca un allergene..." autocomplete="off" style="padding-right: 30px;">
+                            <i class="fa-solid fa-times-circle" id="edit_clear_allergene_search" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: #A3AED0; cursor: pointer; display: none;"></i>
+                        </div>
+                        <div id="edit_allergeni_search_results" class="search-results-dropdown" style="display: none;"></div>
+                    </div>
+
+                    <div id="edit_allergeni_selected_container" class="selected-allergeni-grid">
+                        <div style="grid-column: 1/-1; text-align: center; color: #A3AED0; padding: 20px;">
+                            <i class="fa-solid fa-ban" style="font-size: 24px; margin-bottom: 10px; display: block;"></i>
+                            Nessun allergene selezionato
+                        </div>
+                    </div>
+                    
+                    <input type="hidden" name="allergeni" id="edit_selected_allergeni_hidden" value="[]">
+                </div>
+
+                <button type="submit" class="btn-save" style="width: 100%; margin-top: 20px; border: none; cursor: pointer; background: #2B3674; color: white; padding: 12px; border-radius: 10px; font-weight: 600;">
                     Salva Modifiche
                 </button>
             </form>
@@ -552,20 +734,31 @@ function getAllowedCategories()
     </div>
 
     <script>
+    // Variabili globali
     const foodCategories = <?php echo json_encode(getAllowedCategories()); ?>;
     const badWords = <?php echo json_encode(getBadWords()); ?>;
+    const allergeniList = <?php echo json_encode(getAllergeni()); ?>;
+    
+    // Stati globali
+    let selectedAllergeni = [];
+    let selectedAllergeniEdit = [];
 
+    // Funzione per controllare parole inappropriate
     function checkBadWords(inputElement, selectElement, something, submitBtn) {
         const value = inputElement.value.trim().toLowerCase();
         const found = badWords.some(word => {
             const regex = new RegExp("\\b" + word + "\\b", "i");
             return regex.test(value);
         });
-        submitBtn.disabled = found;
-        submitBtn.style.opacity = found ? '0.5' : '1';
+        if (submitBtn) {
+            submitBtn.disabled = found;
+            submitBtn.style.opacity = found ? '0.5' : '1';
+        }
     }
 
+    // Inizializzazione
     document.addEventListener('DOMContentLoaded', function () {
+        // Sidebar
         const sidebar = document.querySelector('.sidebar');
         const hamburger = document.querySelector('.hamburger-btn');
         const closeBtn = document.getElementById('closeSidebarBtn');
@@ -584,15 +777,19 @@ function getAllowedCategories()
         if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
         overlay.addEventListener('click', closeSidebar);
 
+        // Inizializza selettori
         initCategorySelector();
+        initAllergeniSelector();
     });
 
+    // Upload immagine
     document.getElementById('upload-img').addEventListener('change', function (e) {
         if (e.target.files.length > 0) {
             document.getElementById('file-name').textContent = e.target.files[0].name;
         }
     });
 
+    // Categoria
     function initCategorySelector() {
         const searchInput = document.getElementById('category_search');
         const resultsDiv = document.getElementById('search_results');
@@ -603,6 +800,8 @@ function getAllowedCategories()
         const changeBtn = document.getElementById('change_category_btn');
         const categoryHelp = document.getElementById('category_help');
         const btnSave = document.querySelector('.btn-add');
+
+        if (!searchInput) return;
 
         btnSave.disabled = true;
         btnSave.style.opacity = '0.5';
@@ -698,6 +897,7 @@ function getAllowedCategories()
         });
     }
 
+    // Validazione form categoria
     document.getElementById('form-piatto').addEventListener('submit', function (e) {
         const selectedHidden = document.getElementById('selected_category_hidden');
         if (!selectedHidden.value) {
@@ -708,11 +908,219 @@ function getAllowedCategories()
         }
     });
 
+    // ALLERGENI - Funzioni principali
+    function initAllergeniSelector() {
+        const searchInput = document.getElementById('allergene_search');
+        const resultsDiv = document.getElementById('allergeni_search_results');
+        const clearBtn = document.getElementById('clear_allergene_search');
+
+        if (!searchInput) return;
+
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.trim().toLowerCase();
+            clearBtn.style.display = searchTerm.length > 0 ? 'block' : 'none';
+            
+            if (searchTerm.length < 1) {
+                resultsDiv.style.display = 'none';
+                return;
+            }
+
+            const matches = allergeniList.filter(allergene => 
+                allergene.toLowerCase().includes(searchTerm) && 
+                !selectedAllergeni.includes(allergene)
+            ).slice(0, 10);
+
+            if (matches.length > 0) {
+                showAllergeniResults(matches, searchTerm, resultsDiv, false);
+            } else {
+                resultsDiv.innerHTML = `<div style="padding: 20px; text-align: center; color: #A3AED0;">
+                    <i class="fa-solid fa-search" style="font-size: 24px; margin-bottom: 10px; display: block;"></i>
+                    Nessun allergene trovato per "${searchTerm}"
+                </div>`;
+                resultsDiv.style.display = 'block';
+            }
+        });
+
+        clearBtn.addEventListener('click', function() {
+            searchInput.value = '';
+            resultsDiv.style.display = 'none';
+            clearBtn.style.display = 'none';
+            searchInput.focus();
+        });
+
+        document.addEventListener('click', function(e) {
+            if (!searchInput.contains(e.target) && !resultsDiv.contains(e.target)) {
+                resultsDiv.style.display = 'none';
+            }
+        });
+    }
+
+    function initEditAllergeniSelector() {
+        const searchInput = document.getElementById('edit_allergene_search');
+        const resultsDiv = document.getElementById('edit_allergeni_search_results');
+        const clearBtn = document.getElementById('edit_clear_allergene_search');
+
+        if (!searchInput) return;
+
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.trim().toLowerCase();
+            clearBtn.style.display = searchTerm.length > 0 ? 'block' : 'none';
+            
+            if (searchTerm.length < 1) {
+                resultsDiv.style.display = 'none';
+                return;
+            }
+
+            const matches = allergeniList.filter(allergene => 
+                allergene.toLowerCase().includes(searchTerm) && 
+                !selectedAllergeniEdit.includes(allergene)
+            ).slice(0, 10);
+
+            if (matches.length > 0) {
+                showAllergeniResults(matches, searchTerm, resultsDiv, true);
+            } else {
+                resultsDiv.innerHTML = `<div style="padding: 20px; text-align: center; color: #A3AED0;">
+                    <i class="fa-solid fa-search" style="font-size: 24px; margin-bottom: 10px; display: block;"></i>
+                    Nessun allergene trovato per "${searchTerm}"
+                </div>`;
+                resultsDiv.style.display = 'block';
+            }
+        });
+
+        clearBtn.addEventListener('click', function() {
+            searchInput.value = '';
+            resultsDiv.style.display = 'none';
+            clearBtn.style.display = 'none';
+            searchInput.focus();
+        });
+
+        document.addEventListener('click', function(e) {
+            if (!searchInput.contains(e.target) && !resultsDiv.contains(e.target)) {
+                resultsDiv.style.display = 'none';
+            }
+        });
+    }
+
+    function showAllergeniResults(matches, searchTerm, resultsDiv, isEdit = false) {
+        let html = '<div style="padding: 8px 0;">';
+        matches.forEach(allergene => {
+            const escapedAllergene = allergene.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+            const highlighted = allergene.replace(new RegExp(searchTerm, 'gi'), 
+                match => `<strong style="color: #FF6B6B;">${match}</strong>`);
+            html += `<div class="category-result-item allergene-item" 
+                        data-allergene="${escapedAllergene}" 
+                        style="padding: 12px 15px; cursor: pointer; border-bottom: 1px solid #f0f0f0;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <i class="fa-solid fa-triangle-exclamation" style="color: #FF6B6B; width: 20px;"></i>
+                    <span style="flex: 1;">${highlighted}</span>
+                    <i class="fa-solid fa-plus-circle" style="color: #05CD99;"></i>
+                </div>
+            </div>`;
+        });
+        html += '</div>';
+        resultsDiv.innerHTML = html;
+        resultsDiv.style.display = 'block';
+
+        // CORREZIONE: Usa resultsDiv.id per selezionare gli elementi corretti
+        document.querySelectorAll('#' + resultsDiv.id + ' .allergene-item').forEach(item => {
+            // Rimuovi eventuali listener precedenti
+            item.removeEventListener('click', window.allergeneClickHandler);
+            
+            // Crea un nuovo handler
+            window.allergeneClickHandler = function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                const allergene = this.getAttribute('data-allergene');
+                addAllergene(allergene, isEdit);
+            };
+            
+            item.addEventListener('click', window.allergeneClickHandler);
+            item.addEventListener('mouseenter', function() { this.style.backgroundColor = '#F4F7FE'; });
+            item.addEventListener('mouseleave', function() { this.style.backgroundColor = ''; });
+        });
+    }
+
+    function addAllergene(allergene, isEdit = false) {
+        if (!allergene) return;
+        
+        if (isEdit) {
+            if (!selectedAllergeniEdit.includes(allergene)) {
+                selectedAllergeniEdit.push(allergene);
+                updateAllergeniDisplay(true);
+                
+                // Nascondi risultati e pulisci ricerca
+                const searchInput = document.getElementById('edit_allergene_search');
+                const resultsDiv = document.getElementById('edit_allergeni_search_results');
+                const clearBtn = document.getElementById('edit_clear_allergene_search');
+                
+                if (searchInput) searchInput.value = '';
+                if (resultsDiv) resultsDiv.style.display = 'none';
+                if (clearBtn) clearBtn.style.display = 'none';
+            }
+        } else {
+            if (!selectedAllergeni.includes(allergene)) {
+                selectedAllergeni.push(allergene);
+                updateAllergeniDisplay(false);
+                
+                const searchInput = document.getElementById('allergene_search');
+                const resultsDiv = document.getElementById('allergeni_search_results');
+                const clearBtn = document.getElementById('clear_allergene_search');
+                
+                if (searchInput) searchInput.value = '';
+                if (resultsDiv) resultsDiv.style.display = 'none';
+                if (clearBtn) clearBtn.style.display = 'none';
+            }
+        }
+    }
+
+    function removeAllergene(allergene, isEdit = false) {
+        if (!allergene) return;
+        
+        if (isEdit) {
+            selectedAllergeniEdit = selectedAllergeniEdit.filter(a => a !== allergene);
+            updateAllergeniDisplay(true);
+        } else {
+            selectedAllergeni = selectedAllergeni.filter(a => a !== allergene);
+            updateAllergeniDisplay(false);
+        }
+    }
+
+    function updateAllergeniDisplay(isEdit = false) {
+        const container = isEdit ? 
+            document.getElementById('edit_allergeni_selected_container') : 
+            document.getElementById('allergeni_selected_container');
+        const hiddenInput = isEdit ? 
+            document.getElementById('edit_selected_allergeni_hidden') : 
+            document.getElementById('selected_allergeni_hidden');
+        const list = isEdit ? selectedAllergeniEdit : selectedAllergeni;
+
+        if (!container) return;
+
+        if (list.length === 0) {
+            container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #A3AED0; padding: 20px;"><i class="fa-solid fa-ban" style="font-size: 24px; margin-bottom: 10px; display: block;"></i>Nessun allergene selezionato</div>';
+            hiddenInput.value = '[]';
+        } else {
+            let html = '';
+            list.forEach(allergene => {
+                // Escape degli apici per JavaScript nell'attributo onclick
+                const escapedAllergene = allergene.replace(/'/g, "\\'");
+                html += `<div class="allergene-tag" onclick="removeAllergene('${escapedAllergene}', ${isEdit})" title="Clicca per rimuovere">
+                    <span>${allergene}</span>
+                    <i class="fa-solid fa-times-circle"></i>
+                </div>`;
+            });
+            container.innerHTML = html;
+            hiddenInput.value = JSON.stringify(list);
+        }
+    }
+
+    // Gestione Modal Modifica
     const editModal = document.getElementById('editModal');
     const closeEditModal = document.getElementById('closeEditModal');
 
     document.querySelectorAll('.btn-open-edit').forEach(btn => {
         btn.addEventListener('click', function () {
+            // Dati base
             document.getElementById('edit_dish_id').value = this.dataset.id;
             document.getElementById('edit_name').value = this.dataset.name;
             document.getElementById('edit_price').value = this.dataset.price;
@@ -720,6 +1128,7 @@ function getAllowedCategories()
             document.getElementById('edit_existing_image').value = this.dataset.img;
             document.getElementById('edit-file-name').textContent = "Sostituisci Immagine";
 
+            // Categoria
             const cat = this.dataset.cat.toLowerCase();
             const select = document.getElementById('edit_piatto_select');
             const custom = document.getElementById('edit_piatto_custom');
@@ -738,23 +1147,86 @@ function getAllowedCategories()
                 select.disabled = false;
             }
 
+            // Allergeni
+            try {
+                const allergeniData = this.dataset.allergeni ? JSON.parse(this.dataset.allergeni) : [];
+                selectedAllergeniEdit = Array.isArray(allergeniData) ? allergeniData : [];
+            } catch (e) {
+                selectedAllergeniEdit = [];
+            }
+            
+            updateAllergeniDisplay(true);
+            
+            // Inizializza selettore allergeni per modifica se non già fatto
+            if (!document.getElementById('edit_allergene_search')._initialized) {
+                initEditAllergeniSelector();
+                document.getElementById('edit_allergene_search')._initialized = true;
+            }
+
             editModal.style.display = 'flex';
         });
     });
 
-    closeEditModal.addEventListener('click', () => { editModal.style.display = 'none'; });
-    window.addEventListener('click', (e) => { if (e.target === editModal) editModal.style.display = 'none'; });
+    closeEditModal.addEventListener('click', () => { 
+        editModal.style.display = 'none'; 
+        selectedAllergeniEdit = [];
+    });
+    
+    window.addEventListener('click', (e) => { 
+        if (e.target === editModal) {
+            editModal.style.display = 'none';
+            selectedAllergeniEdit = [];
+        }
+    });
 
+    // Upload immagine modifica
+    document.getElementById('edit-upload-img').addEventListener('change', function (e) {
+        if (e.target.files.length > 0) {
+            document.getElementById('edit-file-name').textContent = e.target.files[0].name;
+        }
+    });
+
+    // Controllo parole inappropriate
     const editCustomInput = document.getElementById('edit_piatto_custom');
     const editSelect = document.getElementById('edit_piatto_select');
     const editSubmitBtn = editModal.querySelector('.btn-save');
 
-    editCustomInput.addEventListener('input', function () { checkBadWords(this, editSelect, null, editSubmitBtn); });
-    editModal.querySelector('form').addEventListener('submit', function () { editSelect.disabled = false; });
+    if (editCustomInput) {
+        editCustomInput.addEventListener('input', function () { 
+            checkBadWords(this, editSelect, null, editSubmitBtn); 
+        });
+    }
 
-    document.getElementById('edit-upload-img').addEventListener('change', function (e) {
-        if (e.target.files.length > 0) {
-            document.getElementById('edit-file-name').textContent = e.target.files[0].name;
+    if (editModal) {
+        editModal.querySelector('form').addEventListener('submit', function () { 
+            if (editSelect) editSelect.disabled = false; 
+        });
+    }
+
+    // Validazione finale form principale
+    document.getElementById('form-piatto').addEventListener('submit', function(e) {
+        const selectedHidden = document.getElementById('selected_category_hidden');
+        const allergeniHidden = document.getElementById('selected_allergeni_hidden');
+        
+        if (!selectedHidden.value) {
+            e.preventDefault();
+            alert('Per favore, seleziona una categoria per il piatto.');
+            return;
+        }
+        
+        try {
+            const allergeni = JSON.parse(allergeniHidden.value || '[]');
+            if (allergeni.length === 0) {
+                e.preventDefault();
+                alert('Per favore, seleziona almeno un allergene per il piatto.');
+                document.getElementById('allergene_search').style.borderColor = '#E31A1A';
+                setTimeout(() => { 
+                    document.getElementById('allergene_search').style.borderColor = '#d1d9e2'; 
+                }, 3000);
+            }
+        } catch (e) {
+            e.preventDefault();
+            alert('Errore nella selezione degli allergeni.');
         }
     });
     </script>
