@@ -66,7 +66,7 @@ foreach ($raw_restaurants as $row) {
             <input type="text" placeholder="Cerca ristoranti, pizza, sushi..." id="searchInput" />
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
                 <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
-            </svg>
+            </svg> 
         </div>
         <div class="nav-links">
             <a href="dashboard_consumatore.php" class="nav-item active">
@@ -134,26 +134,26 @@ foreach ($raw_restaurants as $row) {
     </header>
 
     <div class="categories-wrapper">
-        <div class="categories-container">
-            <div class="category-pill active" data-category="all">
-                <i class="fa-solid fa-utensils"></i> Tutti
-            </div>
-            <div class="category-pill" data-category="pizza">
-                <i class="fa-solid fa-pizza-slice"></i> Pizza
-            </div>
-            <div class="category-pill" data-category="burger">
-                <i class="fa-solid fa-burger"></i> Burger
-            </div>
-            <div class="category-pill" data-category="sushi">
-                <i class="fa-solid fa-fish"></i> Sushi
-            </div>
-            <div class="category-pill" data-category="pasta">
-                <i class="fa-solid fa-bowl-food"></i> Pasta
-            </div>
-            <div class="category-pill" data-category="dolci">
-                <i class="fa-solid fa-ice-cream"></i> Dolci
-            </div>
-        </div>
+       <div class="categories-container">
+    <div class="category-pill active" data-category="all">
+        <i class="fa-solid fa-utensils"></i> Tutti
+    </div>
+    <div class="category-pill" data-category="messicano">
+        <i class="fa-solid fa-pizza-slice"></i> Messicano
+    </div>
+    <div class="category-pill" data-category="burger">
+        <i class="fa-solid fa-burger"></i> Burger
+    </div>
+    <div class="category-pill" data-category="giapponese">
+        <i class="fa-solid fa-fish"></i> Sushi
+    </div>
+    <div class="category-pill" data-category="kebab">
+        <i class="fa-solid fa-drumstick-bite"></i> Kebab
+    </div>
+    <div class="category-pill" data-category="pasticceria">
+        <i class="fa-solid fa-seedling"></i> Dolci
+    </div>
+</div>
     </div>
 
     <div class="main-container">
@@ -168,7 +168,7 @@ foreach ($raw_restaurants as $row) {
                 </div>
             <?php else: ?>
                 <?php foreach ($restaurants as $rest): ?>
-                    <a href="menu.php?id=<?php echo $rest['id']; ?>" class="restaurant-card" data-keywords="<?php echo htmlspecialchars($rest['category_label']); ?>">
+                    <a href="menu.php?id=<?php echo $rest['id']; ?>" class="restaurant-card" data-name="<?php echo htmlspecialchars($rest['nome']); ?>" data-keywords="<?php echo htmlspecialchars($rest['category_label']); ?>">
                         <img src="<?php echo $rest['image_url']; ?>" alt="Cibo" class="card-img-top" style="object-fit: cover; height: 160px; width: 100%;">
                         <div class="card-body">
                             <div class="badge-cat"><?php echo htmlspecialchars($rest['category_label']); ?></div>
@@ -196,13 +196,14 @@ foreach ($raw_restaurants as $row) {
     const cards = document.querySelectorAll('.restaurant-card');
     const categoryPills = document.querySelectorAll('.category-pill');
     let currentCategory = 'all';
-
+ 
     function filterCards(searchTerm = '') {
+        const term = searchTerm.toLowerCase();
         cards.forEach(card => {
-            const text = card.innerText.toLowerCase();
-            const keywords = card.dataset.keywords.toLowerCase();
-            const matchesSearch = searchTerm === '' || text.includes(searchTerm.toLowerCase());
-            const matchesCategory = currentCategory === 'all' || keywords.includes(currentCategory);
+            const name = card.dataset.name.toLowerCase();
+            const category = card.dataset.keywords.toLowerCase();
+            const matchesSearch = term === '' || name.includes(term) || category.includes(term);
+            const matchesCategory = currentCategory === 'all' || category.includes(currentCategory);
             card.style.display = (matchesSearch && matchesCategory) ? '' : 'none';
         });
     }

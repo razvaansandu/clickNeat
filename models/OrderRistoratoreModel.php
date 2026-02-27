@@ -8,7 +8,6 @@ class OrderRistoratoreModel
         $this->db = $db;
     }
 
-
     public function create($user_id, $restaurant_id, $total_amount)
     {
         $data = [
@@ -51,10 +50,37 @@ class OrderRistoratoreModel
         return $this->db->select($sql, [$order_id]);
     }
 
-
     public function updateStatus($order_id, $status)
     {
         return $this->db->update('orders', ['status' => $status], 'id = ?', [$order_id]);
+    }
+
+    public function accept($order_id, $owner_id)
+    {
+        $sql = "SELECT o.id FROM orders o
+                JOIN ristoranti r ON o.restaurant_id = r.id
+                WHERE o.id = ? AND r.proprietario_id = ? AND o.status = 'pending'";
+        $order = $this->db->selectOne($sql, [$order_id, $owner_id]);
+
+        if (!$order) {
+            return false;
+        }
+
+        return $this->updateStatus($order_id, 'accepted');
+    }
+
+    public function reject($order_id, $owner_id)
+    {
+        $sql = "SELECT o.id FROM orders o
+                JOIN ristoranti r ON o.restaurant_id = r.id
+                WHERE o.id = ? AND r.proprietario_id = ? AND o.status = 'pending'";
+        $order = $this->db->selectOne($sql, [$order_id, $owner_id]);
+
+        if (!$order) {
+            return false;
+        }
+
+        return $this->updateStatus($order_id, 'rejected');
     }
 
     public function getByOwnerId($owner_id)
@@ -131,10 +157,12 @@ class OrderRistoratoreModel
     {
         $this->db->beginTransaction();
     }
+
     public function commit()
     {
         $this->db->commit();
     }
+
     public function rollback()
     {
         $this->db->rollback();

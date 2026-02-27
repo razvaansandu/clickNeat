@@ -11,7 +11,7 @@ $mail->isSMTP();
 $mail->SMTPAuth = true;
 
 $mail->Host = 'smtp.gmail.com';
-$mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+$mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS; 
 $mail->Port = 587;
 $mail->Username = 'clickneat2026@gmail.com';
 $mail->Password = 'mgtt fvkc knrh fgso'; 
