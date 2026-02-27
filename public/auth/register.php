@@ -43,13 +43,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $username_err = "L'username deve avere almeno 3 caratteri.";
     } elseif (strlen(trim($_POST["username"])) > 50) {
         $username_err = "L'username è troppo lungo.";
-    } else {
-        if ($registerModel->findByUsername(trim($_POST["username"]))) {
-            $username_err = "Questo username è già in uso.";
-        } else {
-            $username = trim($_POST["username"]);
-        }
-    }
+    } 
 
     if (empty(trim($_POST["email"]))) {
         $email_err = "Inserisci un'email.";
