@@ -116,7 +116,7 @@ class MenuRistoratoreModel
     public function delete_piatto($id)
     {
         $orderCheck = $this->db->selectOne(
-            "SELECT id FROM order_items WHERE menu_item_id = ? LIMIT 1",
+            "SELECT id FROM order_items WHERE dish_id = ? LIMIT 1",
             [$id]
         );
         
