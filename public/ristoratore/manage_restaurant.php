@@ -264,7 +264,6 @@ function getAllergeni()
             .category-search-container { width: 100% !important; }
         }
 
-        /* Stili per allergeni */
         .allergene-tag {
             background: #FFFFFF;
             border: 1px solid #FF6B6B;
