@@ -461,7 +461,6 @@ function getAllergeni()
                             <i class="fa-solid fa-info-circle"></i> Cerca e seleziona una categoria dall'elenco
                         </small>
 
-                        <!-- SEZIONE ALLERGENI -->
                         <label style="display:block; margin-bottom:8px; font-weight:600; color: #2B3674; margin-top: 20px;">
                             Allergeni <span style="color: #E31A1A;">*</span>
                         </label>
@@ -650,7 +649,6 @@ function getAllergeni()
         </div>
     </div>
 
-    <!-- MODAL MODIFICA PIATTO -->
     <div id="editModal" class="modal-overlay">
         <div class="modal-content" style="max-width: 500px; max-height: 90vh; overflow-y: auto;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
@@ -701,7 +699,6 @@ function getAllergeni()
                     <input type="text" name="categoria_custom" id="edit_piatto_custom" placeholder="Oppure scrivi categoria personalizzata...">
                 </div>
 
-                <!-- SEZIONE ALLERGENI MODIFICA -->
                 <label style="display:block; margin-bottom:8px; font-weight:600; color: #2B3674; font-size: 14px; margin-top: 15px;">
                     Allergeni
                 </label>
@@ -734,16 +731,13 @@ function getAllergeni()
     </div>
 
     <script>
-    // Variabili globali
     const foodCategories = <?php echo json_encode(getAllowedCategories()); ?>;
     const badWords = <?php echo json_encode(getBadWords()); ?>;
     const allergeniList = <?php echo json_encode(getAllergeni()); ?>;
     
-    // Stati globali
     let selectedAllergeni = [];
     let selectedAllergeniEdit = [];
 
-    // Funzione per controllare parole inappropriate
     function checkBadWords(inputElement, selectElement, something, submitBtn) {
         const value = inputElement.value.trim().toLowerCase();
         const found = badWords.some(word => {
@@ -756,9 +750,7 @@ function getAllergeni()
         }
     }
 
-    // Inizializzazione
     document.addEventListener('DOMContentLoaded', function () {
-        // Sidebar
         const sidebar = document.querySelector('.sidebar');
         const hamburger = document.querySelector('.hamburger-btn');
         const closeBtn = document.getElementById('closeSidebarBtn');
@@ -777,19 +769,16 @@ function getAllergeni()
         if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
         overlay.addEventListener('click', closeSidebar);
 
-        // Inizializza selettori
         initCategorySelector();
         initAllergeniSelector();
     });
 
-    // Upload immagine
     document.getElementById('upload-img').addEventListener('change', function (e) {
         if (e.target.files.length > 0) {
             document.getElementById('file-name').textContent = e.target.files[0].name;
         }
     });
 
-    // Categoria
     function initCategorySelector() {
         const searchInput = document.getElementById('category_search');
         const resultsDiv = document.getElementById('search_results');
@@ -897,7 +886,6 @@ function getAllergeni()
         });
     }
 
-    // Validazione form categoria
     document.getElementById('form-piatto').addEventListener('submit', function (e) {
         const selectedHidden = document.getElementById('selected_category_hidden');
         if (!selectedHidden.value) {
@@ -908,7 +896,6 @@ function getAllergeni()
         }
     });
 
-    // ALLERGENI - Funzioni principali
     function initAllergeniSelector() {
         const searchInput = document.getElementById('allergene_search');
         const resultsDiv = document.getElementById('allergeni_search_results');
@@ -1021,12 +1008,9 @@ function getAllergeni()
         resultsDiv.innerHTML = html;
         resultsDiv.style.display = 'block';
 
-        // CORREZIONE: Usa resultsDiv.id per selezionare gli elementi corretti
         document.querySelectorAll('#' + resultsDiv.id + ' .allergene-item').forEach(item => {
-            // Rimuovi eventuali listener precedenti
             item.removeEventListener('click', window.allergeneClickHandler);
             
-            // Crea un nuovo handler
             window.allergeneClickHandler = function(e) {
                 e.preventDefault();
                 e.stopPropagation();
@@ -1048,7 +1032,6 @@ function getAllergeni()
                 selectedAllergeniEdit.push(allergene);
                 updateAllergeniDisplay(true);
                 
-                // Nascondi risultati e pulisci ricerca
                 const searchInput = document.getElementById('edit_allergene_search');
                 const resultsDiv = document.getElementById('edit_allergeni_search_results');
                 const clearBtn = document.getElementById('edit_clear_allergene_search');
@@ -1102,7 +1085,6 @@ function getAllergeni()
         } else {
             let html = '';
             list.forEach(allergene => {
-                // Escape degli apici per JavaScript nell'attributo onclick
                 const escapedAllergene = allergene.replace(/'/g, "\\'");
                 html += `<div class="allergene-tag" onclick="removeAllergene('${escapedAllergene}', ${isEdit})" title="Clicca per rimuovere">
                     <span>${allergene}</span>
@@ -1114,13 +1096,11 @@ function getAllergeni()
         }
     }
 
-    // Gestione Modal Modifica
     const editModal = document.getElementById('editModal');
     const closeEditModal = document.getElementById('closeEditModal');
 
     document.querySelectorAll('.btn-open-edit').forEach(btn => {
         btn.addEventListener('click', function () {
-            // Dati base
             document.getElementById('edit_dish_id').value = this.dataset.id;
             document.getElementById('edit_name').value = this.dataset.name;
             document.getElementById('edit_price').value = this.dataset.price;
@@ -1128,7 +1108,6 @@ function getAllergeni()
             document.getElementById('edit_existing_image').value = this.dataset.img;
             document.getElementById('edit-file-name').textContent = "Sostituisci Immagine";
 
-            // Categoria
             const cat = this.dataset.cat.toLowerCase();
             const select = document.getElementById('edit_piatto_select');
             const custom = document.getElementById('edit_piatto_custom');
@@ -1147,7 +1126,6 @@ function getAllergeni()
                 select.disabled = false;
             }
 
-            // Allergeni
             try {
                 const allergeniData = this.dataset.allergeni ? JSON.parse(this.dataset.allergeni) : [];
                 selectedAllergeniEdit = Array.isArray(allergeniData) ? allergeniData : [];
@@ -1157,7 +1135,6 @@ function getAllergeni()
             
             updateAllergeniDisplay(true);
             
-            // Inizializza selettore allergeni per modifica se non già fatto
             if (!document.getElementById('edit_allergene_search')._initialized) {
                 initEditAllergeniSelector();
                 document.getElementById('edit_allergene_search')._initialized = true;
@@ -1179,14 +1156,12 @@ function getAllergeni()
         }
     });
 
-    // Upload immagine modifica
     document.getElementById('edit-upload-img').addEventListener('change', function (e) {
         if (e.target.files.length > 0) {
             document.getElementById('edit-file-name').textContent = e.target.files[0].name;
         }
     });
 
-    // Controllo parole inappropriate
     const editCustomInput = document.getElementById('edit_piatto_custom');
     const editSelect = document.getElementById('edit_piatto_select');
     const editSubmitBtn = editModal.querySelector('.btn-save');
@@ -1203,7 +1178,6 @@ function getAllergeni()
         });
     }
 
-    // Validazione finale form principale
     document.getElementById('form-piatto').addEventListener('submit', function(e) {
         const selectedHidden = document.getElementById('selected_category_hidden');
         const allergeniHidden = document.getElementById('selected_allergeni_hidden');

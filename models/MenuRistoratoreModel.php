@@ -15,7 +15,6 @@ class MenuRistoratoreModel
             [$restaurant_id]
         );
         
-        // Decodifica gli allergeni per ogni piatto
         foreach ($results as &$item) {
             if (isset($item['allergeni']) && !empty($item['allergeni'])) {
                 $item['allergeni_array'] = json_decode($item['allergeni'], true);
@@ -34,7 +33,6 @@ class MenuRistoratoreModel
             [$id]
         );
         
-        // Decodifica gli allergeni
         if ($result && isset($result['allergeni']) && !empty($result['allergeni'])) {
             $result['allergeni_array'] = json_decode($result['allergeni'], true);
         } elseif ($result) {
@@ -49,7 +47,6 @@ class MenuRistoratoreModel
         $final_image = (!empty($image_url)) ? $image_url : null;
         $final_category = (!empty($categoria)) ? $categoria : "altro";
         
-        // Verifica che gli allergeni siano un JSON valido
         if (is_array($allergeni)) {
             $allergeni = json_encode($allergeni);
         } elseif (!is_string($allergeni) || !$this->isJson($allergeni)) {
@@ -81,7 +78,6 @@ class MenuRistoratoreModel
         }
         
         if ($allergeni !== null) {
-            // Verifica che gli allergeni siano un JSON valido
             if (is_array($allergeni)) {
                 $data['allergeni'] = json_encode($allergeni);
             } elseif (!is_string($allergeni) || !$this->isJson($allergeni)) {
@@ -96,7 +92,6 @@ class MenuRistoratoreModel
 
     public function update_piatto($id, $data)
     {
-        // Gestione speciale per gli allergeni
         if (isset($data['allergeni'])) {
             if (is_array($data['allergeni'])) {
                 $data['allergeni'] = json_encode($data['allergeni']);
@@ -120,15 +115,12 @@ class MenuRistoratoreModel
 
     public function delete_piatto($id)
     {
-        // Prima verifica se il piatto è presente in qualche ordine
         $orderCheck = $this->db->selectOne(
             "SELECT id FROM order_items WHERE menu_item_id = ? LIMIT 1",
             [$id]
         );
         
         if ($orderCheck) {
-            // Il piatto è in un ordine, non possiamo eliminarlo fisicamente
-            // ma possiamo nasconderlo con soft delete
             return $this->db->update(
                 'menu_items',
                 ['deleted_at' => date('Y-m-d H:i:s')],
@@ -136,14 +128,10 @@ class MenuRistoratoreModel
                 [$id]
             );
         } else {
-            // Il piatto non è in nessun ordine, possiamo eliminarlo definitivamente
             return $this->db->delete('menu_items', 'id = ?', [$id]);
         }
     }
 
-    /**
-     * Ottiene tutti i piatti con un determinato allergene
-     */
     public function getByAllergene($restaurant_id, $allergene)
     {
         $results = $this->db->select(
@@ -151,7 +139,6 @@ class MenuRistoratoreModel
             [$restaurant_id]
         );
         
-        // Filtra manualmente i risultati per l'allergene specificato
         $filtered = [];
         foreach ($results as $item) {
             if (isset($item['allergeni']) && !empty($item['allergeni'])) {
@@ -166,9 +153,6 @@ class MenuRistoratoreModel
         return $filtered;
     }
 
-    /**
-     * Ottiene statistiche sugli allergeni per un ristorante
-     */
     public function getAllergeniStats($restaurant_id)
     {
         $results = $this->db->select(
@@ -195,9 +179,6 @@ class MenuRistoratoreModel
         return $stats;
     }
 
-    /**
-     * Verifica se una stringa è un JSON valido
-     */
     private function isJson($string)
     {
         if (!is_string($string)) {
@@ -207,9 +188,6 @@ class MenuRistoratoreModel
         return (json_last_error() == JSON_ERROR_NONE);
     }
 
-    /**
-     * Ottiene tutti gli allergeni unici presenti nei piatti del ristorante
-     */
     public function getAllergeniUnici($restaurant_id)
     {
         $results = $this->db->select(
@@ -235,9 +213,6 @@ class MenuRistoratoreModel
         return $allergeniUnici;
     }
 
-    /**
-     * Aggiorna solo gli allergeni di un piatto
-     */
     public function updateAllergeni($id, $allergeni)
     {
         if (is_array($allergeni)) {

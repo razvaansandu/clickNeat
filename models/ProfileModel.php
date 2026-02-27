@@ -16,8 +16,26 @@ class ProfileModel extends LoginModel
             [$email, $username, $id]
         );
 
-        if ($existing) return false;
+        if ($existing)
+            return false;
 
         return $this->db->update('users', ['username' => $username, 'email' => $email], 'id = ?', [$id]);
+    }
+
+    public function deleteAccount($user_id)
+    {
+        $anonymous_email = 'deleted_' . $user_id . '_' . time() . '@deleted.invalid';
+
+        return $this->db->update(
+            'users',
+            [
+                'username' => 'Utente Eliminato',
+                'email' => $anonymous_email,
+                'google_id' => null,
+                'deleted_at' => date('Y-m-d H:i:s')
+            ],
+            'id = ?',
+            [$user_id]
+        );
     }
 }
