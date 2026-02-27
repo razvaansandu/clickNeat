@@ -31,36 +31,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
         }
     }
-
-    if (isset($_POST['update_pass'])) {
-        $old_pass = $_POST['old_password'];
-        $new_pass = $_POST['new_password'];
-        $confirm_pass = $_POST['confirm_password'];
-
-        if ($new_pass !== $confirm_pass) {
-            $msg = "Le nuove password non coincidono.";
-            $msg_type = "error";
-        } else {
-            $hashed_password = $profileModel->getPasswordHash($user_id);
-
-            if ($hashed_password && password_verify($old_pass, $hashed_password)) {
-                $new_param_password = password_hash($new_pass, PASSWORD_DEFAULT);
-
-                if ($profileModel->updatePassword($user_id, $new_param_password)) {
-                    $msg = "Password aggiornata correttamente!";
-                    $msg_type = "success";
-                } else {
-                    $msg = "Errore aggiornamento password.";
-                    $msg_type = "error";
-                }
-            } else {
-                $msg = "La vecchia password non è corretta.";
-                $msg_type = "error";
-            }
-        }
-    }
 }
-
 $userData = $profileModel->getProfileData($user_id);
 $username = $userData['username'];
 $email = $userData['email'];
@@ -210,33 +181,9 @@ $created_at = $userData['created_at'];
                         <button type="submit" name="update_info" class="btn-save" style="background: linear-gradient(135deg, #05CD99, #02A176); color: white; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-weight: 600;">Salva Modifiche</button>
                     </div>
                 </form>
-
-                <div style="margin: 40px 0; border-top: 1px solid #eee;"></div>
-
-                <div class="form-title" style="color: #2B3674; font-size: 18px; font-weight: 700; margin-bottom: 20px;">Sicurezza Password</div>
-                <form method="POST" action="profile_consumatore.php">
-                    <div class="input-group" style="margin-bottom: 20px;">
-                        <label style="display: block; color: #2B3674; font-size: 14px; margin-bottom: 8px;">Password Attuale</label>
-                        <input type="password" name="old_password" placeholder="Conferma la tua identità" required style="width: 100%; padding: 10px; border: 1px solid #E0E5F2; border-radius: 10px;">
-                    </div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
-                        <div class="input-group">
-                            <label style="display: block; color: #2B3674; font-size: 14px; margin-bottom: 8px;">Nuova Password</label>
-                            <input type="password" name="new_password" placeholder="Min. 8 caratteri" required style="width: 100%; padding: 10px; border: 1px solid #E0E5F2; border-radius: 10px;">
-                        </div>
-                        <div class="input-group">
-                            <label style="display: block; color: #2B3674; font-size: 14px; margin-bottom: 8px;">Conferma Password</label>
-                            <input type="password" name="confirm_password" placeholder="Ripeti password" required style="width: 100%; padding: 10px; border: 1px solid #E0E5F2; border-radius: 10px;">
-                        </div>
-                    </div>
-                    <div style="text-align: right;">
-                        <button type="submit" name="update_pass" class="btn-save" style="background: #2B3674; color: white; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-weight: 600;">Aggiorna Password</button>
-                    </div>
-                </form>
-
             </div>
         </div>
     </div>
 </body>
 
-</html> 
+</html>

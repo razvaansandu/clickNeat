@@ -31,27 +31,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
         }
     }
-
-    if (isset($_POST['update_pass'])) {
-        $old_pass = $_POST['old_password'];
-        $new_pass = $_POST['new_password'];
-
-        $hashed_password = $profileModel->getPasswordHash($user_id);
-
-        if ($hashed_password && password_verify($old_pass, $hashed_password)) {
-            $new_param_password = password_hash($new_pass, PASSWORD_DEFAULT);
-            if ($profileModel->updatePassword($user_id, $new_param_password)) {
-                $msg = "Password aggiornata correttamente!";
-                $msg_type = "success";
-            } else {
-                $msg = "Errore aggiornamento password.";
-                $msg_type = "error";
-            }
-        } else {
-            $msg = "La vecchia password non è corretta.";
-            $msg_type = "error";
-        }
-    }
 }
 
 $userData = $profileModel->getProfileData($user_id);
@@ -156,23 +135,6 @@ if ($userData) {
                 </form>
 
                 <div style="margin: 40px 0; border-top: 1px solid #eee;"></div>
-
-                <div class="form-title" style="margin-bottom: 20px; font-weight:700; color:#2B3674; border-bottom:1px solid #eee; padding-bottom:10px;">Sicurezza Password</div>
-                <form method="POST" action="">
-                    <div class="input-group">
-                        <label>Password Attuale</label>
-                        <input type="password" name="old_password" required>
-                    </div>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
-                        <div class="input-group">
-                            <label>Nuova Password</label>
-                            <input type="password" name="new_password" required>
-                        </div>
-                    </div>
-                    <div style="text-align: right;">
-                        <button type="submit" name="update_pass" class="btn-save" style="background-color: #2B3674;">Aggiorna Password</button>
-                    </div>
-                </form>
             </div>
         </div>
     </div>

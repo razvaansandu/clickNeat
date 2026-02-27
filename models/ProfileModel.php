@@ -20,15 +20,4 @@ class ProfileModel extends LoginModel
 
         return $this->db->update('users', ['username' => $username, 'email' => $email], 'id = ?', [$id]);
     }
-
-    public function getPasswordHash($id)
-    {
-        $user = $this->db->selectOne("SELECT password FROM users WHERE id = ?", [$id]);
-        return $user ? $user['password'] : null;
-    }
-
-    public function updatePassword($id, $new_hash)
-    {
-        return $this->db->update('users', ['password' => $new_hash], 'id = ?', [$id]);
-    }
 }
