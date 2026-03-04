@@ -16,19 +16,46 @@ class ProfileModel extends LoginModel
             [$email, $username, $id]
         );
 
-        if ($existing) return false;
+        if ($existing)
+            return false;
 
         return $this->db->update('users', ['username' => $username, 'email' => $email], 'id = ?', [$id]);
     }
 
-    public function getPasswordHash($id)
+    public function deleteAccount($user_id)
     {
-        $user = $this->db->selectOne("SELECT password FROM users WHERE id = ?", [$id]);
-        return $user ? $user['password'] : null;
+        $anonymous_email = 'deleted_' . $user_id . '_' . time() . '@deleted.invalid';
+        $anonymous_username = 'deleted_' . $user_id;
+
+        return $this->db->update(
+            'users',
+            [
+                'username' => $anonymous_username,
+                'email' => $anonymous_email,
+                'google_id' => null,
+                'deleted_at' => date('Y-m-d H:i:s')
+            ],
+            'id = ?',
+            [$user_id]
+        );
     }
 
-    public function updatePassword($id, $new_hash)
+    public function updateBillingInfo($user_id, $data)
     {
-        return $this->db->update('users', ['password' => $new_hash], 'id = ?', [$id]);
+        return $this->db->update(
+            'users',
+            [
+                'codice_fiscale' => $data['codice_fiscale'],
+                'partita_iva' => $data['partita_iva'],
+                'indirizzo' => $data['indirizzo'],
+                'citta' => $data['citta'],
+                'cap' => $data['cap'],
+                'provincia' => $data['provincia']
+            ],
+            'id = ?',
+            [$user_id]
+        );
     }
+
+
 }
