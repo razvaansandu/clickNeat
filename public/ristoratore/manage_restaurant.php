@@ -6,6 +6,7 @@ require_once "../../config/db.php";
 require_once "../../models/RistoranteRistoratoreModel.php";
 require_once "../../models/MenuRistoratoreModel.php";
 require_once "../../models/OrderRistoratoreModel.php";
+require_once "../../models/RistoranteTavoliModel.php";
 
 if (!isset($_SESSION["loggedin"]) || $_SESSION["ruolo"] !== 'ristoratore') {
     header("location: ../auth/login.php");
@@ -23,6 +24,7 @@ $user_id = $_SESSION['id'];
 $ristoranteModel = new RistoranteRistoratoreModel($db);
 $menuModel = new MenuRistoratoreModel($db);
 $orderModel = new OrderRistoratoreModel($db);
+$tavoliModel = new RistoranteTavoliModel($db);
 
 $restaurant = $ristoranteModel->getByIdAndOwner($restaurant_id, $user_id);
 
@@ -204,10 +206,52 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             }
         }
     }
+
+    if (isset($_POST['add_tavolo'])) {
+        $numero_tavolo = $_POST['numero_tavolo'];
+        $capacita = $_POST['capacita'];
+        $note = $_POST['note'] ?? '';
+        
+        if ($tavoliModel->create($restaurant_id, "Tavolo " . $numero_tavolo, $capacita, $note)) {
+            $msg = "Tavolo aggiunto con successo!";
+            $msg_type = "success";
+        } else {
+            $msg = "Errore durante l'aggiunta del tavolo.";
+            $msg_type = "error";
+        }
+    }
+
+    if (isset($_POST['edit_tavolo'])) {
+        $tavolo_id = $_POST['tavolo_id'];
+        $numero_tavolo = $_POST['numero_tavolo'];
+        $capacita = $_POST['capacita'];
+        $disponibile = ($_POST['stato'] === 'disponibile') ? 1 : 0;
+        $note = $_POST['note'] ?? '';
+        
+        if ($tavoliModel->update($tavolo_id, "Tavolo " . $numero_tavolo, $capacita, $note, $disponibile)) {
+            $msg = "Tavolo aggiornato con successo!";
+            $msg_type = "success";
+        } else {
+            $msg = "Errore durante l'aggiornamento del tavolo.";
+            $msg_type = "error";
+        }
+    }
+
+    if (isset($_POST['delete_tavolo'])) {
+        $tavolo_id = $_POST['tavolo_id'];
+        if ($tavoliModel->delete($tavolo_id)) {
+            $msg = "Tavolo eliminato con successo!";
+            $msg_type = "success";
+        } else {
+            $msg = "Errore durante l'eliminazione del tavolo.";
+            $msg_type = "error";
+        }
+    }
 }
 
 $menu_items = $menuModel->getByRestaurant($restaurant_id);
 $orders = $orderModel->getByRestaurantId($restaurant_id);
+$tavoli = $tavoliModel->getByRistorante($restaurant_id); // AGGIUNTO
 
 function getBadWords()
 {
@@ -297,6 +341,10 @@ function getAllergeni()
 
             .category-search-container {
                 width: 100% !important;
+            }
+            
+            .tavoli-grid {
+                grid-template-columns: 1fr !important;
             }
         }
 
@@ -400,6 +448,22 @@ function getAllergeni()
             overflow-y: auto;
             z-index: 1000;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .tavolo-card {
+            transition: all 0.3s ease;
+        }
+        .tavolo-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(67, 24, 255, 0.12) !important;
+            border-color: #4318FF !important;
+        }
+        .tavolo-card button {
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .tavolo-card:hover button {
+            opacity: 1;
         }
     </style>
 </head>
@@ -719,9 +783,154 @@ function getAllergeni()
                     <?php endif; ?>
                 </div>
             </div>
+
+            <div class="col-tables" style="grid-column: 1/-1; margin-top: 30px;">
+                <div class="card">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
+                        <h3 style="color: #2B3674; margin:0; display: flex; align-items: center; gap: 10px;">
+                            <i class="fa-solid fa-chair" style="color: #4318FF;"></i>
+                            Gestione Tavoli
+                        </h3>
+                        <button type="button" class="btn-add" onclick="openAggiungiTavoloModal()"
+                                style="background: #1A4D4E; color: white; padding: 10px 20px; border-radius: 12px; border: none; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 14px;">
+                            <i class="fa-solid fa-plus"></i> Aggiungi Tavolo
+                        </button>
+                    </div>
+
+                    <?php if (empty($tavoli)): ?>
+                        <div style="text-align:center; padding:50px 20px;">
+                            <i class="fa-solid fa-chair" style="font-size:48px; color:#A3AED0; display:block; margin-bottom:15px;"></i>
+                            <p style="color:#A3AED0; font-size:16px;">Nessun tavolo configurato.</p>
+                            <p style="color:#A3AED0; margin-top:5px;">Clicca su "Aggiungi Tavolo" per iniziare!</p>
+                        </div>
+                    <?php else: ?>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px;">
+                            <?php foreach ($tavoli as $tavolo): ?>
+                                <div class="tavolo-card" style="background: linear-gradient(135deg, #F8F9FF 0%, #FFFFFF 100%); border-radius: 16px; padding: 20px 15px; border: 1px solid #E0E5F2; box-shadow: 0 4px 12px rgba(0,0,0,0.02); position: relative; overflow: hidden;">
+                                    <div style="position: absolute; top: 0; right: 0; background: <?php echo $tavolo['disponibile'] ? '#05CD99' : '#A3AED0'; ?>; color: white; padding: 4px 12px; border-radius: 0 16px 0 16px; font-size: 11px; font-weight: 600;">
+                                        <i class="fa-solid fa-<?php echo $tavolo['disponibile'] ? 'check-circle' : 'ban'; ?>"></i>
+                                        <?php echo $tavolo['disponibile'] ? 'Disponibile' : 'Non disponibile'; ?>
+                                    </div>
+                                    <div style="position: absolute; top: 10px; left: 10px; display: flex; gap: 5px;">
+                                        <button type="button" onclick='openModificaTavoloModal(<?php echo json_encode($tavolo); ?>)' 
+                                                style="background: white; border: none; width: 30px; height: 30px; border-radius: 8px; color: #4318FF; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                                            <i class="fa-solid fa-pen"></i>
+                                        </button>
+                                        <form method="POST" style="display: inline;" onsubmit="return confirm('Sei sicuro di voler eliminare questo tavolo?');">
+                                            <input type="hidden" name="delete_tavolo" value="1">
+                                            <input type="hidden" name="tavolo_id" value="<?php echo $tavolo['id']; ?>">
+                                            <button type="submit" style="background: white; border: none; width: 30px; height: 30px; border-radius: 8px; color: #E31A1A; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                                                <i class="fa-solid fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                    <div style="text-align: center;">
+                                        <div style="width: 60px; height: 60px; background: <?php echo $tavolo['disponibile'] ? '#05CD99' : '#A3AED0'; ?>; border-radius: 50%; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center;">
+                                            <i class="fa-solid fa-chair" style="color: white; font-size: 24px;"></i>
+                                        </div>
+                                        <div style="font-size: 28px; font-weight: 700; color: #2B3674; line-height: 1;">
+                                            <?php echo htmlspecialchars($tavolo['nome']); ?>
+                                        </div>
+                                        <div style="color: #A3AED0; font-size: 13px; margin: 5px 0 10px;">Tavolo</div>
+                                        <div style="background: #F1F4FF; padding: 8px 12px; border-radius: 30px; display: inline-flex; align-items: center; gap: 6px;">
+                                            <i class="fa-solid fa-users" style="color: #4318FF; font-size: 12px;"></i>
+                                            <span style="font-weight: 600; color: #2B3674;"><?php echo $tavolo['capacita']; ?> posti</span>
+                                        </div>
+                                        <?php if (!empty($tavolo['posizione'])): ?>
+                                            <div style="font-size: 11px; color: #A3AED0; margin-top: 8px; padding-top: 8px; border-top: 1px dashed #E0E5F2;">
+                                                <i class="fa-solid fa-note-sticky"></i> <?php echo htmlspecialchars($tavolo['posizione']); ?>
+                                            </div>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
         </div>
     </div>
 
+    <div id="modalAggiungiTavolo" class="modal-overlay" style="display: none;">
+        <div class="modal-content" style="max-width: 400px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="color: #2B3674; margin: 0;">Aggiungi Tavolo</h3>
+                <button type="button" onclick="chiudiModali()" style="background: none; border: none; font-size: 20px; cursor: pointer; color: #A3AED0;">
+                    <i class="fa-solid fa-times"></i>
+                </button>
+            </div>
+
+            <form method="POST">
+                <input type="hidden" name="add_tavolo" value="1">
+                
+                <div class="input-wrapper" style="margin-bottom: 15px;">
+                    <i class="fa-solid fa-hashtag"></i>
+                    <input type="number" name="numero_tavolo" placeholder="Numero Tavolo" required min="1">
+                </div>
+
+                <div class="input-wrapper" style="margin-bottom: 15px;">
+                    <i class="fa-solid fa-users"></i>
+                    <input type="number" name="capacita" placeholder="Capacità (posti)" required min="1">
+                </div>
+
+                <div class="input-wrapper" style="margin-bottom: 15px;">
+                    <i class="fa-solid fa-note-sticky"></i>
+                    <input type="text" name="note" placeholder="Note (opzionale)">
+                </div>
+
+                <button type="submit" class="btn-save" 
+                        style="width: 100%; background: #2B3674; color: white; padding: 12px; border: none; border-radius: 10px; font-weight: 600; cursor: pointer;">
+                    Salva Tavolo
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div id="modalModificaTavolo" class="modal-overlay" style="display: none;">
+        <div class="modal-content" style="max-width: 400px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="color: #2B3674; margin: 0;">Modifica Tavolo</h3>
+                <button type="button" onclick="chiudiModali()" style="background: none; border: none; font-size: 20px; cursor: pointer; color: #A3AED0;">
+                    <i class="fa-solid fa-times"></i>
+                </button>
+            </div>
+
+            <form method="POST" id="formModificaTavolo">
+                <input type="hidden" name="edit_tavolo" value="1">
+                <input type="hidden" name="tavolo_id" id="edit_tavolo_id">
+                
+                <div class="input-wrapper" style="margin-bottom: 15px;">
+                    <i class="fa-solid fa-hashtag"></i>
+                    <input type="number" name="numero_tavolo" id="edit_numero_tavolo" required min="1">
+                </div>
+
+                <div class="input-wrapper" style="margin-bottom: 15px;">
+                    <i class="fa-solid fa-users"></i>
+                    <input type="number" name="capacita" id="edit_capacita" required min="1">
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 8px; color: #2B3674; font-weight: 500;">Stato</label>
+                    <select name="stato" id="edit_stato" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #E0E5F2;">
+                        <option value="disponibile">Disponibile</option>
+                        <option value="non_disponibile">Non disponibile</option>
+                    </select>
+                </div>
+
+                <div class="input-wrapper" style="margin-bottom: 15px;">
+                    <i class="fa-solid fa-note-sticky"></i>
+                    <input type="text" name="note" id="edit_note" placeholder="Note (opzionale)">
+                </div>
+
+                <button type="submit" class="btn-save" 
+                        style="width: 100%; background: #2B3674; color: white; padding: 12px; border: none; border-radius: 10px; font-weight: 600; cursor: pointer;">
+                    Aggiorna Tavolo
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODALE MODIFICA PIATTO -->
     <div id="editModal" class="modal-overlay">
         <div class="modal-content" style="max-width: 500px; max-height: 90vh; overflow-y: auto;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
@@ -1286,6 +1495,37 @@ function getAllergeni()
             } catch (e) {
                 e.preventDefault();
                 alert('Errore nella selezione degli allergeni.');
+            }
+        });
+
+        function openAggiungiTavoloModal() {
+            document.getElementById('modalAggiungiTavolo').style.display = 'flex';
+        }
+
+        function openModificaTavoloModal(tavolo) {
+            document.getElementById('edit_tavolo_id').value = tavolo.id;
+            document.getElementById('edit_numero_tavolo').value = tavolo.nome.replace('Tavolo ', '');
+            document.getElementById('edit_capacita').value = tavolo.capacita;
+            document.getElementById('edit_stato').value = tavolo.disponibile ? 'disponibile' : 'non_disponibile';
+            document.getElementById('edit_note').value = tavolo.posizione || '';
+            
+            document.getElementById('modalModificaTavolo').style.display = 'flex';
+        }
+
+        function chiudiModali() {
+            document.getElementById('modalAggiungiTavolo').style.display = 'none';
+            document.getElementById('modalModificaTavolo').style.display = 'none';
+        }
+
+        window.addEventListener('click', function(e) {
+            const modaleAggiungi = document.getElementById('modalAggiungiTavolo');
+            const modaleModifica = document.getElementById('modalModificaTavolo');
+            
+            if (e.target === modaleAggiungi) {
+                modaleAggiungi.style.display = 'none';
+            }
+            if (e.target === modaleModifica) {
+                modaleModifica.style.display = 'none';
             }
         });
     </script>
