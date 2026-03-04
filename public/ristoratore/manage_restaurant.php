@@ -432,12 +432,6 @@ function getAllergeni()
                 <i class="fa-solid fa-pen-to-square"></i> Modifica Informazioni
             </a>
 
-            <!-- PULSANTE PIANTINA -->
-            <a href="piantina_tavoli.php?ristorante_id=<?php echo $restaurant_id; ?>"
-                style="background: linear-gradient(135deg, #05CD99, #02A176); color: white; padding: 12px 24px; border-radius: 30px; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 10px rgba(5,205,153,0.3); transition: all 0.2s ease;">
-                <i class="fa-solid fa-table-cells"></i> Piantina Tavoli
-            </a>
-
         </div>
 
         <?php if ($msg): ?>
