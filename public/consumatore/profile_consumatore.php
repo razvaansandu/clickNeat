@@ -4,6 +4,7 @@ if (session_status() !== PHP_SESSION_ACTIVE)
 
 require_once "../../config/db.php";
 require_once "../../models/ProfileModel.php";
+require_once "../../models/WalletModel.php";
 
 if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
     header("location: ../auth/login.php");
@@ -12,6 +13,7 @@ if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
 
 $user_id = $_SESSION["id"];
 $profileModel = new ProfileModel($db);
+$walletModel = new WalletModel($db);
 $msg = "";
 $msg_type = "";
 
@@ -19,6 +21,7 @@ $userData = $profileModel->getProfileData($user_id);
 $username = $userData['username'];
 $email = $userData['email'];
 $created_at = $userData['created_at'];
+$creditoEuro = $walletModel->getBalanceEuro($user_id);
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
@@ -316,10 +319,21 @@ if (isset($_POST['update_billing'])) {
                         <b
                             style="color: #2B3674; font-size: 12px; word-break: break-all;"><?php echo htmlspecialchars($email); ?></b>
                     </div>
-                    <div class="info-row" style="display: flex; justify-content: space-between; padding: 10px 0;">
+                    <div class="info-row" style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f0f0f0;">
                         <span style="color: #A3AED0;">Stato</span>
                         <b style="color: #05CD99;">Attivo</b>
                     </div>
+                    <div class="info-row" style="display: flex; justify-content: space-between; padding: 10px 0;">
+                        <span style="color: #A3AED0;">Credito</span>
+                        <b style="color: #05CD99; font-size: 16px;">&euro; <?php echo $creditoEuro; ?></b>
+                    </div>
+                </div>
+
+                <div style="margin-top: 25px;">
+                    <a href="ricarica_credito.php"
+                       style="display: block; background: linear-gradient(135deg, #ff9f43, #ff6b35); color: white; padding: 12px; border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 15px; text-align: center; box-shadow: 0 4px 15px rgba(255,159,67,0.3); transition: transform 0.2s;">
+                        <i class="fa-solid fa-plus-circle"></i> Aggiungi Credito
+                    </a>
                 </div>
             </div>
 
@@ -446,6 +460,6 @@ if (isset($_POST['update_billing'])) {
         </div>
     </div>
 
-</body>
+</body> 
 
 </html>
