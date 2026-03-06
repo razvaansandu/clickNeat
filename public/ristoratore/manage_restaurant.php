@@ -224,7 +224,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
 $menu_items = $menuModel->getByRestaurant($restaurant_id);
 $orders = $orderModel->getByRestaurantId($restaurant_id);
-$tavoli = $tavoliModel->getByRistorante($restaurant_id); // AGGIUNTO
+$tavoli = $tavoliModel->getByRistorante($restaurant_id);
 
 function getBadWords()
 {
@@ -449,6 +449,104 @@ function getAllergeni()
 
         .tavolo-card:hover button {
             opacity: 1;
+        }
+
+        .confirm-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            backdrop-filter: blur(5px);
+        }
+
+        .confirm-modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .confirm-icon {
+            width: 70px;
+            height: 70px;
+            background: #FFE5E5;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            color: #E31A1A;
+            font-size: 30px;
+        }
+
+        .confirm-title {
+            color: #2B3674;
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .confirm-message {
+            color: #A3AED0;
+            font-size: 14px;
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+
+        .confirm-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .confirm-btn {
+            padding: 12px 30px;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            font-size: 14px;
+        }
+
+        .confirm-btn.cancel {
+            background: #F4F7FE;
+            color: #2B3674;
+        }
+
+        .confirm-btn.cancel:hover {
+            background: #E0E5F2;
+        }
+
+        .confirm-btn.delete {
+            background: #E31A1A;
+            color: white;
+        }
+
+        .confirm-btn.delete:hover {
+            background: #b31515;
+            transform: scale(1.05);
         }
     </style>
 
@@ -1462,19 +1560,42 @@ function getAllergeni()
                 document.getElementById('modalAggiungiTavolo').style.display = 'none';
                 document.getElementById('modalModificaTavolo').style.display = 'none';
             }
+        });
 
-            window.addEventListener('click', function (e) {
-                const modaleAggiungi = document.getElementById('modalAggiungiTavolo');
-                const modaleModifica = document.getElementById('modalModificaTavolo');
+        function openDeleteConfirm(tavoloId, tavoloNome) {
+            document.getElementById('delete_tavolo_id').value = tavoloId;
+            document.getElementById('confirmDeleteMessage').textContent = `Sei sicuro di voler eliminare il ${tavoloNome}?`;
+            document.getElementById('confirmDeleteModal').style.display = 'flex';
+        }
 
-                if (e.target === modaleAggiungi) {
-                    modaleAggiungi.style.display = 'none';
-                }
-                if (e.target === modaleModifica) {
-                    modaleModifica.style.display = 'none';
-                }
+        function closeDeleteConfirm() {
+            document.getElementById('confirmDeleteModal').style.display = 'none';
+        }
+
+        document.querySelectorAll('.delete-dish-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const dishId = this.dataset.id;
+                document.getElementById('delete_dish_id').value = dishId;
+                document.getElementById('confirmDeleteDishModal').style.display = 'flex';
             });
-        </script>
+        });
+
+        function closeDeleteDishConfirm() {
+            document.getElementById('confirmDeleteDishModal').style.display = 'none';
+        }
+
+        window.addEventListener('click', function(e) {
+            const confirmModal = document.getElementById('confirmDeleteModal');
+            const confirmDishModal = document.getElementById('confirmDeleteDishModal');
+            
+            if (e.target === confirmModal) {
+                confirmModal.style.display = 'none';
+            }
+            if (e.target === confirmDishModal) {
+                confirmDishModal.style.display = 'none';
+            }
+        });
+    </script>
 </body>
 
 </html>
