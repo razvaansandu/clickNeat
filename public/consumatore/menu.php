@@ -473,9 +473,24 @@ if (isset($_SESSION['cart']) && !empty($_SESSION['cart']['items'])) {
             <p><i class="fa-solid fa-clock"></i> Orari: 12:00 - 23:00</p>
             <div class="wallet-badge-header" style="margin-top: 15px; display: inline-flex; align-items: center; background: rgba(255,255,255,0.2); padding: 8px 15px; border-radius: 50px; border: 1px solid rgba(255,255,255,0.4); backdrop-filter: blur(5px);">
                 <i class="fa-solid fa-wallet" style="margin-right: 10px; color: #fff;"></i>
-                <span style="color: #fff; font-weight: 600;">Credito: &euro; <?php echo $creditoEuro; ?></span>
+                <span style="color: #fff; font-weight: 600;">Credito: &euro; <?php echo $creditoEuro; ?></span> 
+             
+            </div> 
+            <div style="margin-top: 18px;">
+                <a href="prenota_tavolo_g.php?id=<?php echo $ristorante_id; ?>"
+                   style="display: inline-flex; align-items: center; gap: 8px;
+                          background: #FF9F43; color: white; font-weight: 700;
+                          font-size: 15px; padding: 12px 28px; border-radius: 50px;
+                          text-decoration: none; letter-spacing: 0.3px;
+                          box-shadow: 0 6px 18px rgba(255,159,67,0.45);
+                          transition: transform 0.2s, box-shadow 0.2s;"
+                   onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 10px 24px rgba(255,159,67,0.55)'"
+                   onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 6px 18px rgba(255,159,67,0.45)'">
+                    <i class="fa-solid fa-calendar-plus"></i> Prenota un Tavolo
+                </a>
             </div>
-        </div>
+        </div> 
+        
     </header>
 
     <div class="main-container"> 

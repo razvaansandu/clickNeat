@@ -43,9 +43,11 @@ class OrderRistoratoreModel
 
     public function getOrderItems($order_id)
     {
-        $sql = "SELECT oi.*, m.name 
-                FROM order_items oi 
-                JOIN menu_items m ON oi.dish_id = m.id 
+        $sql = "SELECT 
+                    oi.*,
+                    COALESCE(m.name, CONCAT('Piatto #', oi.dish_id)) AS name
+                FROM order_items oi
+                LEFT JOIN menu_items m ON oi.dish_id = m.id
                 WHERE oi.order_id = ?";
         return $this->db->select($sql, [$order_id]);
     }
@@ -86,10 +88,11 @@ class OrderRistoratoreModel
     public function getByOwnerId($owner_id)
     {
         $sql = "SELECT o.id, o.total_amount, o.status, o.created_at, 
-                       u.username as cliente, r.nome as ristorante_nome
+                       COALESCE(u.username, 'Utente Eliminato') as cliente, 
+                       r.nome as ristorante_nome
                 FROM orders o
                 JOIN ristoranti r ON o.restaurant_id = r.id
-                JOIN users u ON o.user_id = u.id
+                LEFT JOIN users u ON o.user_id = u.id
                 WHERE r.proprietario_id = ?
                 ORDER BY o.created_at DESC";
 
@@ -98,6 +101,7 @@ class OrderRistoratoreModel
         foreach ($orders as &$order) {
             $order['items'] = $this->getOrderItems($order['id']);
         }
+
         return $orders;
     }
 
@@ -137,6 +141,7 @@ class OrderRistoratoreModel
     {
         $orders = $this->db->selectOne("SELECT COUNT(*) as count FROM orders WHERE restaurant_id = ?", [$rest_id]);
         $revenue = $this->db->selectOne("SELECT SUM(total_amount) as total FROM orders WHERE restaurant_id = ? AND status = 'completed'", [$rest_id]);
+
         return [
             'total_orders' => $orders['count'] ?? 0,
             'revenue' => $revenue['total'] ?? 0.00
@@ -145,12 +150,28 @@ class OrderRistoratoreModel
 
     public function getByRestaurantId($restaurant_id)
     {
-        $sql = "SELECT o.*, u.username as cliente_nome 
-                FROM orders o 
-                JOIN users u ON o.user_id = u.id 
-                WHERE o.restaurant_id = ? 
+        $sql = "SELECT 
+                    o.*,
+                    COALESCE(u.username, 'Utente Eliminato') as cliente_nome
+                FROM orders o
+                LEFT JOIN users u ON o.user_id = u.id
+                WHERE o.restaurant_id = ?
                 ORDER BY o.created_at DESC";
         return $this->db->select($sql, [$restaurant_id]);
+    }
+
+    public function getDetailByOrderIdAndOwner($order_id, $owner_id)
+    {
+        $sql = "SELECT 
+                    o.*,
+                    COALESCE(u.username, 'Utente Eliminato') as cliente_nome,
+                    r.nome as ristorante_nome
+                FROM orders o
+                JOIN ristoranti r ON o.restaurant_id = r.id
+                LEFT JOIN users u ON o.user_id = u.id
+                WHERE o.id = ? AND r.proprietario_id = ?
+                LIMIT 1";
+        return $this->db->selectOne($sql, [$order_id, $owner_id]);
     }
 
     public function beginTransaction()
