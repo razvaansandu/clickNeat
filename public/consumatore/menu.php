@@ -2,6 +2,7 @@
 require_once "../../config/db.php";
 require_once "../../models/RistoranteModel.php";
 require_once "../../models/MenuModel.php";
+require_once "../../models/WalletModel.php";
 
 if (session_status() !== PHP_SESSION_ACTIVE)
     session_start();
@@ -20,8 +21,10 @@ $ristorante_id = intval($_GET['id']);
 
 $ristoranteModel = new RistoranteModel($db);
 $menuModel = new MenuModel($db);
+$walletModel = new WalletModel($db);
 
 $ristorante = $ristoranteModel->getById($ristorante_id);
+$creditoEuro = $walletModel->getBalanceEuro($_SESSION['id']);
 
 if (!$ristorante) {
     die("Ristorante non trovato.");
@@ -58,23 +61,36 @@ if (isset($_SESSION['cart']) && !empty($_SESSION['cart']['items'])) {
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         .restaurant-header-custom {
+            <?php 
+            $bg_url = "";
+            if (!empty($ristorante['image_url'])) {
+                 $clean_path = ltrim($ristorante['image_url'], '/');
+                $bg_url = "../../assets/" . $clean_path;
+            }
+            
+            if ($bg_url): ?>
+            background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.7)), url('<?php echo $bg_url; ?>') no-repeat center center;
+            <?php else: ?>
             background: linear-gradient(105deg, var(--accent-orange) 0%, var(--accent-red) 100%);
-            padding: 40px 60px;
+            <?php endif; ?>
+            background-size: cover;
+            padding: 80px 60px;
             color: var(--white);
             position: relative;
             overflow: hidden;
             margin-bottom: 40px;
+            border-radius: 0 0 40px 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
         }
-
+ 
         .restaurant-header-custom::before {
-            content: '';
+            content: ''; 
             position: absolute;
-            top: -50%;
-            right: -10%;
-            width: 60%;
-            height: 200%; 
-            background: rgba(255,255,255,0.1);
-            transform: rotate(-15deg);
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.2);
             pointer-events: none;
         }
 
@@ -436,14 +452,29 @@ if (isset($_SESSION['cart']) && !empty($_SESSION['cart']['items'])) {
         </div>
     </nav>
 
-    <header class="restaurant-header-custom">
+    <header class="restaurant-header-custom"> 
+        <?php 
+        $bg_url = "";
+        if (!empty($ristorante['image_url'])) {
+            $clean_path = ltrim($ristorante['image_url'], '/');
+            $bg_url = "../../assets/" . $clean_path;
+        }
+        
+        if ($bg_url): ?>
+            <img src="<?php echo $bg_url; ?>" alt="Background" class="restaurant-header-bg">
+        <?php endif; ?>
+
         <div class="restaurant-header-content">
             <a href="dashboard_consumatore.php" class="btn-back-hero">
                 <i class="fa-solid fa-arrow-left"></i> Torna ai Ristoranti
-            </a>
+            </a> 
             <h1><?php echo htmlspecialchars($ristorante['nome']); ?></h1>
             <p><i class="fa-solid fa-location-dot"></i> <?php echo htmlspecialchars($ristorante['indirizzo']); ?></p>
             <p><i class="fa-solid fa-clock"></i> Orari: 12:00 - 23:00</p>
+            <div class="wallet-badge-header" style="margin-top: 15px; display: inline-flex; align-items: center; background: rgba(255,255,255,0.2); padding: 8px 15px; border-radius: 50px; border: 1px solid rgba(255,255,255,0.4); backdrop-filter: blur(5px);">
+                <i class="fa-solid fa-wallet" style="margin-right: 10px; color: #fff;"></i>
+                <span style="color: #fff; font-weight: 600;">Credito: &euro; <?php echo $creditoEuro; ?></span>
+            </div>
         </div>
     </header>
 
