@@ -125,7 +125,7 @@ $_SESSION['cart']['total'] += $piatto['price'];
 
             <div style="color: #A3AED0; font-size: 14px; margin-bottom: 5px;">Hai aggiunto:</div>
 
-            <img src="<?php echo htmlspecialchars($img_url); ?>" alt="Piatto"
+            <img src="<?php echo htmlspecialchars("/assets/$img_url"); ?>" alt="Piatto"
                 style="width: 100px; height: 100px; object-fit: cover; border-radius: 15px; margin: 15px auto; display: block;">
 
             <div class="added-item-name"><?php echo htmlspecialchars($piatto['name']); ?></div>

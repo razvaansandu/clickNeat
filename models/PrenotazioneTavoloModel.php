@@ -21,13 +21,34 @@ class PrenotazioneTavoloModel
         return $result['count'] == 0;
     }
 
-    public function isOrarioValido($data, $ora)
+    public function isOrarioValido($data, $ora, $ristorante_id = null)
     {
-        $timestamp = strtotime("$data $ora");
-        if ($timestamp < time()) return false;
+        if ($data < date('Y-m-d')) return false;
 
         $ora_int = (int) date('H', strtotime($ora));
-        return $ora_int >= 12 && $ora_int < 22;
+
+        if ($ristorante_id) {
+            $ristorante = $this->db->selectOne(
+                "SELECT orario_limite_prenotazioni FROM ristoranti WHERE id = ?",
+                [$ristorante_id]
+            );
+            $limite = isset($ristorante['orario_limite_prenotazioni'])
+                ? (int) date('H', strtotime($ristorante['orario_limite_prenotazioni']))
+                : 22;
+        } else {
+            $limite = 22;
+        }
+
+        return $ora_int >= 12 && $ora_int < $limite;
+    }
+
+    public function getOrarioLimite($ristorante_id)
+    {
+        $ristorante = $this->db->selectOne(
+            "SELECT orario_limite_prenotazioni FROM ristoranti WHERE id = ?",
+            [$ristorante_id]
+        );
+        return $ristorante['orario_limite_prenotazioni'] ?? '22:00:00';
     }
 
     public function create($dati)
@@ -45,7 +66,7 @@ class PrenotazioneTavoloModel
             "SELECT p.*, t.nome as tavolo_nome, t.capacita, t.pos_x, t.pos_y, t.forma
              FROM prenotazioni_tavoli p
              JOIN ristorante_tavoli t ON p.tavolo_id = t.id
-             WHERE p.ristorante_id = ?
+             WHERE t.ristorante_id = ?
              AND p.data_prenotazione = ?
              AND p.stato != 'cancellata'
              ORDER BY p.ora_prenotazione ASC",
