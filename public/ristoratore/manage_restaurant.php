@@ -251,7 +251,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
 $menu_items = $menuModel->getByRestaurant($restaurant_id);
 $orders = $orderModel->getByRestaurantId($restaurant_id);
-$tavoli = $tavoliModel->getByRistorante($restaurant_id); // AGGIUNTO
+$tavoli = $tavoliModel->getByRistorante($restaurant_id);
 
 function getBadWords()
 {
@@ -464,6 +464,104 @@ function getAllergeni()
         }
         .tavolo-card:hover button {
             opacity: 1;
+        }
+
+        .confirm-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            backdrop-filter: blur(5px);
+        }
+
+        .confirm-modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .confirm-icon {
+            width: 70px;
+            height: 70px;
+            background: #FFE5E5;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            color: #E31A1A;
+            font-size: 30px;
+        }
+
+        .confirm-title {
+            color: #2B3674;
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .confirm-message {
+            color: #A3AED0;
+            font-size: 14px;
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+
+        .confirm-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .confirm-btn {
+            padding: 12px 30px;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            font-size: 14px;
+        }
+
+        .confirm-btn.cancel {
+            background: #F4F7FE;
+            color: #2B3674;
+        }
+
+        .confirm-btn.cancel:hover {
+            background: #E0E5F2;
+        }
+
+        .confirm-btn.delete {
+            background: #E31A1A;
+            color: white;
+        }
+
+        .confirm-btn.delete:hover {
+            background: #b31515;
+            transform: scale(1.05);
         }
     </style>
 </head>
@@ -687,15 +785,10 @@ function getAllergeni()
                                                 style="background: none; border: none; color: #4318FF; cursor: pointer; font-size: 14px;">
                                                 <i class="fa-solid fa-pen"></i>
                                             </button>
-                                            <form method="POST" style="margin:0;"
-                                                onsubmit="return confirm('Sei sicuro di voler eliminare questo piatto?');">
-                                                <input type="hidden" name="delete_dish" value="1">
-                                                <input type="hidden" name="dish_id" value="<?php echo $item['id']; ?>">
-                                                <button type="submit"
-                                                    style="background: none; border: none; color: #E31A1A; cursor: pointer; font-size: 14px;">
-                                                    <i class="fa-solid fa-trash"></i>
-                                                </button>
-                                            </form>
+                                            <button type="button" class="delete-dish-btn" data-id="<?php echo $item['id']; ?>"
+                                                style="background: none; border: none; color: #E31A1A; cursor: pointer; font-size: 14px;">
+                                                <i class="fa-solid fa-trash"></i>
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
@@ -816,13 +909,10 @@ function getAllergeni()
                                                 style="background: white; border: none; width: 30px; height: 30px; border-radius: 8px; color: #4318FF; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
                                             <i class="fa-solid fa-pen"></i>
                                         </button>
-                                        <form method="POST" style="display: inline;" onsubmit="return confirm('Sei sicuro di voler eliminare questo tavolo?');">
-                                            <input type="hidden" name="delete_tavolo" value="1">
-                                            <input type="hidden" name="tavolo_id" value="<?php echo $tavolo['id']; ?>">
-                                            <button type="submit" style="background: white; border: none; width: 30px; height: 30px; border-radius: 8px; color: #E31A1A; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                                                <i class="fa-solid fa-trash"></i>
-                                            </button>
-                                        </form>
+                                        <button type="button" onclick="openDeleteConfirm(<?php echo $tavolo['id']; ?>, '<?php echo $tavolo['nome']; ?>')" 
+                                                style="background: white; border: none; width: 30px; height: 30px; border-radius: 8px; color: #E31A1A; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
                                     </div>
                                     <div style="text-align: center;">
                                         <div style="width: 60px; height: 60px; background: <?php echo $tavolo['disponibile'] ? '#05CD99' : '#A3AED0'; ?>; border-radius: 50%; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center;">
@@ -847,6 +937,42 @@ function getAllergeni()
                         </div>
                     <?php endif; ?>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="confirmDeleteModal" class="confirm-modal-overlay">
+        <div class="confirm-modal-content">
+            <div class="confirm-icon">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <div class="confirm-title">Elimina Tavolo</div>
+            <div class="confirm-message" id="confirmDeleteMessage">Sei sicuro di voler eliminare questo tavolo?</div>
+            <div class="confirm-buttons">
+                <button class="confirm-btn cancel" onclick="closeDeleteConfirm()">Annulla</button>
+                <form method="POST" id="deleteTavoloForm" style="display: inline;">
+                    <input type="hidden" name="delete_tavolo" value="1">
+                    <input type="hidden" name="tavolo_id" id="delete_tavolo_id">
+                    <button type="submit" class="confirm-btn delete">Elimina</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="confirmDeleteDishModal" class="confirm-modal-overlay">
+        <div class="confirm-modal-content">
+            <div class="confirm-icon">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <div class="confirm-title">Elimina Piatto</div>
+            <div class="confirm-message" id="confirmDeleteDishMessage">Sei sicuro di voler eliminare questo piatto?</div>
+            <div class="confirm-buttons">
+                <button class="confirm-btn cancel" onclick="closeDeleteDishConfirm()">Annulla</button>
+                <form method="POST" id="deleteDishForm" style="display: inline;">
+                    <input type="hidden" name="delete_dish" value="1">
+                    <input type="hidden" name="dish_id" id="delete_dish_id">
+                    <button type="submit" class="confirm-btn delete">Elimina</button>
+                </form>
             </div>
         </div>
     </div>
@@ -1526,6 +1652,40 @@ function getAllergeni()
             }
             if (e.target === modaleModifica) {
                 modaleModifica.style.display = 'none';
+            }
+        });
+
+        function openDeleteConfirm(tavoloId, tavoloNome) {
+            document.getElementById('delete_tavolo_id').value = tavoloId;
+            document.getElementById('confirmDeleteMessage').textContent = `Sei sicuro di voler eliminare il ${tavoloNome}?`;
+            document.getElementById('confirmDeleteModal').style.display = 'flex';
+        }
+
+        function closeDeleteConfirm() {
+            document.getElementById('confirmDeleteModal').style.display = 'none';
+        }
+
+        document.querySelectorAll('.delete-dish-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const dishId = this.dataset.id;
+                document.getElementById('delete_dish_id').value = dishId;
+                document.getElementById('confirmDeleteDishModal').style.display = 'flex';
+            });
+        });
+
+        function closeDeleteDishConfirm() {
+            document.getElementById('confirmDeleteDishModal').style.display = 'none';
+        }
+
+        window.addEventListener('click', function(e) {
+            const confirmModal = document.getElementById('confirmDeleteModal');
+            const confirmDishModal = document.getElementById('confirmDeleteDishModal');
+            
+            if (e.target === confirmModal) {
+                confirmModal.style.display = 'none';
+            }
+            if (e.target === confirmDishModal) {
+                confirmDishModal.style.display = 'none';
             }
         });
     </script>
