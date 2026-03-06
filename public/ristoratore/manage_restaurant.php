@@ -7,6 +7,7 @@ require_once "../../models/RistoranteRistoratoreModel.php";
 require_once "../../models/MenuRistoratoreModel.php";
 require_once "../../models/OrderRistoratoreModel.php";
 require_once "../../models/RistoranteTavoliModel.php";
+require_once "../../models/MenuGiornalieroModel.php";
 
 if (!isset($_SESSION["loggedin"]) || $_SESSION["ruolo"] !== 'ristoratore') {
     header("location: ../auth/login.php");
@@ -25,6 +26,7 @@ $ristoranteModel = new RistoranteRistoratoreModel($db);
 $menuModel = new MenuRistoratoreModel($db);
 $orderModel = new OrderRistoratoreModel($db);
 $tavoliModel = new RistoranteTavoliModel($db);
+$menuGiornalieroModel = new MenuGiornalieroModel($db);
 
 $restaurant = $ristoranteModel->getByIdAndOwner($restaurant_id, $user_id);
 
@@ -220,11 +222,72 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $msg_type = "error";
         }
     }
+
+    if (isset($_POST['save_menu_giornaliero'])) {
+        $giorno = isset($_POST['giorno']) ? (int)$_POST['giorno'] : (int)$_POST['giorno_select'];
+        $titolo = trim($_POST['titolo_menu']);
+        $piatti_ids = $_POST['piatti_ids'] ?? [];
+        
+        if (!empty($titolo) && !empty($piatti_ids)) {
+            if ($menuGiornalieroModel->saveMenuGiornaliero($restaurant_id, $giorno, $titolo, $piatti_ids)) {
+                $msg = "Menu giornaliero salvato con successo!";
+                $msg_type = "success";
+            } else {
+                $msg = "Errore durante il salvataggio del menu.";
+                $msg_type = "error";
+            }
+        } else {
+            $msg = "Titolo e almeno un piatto sono obbligatori.";
+            $msg_type = "error";
+        }
+    }
+
+    if (isset($_POST['save_menu_fallback'])) {
+        $titolo = trim($_POST['titolo_fallback']);
+        $piatti_ids = $_POST['piatti_fallback_ids'] ?? [];
+        
+        if (!empty($titolo) && !empty($piatti_ids)) {
+            if ($menuGiornalieroModel->saveMenuFallback($restaurant_id, $titolo, $piatti_ids)) {
+                $msg = "Menu di fallback salvato con successo!";
+                $msg_type = "success";
+            } else {
+                $msg = "Errore durante il salvataggio del menu di fallback.";
+                $msg_type = "error";
+            }
+        } else {
+            $msg = "Titolo e almeno un piatto sono obbligatori.";
+            $msg_type = "error";
+        }
+    }
+
+    if (isset($_POST['delete_menu'])) {
+        $menu_id = $_POST['menu_id'];
+        if ($menuGiornalieroModel->delete($menu_id)) {
+            $msg = "Menu eliminato con successo!";
+            $msg_type = "success";
+        } else {
+            $msg = "Errore durante l'eliminazione del menu.";
+            $msg_type = "error";
+        }
+    }
 }
 
 $menu_items = $menuModel->getByRestaurant($restaurant_id);
 $orders = $orderModel->getByRestaurantId($restaurant_id);
 $tavoli = $tavoliModel->getByRistorante($restaurant_id);
+$menus = $menuGiornalieroModel->getByRistorante($restaurant_id);
+
+$menu_fallback = null;
+$menu_giornalieri = [];
+foreach ($menus as $menu) {
+    if ($menu['type'] === 'fallback') {
+        $menu_fallback = $menu;
+    } else {
+        $menu_giornalieri[$menu['weekday']] = $menu;
+    }
+}
+
+$giorni = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
 
 function getBadWords()
 {
@@ -262,7 +325,6 @@ function getAllergeni()
 
 <!DOCTYPE html>
 <html lang="it">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -278,31 +340,25 @@ function getAllergeni()
                 align-items: flex-start !important;
                 gap: 10px !important;
             }
-
             .dish-img {
                 width: 100% !important;
                 height: 150px !important;
             }
-
             .order-header {
                 flex-direction: column !important;
                 gap: 10px !important;
             }
-
             .order-actions {
                 flex-direction: column !important;
             }
-
             .page-header {
                 flex-direction: column !important;
                 align-items: flex-start !important;
                 gap: 15px !important;
             }
-
             .msg-box {
                 width: 100% !important;
             }
-
             .category-search-container {
                 width: 100% !important;
             }
@@ -567,8 +623,7 @@ function getAllergeni()
                     <i class="fa-solid fa-arrow-left"></i> Torna alla Dashboard
                 </a>
                 <h1><?php echo htmlspecialchars($restaurant['nome']); ?></h1>
-                <p><i class="fa-solid fa-location-dot"></i> <?php echo htmlspecialchars($restaurant['indirizzo']); ?>
-                </p>
+                <p><i class="fa-solid fa-location-dot"></i> <?php echo htmlspecialchars($restaurant['indirizzo']); ?></p>
             </div>
         </div>
 
@@ -1030,10 +1085,157 @@ function getAllergeni()
                             placeholder="Oppure scrivi categoria personalizzata...">
                     </div>
 
-                    <label
-                        style="display:block; margin-bottom:8px; font-weight:600; color: #2B3674; font-size: 14px; margin-top: 15px;">
-                        Allergeni
-                    </label>
+    <!-- MODAL MENU GIORNALIERO -->
+    <div id="modalMenuGiornaliero" class="modal-overlay" style="display: none;">
+        <div class="modal-content" style="max-width: 600px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="color: #2B3674; margin: 0;" id="modalMenuTitle">
+                    <i class="fa-solid fa-calendar-plus"></i> Nuovo Menu Giornaliero
+                </h3>
+                <button type="button" onclick="chiudiModaliMenu()" style="background: none; border: none; font-size: 20px; cursor: pointer; color: #A3AED0;">
+                    <i class="fa-solid fa-times"></i>
+                </button>
+            </div>
+
+            <form method="POST" id="formMenuGiornaliero">
+                <input type="hidden" name="save_menu_giornaliero" value="1">
+                <input type="hidden" name="menu_id" id="menu_id" value="">
+                <input type="hidden" name="giorno" id="menu_giorno" value="">
+
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 8px; color: #2B3674; font-weight: 500;">Giorno della settimana</label>
+                    <select name="giorno_select" id="menu_giorno_select" required
+                            style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #E0E5F2; font-family: 'Inter', sans-serif;">
+                        <option value="0">Domenica</option>
+                        <option value="1">Lunedì</option>
+                        <option value="2">Martedì</option>
+                        <option value="3">Mercoledì</option>
+                        <option value="4">Giovedì</option>
+                        <option value="5">Venerdì</option>
+                        <option value="6">Sabato</option>
+                    </select>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 8px; color: #2B3674; font-weight: 500;">Titolo del Menu</label>
+                    <input type="text" name="titolo_menu" id="menu_titolo" required
+                           placeholder="Es. Menu del Giorno, Speciale Pesce..."
+                           style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #E0E5F2; font-family: 'Inter', sans-serif;">
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 8px; color: #2B3674; font-weight: 500;">Piatti del Menu</label>
+                    <div style="background: #F8F9FF; border-radius: 12px; padding: 15px; max-height: 300px; overflow-y: auto; border: 1px solid #E0E5F2;">
+                        <?php if (!empty($menu_items)): ?>
+                            <?php foreach ($menu_items as $piatto): ?>
+                                <label style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px; padding: 10px; background: white; border-radius: 8px; border: 1px solid #E0E5F2; cursor: pointer;">
+                                    <input type="checkbox" name="piatti_ids[]" value="<?php echo $piatto['id']; ?>" class="piatto-checkbox-giornaliero">
+                                    <div style="flex: 1;">
+                                        <div style="display: flex; justify-content: space-between;">
+                                            <strong style="color: #2B3674;"><?php echo htmlspecialchars($piatto['name']); ?></strong>
+                                            <span style="color: #4318FF; font-weight: 600;">€ <?php echo number_format($piatto['price'], 2); ?></span>
+                                        </div>
+                                        <div style="font-size: 12px; color: #A3AED0;">
+                                            <?php echo htmlspecialchars($piatto['categoria']); ?>
+                                            <?php 
+                                            $allergeni_piatto = !empty($piatto['allergeni']) ? json_decode($piatto['allergeni'], true) : [];
+                                            if (!empty($allergeni_piatto)): 
+                                            ?>
+                                                <span style="margin-left: 8px; color: #FF6B6B;">
+                                                    <i class="fa-solid fa-triangle-exclamation"></i> 
+                                                    <?php echo count($allergeni_piatto); ?> allergeni
+                                                </span>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                </label>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <p style="text-align: center; color: #A3AED0; padding: 20px;">
+                                Nessun piatto disponibile. Crea prima alcuni piatti.
+                            </p>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-save" 
+                        style="width: 100%; background: #2B3674; color: white; padding: 14px; border: none; border-radius: 10px; font-weight: 600; cursor: pointer;">
+                    <i class="fa-solid fa-save"></i> Salva Menu Giornaliero
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL MENU FALLBACK -->
+    <div id="modalMenuFallback" class="modal-overlay" style="display: none;">
+        <div class="modal-content" style="max-width: 600px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="color: #2B3674; margin: 0;">
+                    <i class="fa-solid fa-umbrella"></i> Menu di Fallback
+                </h3>
+                <button type="button" onclick="chiudiModaliMenu()" style="background: none; border: none; font-size: 20px; cursor: pointer; color: #A3AED0;">
+                    <i class="fa-solid fa-times"></i>
+                </button>
+            </div>
+
+            <form method="POST" id="formMenuFallback">
+                <input type="hidden" name="save_menu_fallback" value="1">
+                <input type="hidden" name="menu_fallback_id" id="menu_fallback_id" value="">
+
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 8px; color: #2B3674; font-weight: 500;">Titolo del Menu di Fallback</label>
+                    <input type="text" name="titolo_fallback" id="menu_fallback_titolo" required
+                           placeholder="Es. Menu Standard, Menu Principale..."
+                           style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #E0E5F2; font-family: 'Inter', sans-serif;">
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 8px; color: #2B3674; font-weight: 500;">Piatti del Menu di Fallback</label>
+                    <div style="background: #F8F9FF; border-radius: 12px; padding: 15px; max-height: 300px; overflow-y: auto; border: 1px solid #E0E5F2;">
+                        <?php if (!empty($menu_items)): ?>
+                            <?php foreach ($menu_items as $piatto): ?>
+                                <label style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px; padding: 10px; background: white; border-radius: 8px; border: 1px solid #E0E5F2; cursor: pointer;">
+                                    <input type="checkbox" name="piatti_fallback_ids[]" value="<?php echo $piatto['id']; ?>" class="piatto-checkbox-fallback">
+                                    <div style="flex: 1;">
+                                        <div style="display: flex; justify-content: space-between;">
+                                            <strong style="color: #2B3674;"><?php echo htmlspecialchars($piatto['name']); ?></strong>
+                                            <span style="color: #4318FF; font-weight: 600;">€ <?php echo number_format($piatto['price'], 2); ?></span>
+                                        </div>
+                                        <div style="font-size: 12px; color: #A3AED0;">
+                                            <?php echo htmlspecialchars($piatto['categoria']); ?>
+                                            <?php 
+                                            $allergeni_piatto = !empty($piatto['allergeni']) ? json_decode($piatto['allergeni'], true) : [];
+                                            if (!empty($allergeni_piatto)): 
+                                            ?>
+                                                <span style="margin-left: 8px; color: #FF6B6B;">
+                                                    <i class="fa-solid fa-triangle-exclamation"></i> 
+                                                    <?php echo count($allergeni_piatto); ?> allergeni
+                                                </span>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                </label>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <p style="text-align: center; color: #A3AED0; padding: 20px;">
+                                Nessun piatto disponibile. Crea prima alcuni piatti.
+                            </p>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-save" 
+                        style="width: 100%; background: #4318FF; color: white; padding: 14px; border: none; border-radius: 10px; font-weight: 600; cursor: pointer;">
+                    <i class="fa-solid fa-save"></i> Salva Menu di Fallback
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const foodCategories = <?php echo json_encode(getAllowedCategories()); ?>;
+        const badWords = <?php echo json_encode(getBadWords()); ?>;
+        const allergeniList = <?php echo json_encode(getAllergeni()); ?>;
 
                     <div class="allergeni-container-edit">
                         <div class="allergeni-search-container" style="position: relative; margin-bottom: 10px;">
@@ -1595,7 +1797,83 @@ function getAllergeni()
                 confirmDishModal.style.display = 'none';
             }
         });
+
+        function openMenuGiornalieroModal() {
+            document.getElementById('modalMenuTitle').innerHTML = '<i class="fa-solid fa-calendar-plus"></i> Nuovo Menu Giornaliero';
+            document.getElementById('menu_id').value = '';
+            document.getElementById('menu_titolo').value = '';
+            document.getElementById('menu_giorno').value = '';
+            document.getElementById('menu_giorno_select').value = '1';
+            
+            document.querySelectorAll('.piatto-checkbox-giornaliero').forEach(cb => cb.checked = false);
+            
+            document.getElementById('modalMenuGiornaliero').style.display = 'flex';
+        }
+
+        function openMenuGiornalieroModalForDay(giorno) {
+            document.getElementById('modalMenuTitle').innerHTML = '<i class="fa-solid fa-calendar-plus"></i> Nuovo Menu Giornaliero';
+            document.getElementById('menu_id').value = '';
+            document.getElementById('menu_titolo').value = '';
+            document.getElementById('menu_giorno').value = giorno;
+            document.getElementById('menu_giorno_select').value = giorno;
+            
+            document.querySelectorAll('.piatto-checkbox-giornaliero').forEach(cb => cb.checked = false);
+            
+            document.getElementById('modalMenuGiornaliero').style.display = 'flex';
+        }
+
+        function openEditMenuGiornalieroModal(menu, giorno) {
+            document.getElementById('modalMenuTitle').innerHTML = '<i class="fa-solid fa-pen"></i> Modifica Menu Giornaliero';
+            document.getElementById('menu_id').value = menu.id;
+            document.getElementById('menu_titolo').value = menu.title;
+            document.getElementById('menu_giorno').value = giorno;
+            document.getElementById('menu_giorno_select').value = giorno;
+            
+            const piattiIds = menu.piatti.map(p => p.id);
+            document.querySelectorAll('.piatto-checkbox-giornaliero').forEach(cb => {
+                cb.checked = piattiIds.includes(parseInt(cb.value));
+            });
+            
+            document.getElementById('modalMenuGiornaliero').style.display = 'flex';
+        }
+
+        function openMenuFallbackModal() {
+            document.getElementById('menu_fallback_id').value = '';
+            document.getElementById('menu_fallback_titolo').value = '';
+            
+            document.querySelectorAll('.piatto-checkbox-fallback').forEach(cb => cb.checked = false);
+            
+            document.getElementById('modalMenuFallback').style.display = 'flex';
+        }
+
+        function openEditMenuFallbackModal(menu) {
+            document.getElementById('menu_fallback_id').value = menu.id;
+            document.getElementById('menu_fallback_titolo').value = menu.title;
+            
+            const piattiIds = menu.piatti.map(p => p.id);
+            document.querySelectorAll('.piatto-checkbox-fallback').forEach(cb => {
+                cb.checked = piattiIds.includes(parseInt(cb.value));
+            });
+            
+            document.getElementById('modalMenuFallback').style.display = 'flex';
+        }
+
+        function chiudiModaliMenu() {
+            document.getElementById('modalMenuGiornaliero').style.display = 'none';
+            document.getElementById('modalMenuFallback').style.display = 'none';
+        }
+
+        window.addEventListener('click', function(e) {
+            const modalGiornaliero = document.getElementById('modalMenuGiornaliero');
+            const modalFallback = document.getElementById('modalMenuFallback');
+            
+            if (e.target === modalGiornaliero) {
+                modalGiornaliero.style.display = 'none';
+            }
+            if (e.target === modalFallback) {
+                modalFallback.style.display = 'none';
+            }
+        });
     </script>
 </body>
-
 </html>
