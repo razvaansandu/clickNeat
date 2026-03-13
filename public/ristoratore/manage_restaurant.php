@@ -43,6 +43,33 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $action = $_POST['action'] ?? null;
     $owner_id = $_SESSION['id'];
 
+    if ($order_id && $action === 'accept') {
+        if ($orderModel->accept($order_id, $owner_id)) {
+            $msg = "Ordine accettato!";
+            $msg_type = "success";
+        }
+        header("Location: " . $_SERVER['PHP_SELF'] . "?id=" . $restaurant_id);
+        exit;
+    } elseif ($order_id && $action === 'reject') {
+        if ($orderModel->reject($order_id, $owner_id)) {
+            $msg = "Ordine rifiutato.";
+            $msg_type = "error";
+        }
+        header("Location: " . $_SERVER['PHP_SELF'] . "?id=" . $restaurant_id);
+        exit;
+    } elseif (isset($_POST['update_order'])) {
+        $new_status = $_POST['status'];
+        if ($orderModel->updateStatus($order_id, $new_status)) {
+            $msg = "Ordine aggiornato con successo!";
+            $msg_type = "success";
+        } else {
+            $msg = "Errore durante l'aggiornamento dell'ordine.";
+            $msg_type = "error";
+        }
+        header("Location: " . $_SERVER['PHP_SELF'] . "?id=" . $restaurant_id);
+        exit;
+    }
+
     if (isset($_POST['delete_dish'])) {
         $dish_id = $_POST['dish_id'];
         if ($menuModel->delete_piatto($dish_id)) {
@@ -186,7 +213,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $numero_tavolo = $_POST['numero_tavolo'];
         $capacita = $_POST['capacita'];
         $note = $_POST['note'] ?? '';
-
+        
         if ($tavoliModel->create($restaurant_id, "Tavolo " . $numero_tavolo, $capacita, $note)) {
             $msg = "Tavolo aggiunto con successo!";
             $msg_type = "success";
@@ -202,7 +229,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $capacita = $_POST['capacita'];
         $disponibile = ($_POST['stato'] === 'disponibile') ? 1 : 0;
         $note = $_POST['note'] ?? '';
-
+        
         if ($tavoliModel->update($tavolo_id, "Tavolo " . $numero_tavolo, $capacita, $note, $disponibile)) {
             $msg = "Tavolo aggiornato con successo!";
             $msg_type = "success";
@@ -362,7 +389,6 @@ function getAllergeni()
             .category-search-container {
                 width: 100% !important;
             }
-
             .tavoli-grid {
                 grid-template-columns: 1fr !important;
             }
@@ -507,7 +533,16 @@ function getAllergeni()
             opacity: 1;
         }
 
-        .confirm-modal-overlay {
+        .menu-giornaliero-card {
+            transition: all 0.3s ease;
+        }
+
+        .menu-giornaliero-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(5, 205, 153, 0.15) !important;
+        }
+
+        .modal-overlay {
             position: fixed;
             top: 0;
             left: 0;
@@ -517,17 +552,18 @@ function getAllergeni()
             display: none;
             align-items: center;
             justify-content: center;
-            z-index: 2000;
+            z-index: 1000;
             backdrop-filter: blur(5px);
         }
 
-        .confirm-modal-content {
+        .modal-content {
             background: white;
             border-radius: 20px;
             padding: 30px;
-            max-width: 400px;
+            max-width: 500px;
             width: 90%;
-            text-align: center;
+            max-height: 90vh;
+            overflow-y: auto;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             animation: slideIn 0.3s ease;
         }
@@ -543,69 +579,190 @@ function getAllergeni()
             }
         }
 
-        .confirm-icon {
-            width: 70px;
-            height: 70px;
-            background: #FFE5E5;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 20px;
-            color: #E31A1A;
-            font-size: 30px;
+        .modal-content.large {
+            max-width: 600px;
         }
 
-        .confirm-title {
-            color: #2B3674;
-            font-size: 20px;
-            font-weight: 700;
-            margin-bottom: 10px;
+        .input-wrapper {
+            position: relative;
+            width: 100%;
         }
 
-        .confirm-message {
+        .input-wrapper i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
             color: #A3AED0;
+        }
+
+        .input-wrapper input,
+        .input-wrapper textarea,
+        .input-wrapper select {
+            width: 100%;
+            padding: 12px 15px 12px 45px;
+            border: 1px solid #E0E5F2;
+            border-radius: 12px;
+            font-family: 'Inter', sans-serif;
             font-size: 14px;
-            margin-bottom: 25px;
-            line-height: 1.5;
+            transition: all 0.3s ease;
         }
 
-        .confirm-buttons {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
+        .input-wrapper input:focus,
+        .input-wrapper textarea:focus,
+        .input-wrapper select:focus {
+            border-color: #4318FF;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(67, 24, 255, 0.1);
         }
 
-        .confirm-btn {
-            padding: 12px 30px;
+        .btn-add {
+            background: #1A4D4E;
+            color: white;
+            border: none;
+            padding: 12px 24px;
             border-radius: 12px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            border: none;
-            font-size: 14px;
         }
 
-        .confirm-btn.cancel {
+        .btn-add:hover {
+            background: #0f3536;
+            transform: translateY(-2px);
+        }
+
+        .btn-save {
+            background: #2B3674;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-save:hover {
+            background: #1f2756;
+            transform: translateY(-2px);
+        }
+
+        .btn-modifica {
+            background: #4318FF;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-modifica:hover {
+            background: #2f0fcc;
+        }
+
+        .btn-elimina {
+            background: #E31A1A;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-elimina:hover {
+            background: #b31515;
+        }
+
+        .btn-tavolo {
             background: #F4F7FE;
             color: #2B3674;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
         }
 
-        .confirm-btn.cancel:hover {
+        .btn-tavolo:hover {
             background: #E0E5F2;
         }
 
-        .confirm-btn.delete {
-            background: #E31A1A;
-            color: white;
+        .msg-box {
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-weight: 500;
         }
 
-        .confirm-btn.delete:hover {
-            background: #b31515;
-            transform: scale(1.05);
+        .msg-box.success {
+            background: #E6FAF5;
+            color: #05CD99;
+            border: 1px solid #05CD99;
+        }
+
+        .msg-box.error {
+            background: #FFE5E5;
+            color: #E31A1A;
+            border: 1px solid #E31A1A;
+        }
+
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-pending {
+            background: #FFF3E0;
+            color: #FFA500;
+        }
+
+        .status-accepted {
+            background: #E6FAF5;
+            color: #05CD99;
+        }
+
+        .status-completed {
+            background: #F0F0FF;
+            color: #4318FF;
+        }
+
+        .status-rejected {
+            background: #FFE5E5;
+            color: #E31A1A;
+        }
+
+        .card-add {
+            border: 2px dashed #E0E5F2;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .card-add:hover {
+            border-color: #4318FF;
+            background: #F8F9FF;
+        }
+
+        .icon-plus {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .text-add {
+            color: #A3AED0;
+            font-size: 14px;
         }
     </style>
-
 </head>
 
 <body>
@@ -628,10 +785,9 @@ function getAllergeni()
         </div>
 
         <div class="page-header"
-            style="display:flex; justify-content:flex-start; align-items:center; margin-top:-20px; padding-top:0; gap:15px; flex-wrap:wrap;">
-
+            style="display: flex; justify-content: flex-start; align-items: center; margin-top: -20px; padding-top: 0; gap: 15px; flex-wrap: wrap;">
             <a href="modifica_ristorante.php?id=<?php echo $restaurant_id; ?>"
-                style="background:#1A4D4E; color:white; padding:12px 24px; border-radius:30px; text-decoration:none; font-weight:600; display:inline-flex; align-items:center; gap:8px; box-shadow:0 4px 10px rgba(67,24,255,0.25); transition:all 0.2s ease;">
+                style="background: #2B3674; color: white; padding: 12px 24px; border-radius: 30px; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 10px rgba(67,24,255,0.25); transition: all 0.2s ease;">
                 <i class="fa-solid fa-pen-to-square"></i> Modifica Informazioni
             </a>
 
@@ -643,18 +799,16 @@ function getAllergeni()
             }
             ?>
             <a href="ordini_ristoratore.php?id=<?php echo $restaurant_id; ?>"
-                style="background:#1A4D4E; color:white; padding:12px 24px; border-radius:30px; text-decoration:none; font-weight:600; display:inline-flex; align-items:center; gap:8px; box-shadow:0 4px 10px rgba(26,77,78,0.25); position:relative;">
+                style="background: #1A4D4E; color: white; padding: 12px 24px; border-radius: 30px; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 10px rgba(26,77,78,0.25); position:relative;">
                 <i class="fa-solid fa-receipt"></i> Gestisci Ordini
                 <?php if ($pending_count > 0): ?>
                     <span
-                        style="background:#e53e3e; color:white; border-radius:50%; width:22px; height:22px; font-size:11px; font-weight:700; display:inline-flex; align-items:center; justify-content:center;">
+                        style="background:#e53e3e; color:white; border-radius:50%; width:22px; height:22px; font-size:11px; font-weight:700; display:inline-flex; align-items:center; justify-content:center; margin-left:5px;">
                         <?php echo $pending_count; ?>
                     </span>
                 <?php endif; ?>
             </a>
-
         </div>
-
 
         <?php if ($msg): ?>
             <div class="msg-box <?php echo $msg_type; ?>">
@@ -663,7 +817,6 @@ function getAllergeni()
         <?php endif; ?>
 
         <div class="menu-top-grid">
-
             <div class="card">
                 <h3 style="color: #2B3674; margin-bottom: 20px;">Aggiungi Piatto</h3>
                 <form method="POST" id="form-piatto" enctype="multipart/form-data">
@@ -675,8 +828,7 @@ function getAllergeni()
                     </label>
                     <input type="file" name="dish_image" id="upload-img" style="display: none;" accept="image/*">
 
-                    <div
-                        style="display: grid; grid-template-columns: 2fr 1fr; gap: 15px; margin-bottom: 15px; margin-top: 15px;">
+                    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 15px; margin-bottom: 15px; margin-top: 15px;">
                         <div class="input-wrapper">
                             <i class="fa-solid fa-utensils"></i>
                             <input type="text" name="name" placeholder="Nome Piatto" required>
@@ -710,15 +862,12 @@ function getAllergeni()
                     </div>
 
                     <div id="selected_category_container" style="display: none;">
-                        <div
-                            style="background: #E6FAF5; border-radius: 30px; padding: 12px 18px; margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between;">
+                        <div style="background: #E6FAF5; border-radius: 30px; padding: 12px 18px; margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between;">
                             <div style="display: flex; align-items: center; gap: 10px;">
                                 <i class="fa-solid fa-check-circle" style="color: #05CD99; font-size: 18px;"></i>
                                 <div>
-                                    <div style="font-size: 12px; color: #2B3674; opacity: 0.7;">Categoria selezionata
-                                    </div>
-                                    <span id="selected_category_name"
-                                        style="font-weight: 700; color: #2B3674; font-size: 16px;"></span>
+                                    <div style="font-size: 12px; color: #2B3674; opacity: 0.7;">Categoria selezionata</div>
+                                    <span id="selected_category_name" style="font-weight: 700; color: #2B3674; font-size: 16px;"></span>
                                 </div>
                             </div>
                             <button type="button" id="change_category_btn"
@@ -729,8 +878,7 @@ function getAllergeni()
                     </div>
 
                     <input type="hidden" name="categoria" id="selected_category_hidden" value="" required>
-                    <small id="category_help"
-                        style="color: #A3AED0; font-size: 11px; margin-top: 5px; display: block; height: 15px;">
+                    <small id="category_help" style="color: #A3AED0; font-size: 11px; margin-top: 5px; display: block; height: 15px;">
                         <i class="fa-solid fa-info-circle"></i> Cerca e seleziona una categoria dall'elenco
                     </small>
 
@@ -742,34 +890,28 @@ function getAllergeni()
                         <div class="allergeni-search-container" style="position: relative; margin-bottom: 10px;">
                             <div class="input-wrapper" style="position: relative;">
                                 <i class="fa-solid fa-search"></i>
-                                <input type="text" id="allergene_search" placeholder="Cerca un allergene..."
-                                    autocomplete="off" style="padding-right: 30px;">
+                                <input type="text" id="allergene_search" placeholder="Cerca un allergene..." autocomplete="off" style="padding-right: 30px;">
                                 <i class="fa-solid fa-times-circle" id="clear_allergene_search"
                                     style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: #A3AED0; cursor: pointer; display: none;"></i>
                             </div>
-                            <div id="allergeni_search_results" class="search-results-dropdown" style="display: none;">
-                            </div>
+                            <div id="allergeni_search_results" class="search-results-dropdown" style="display: none;"></div>
                         </div>
 
                         <div id="allergeni_selected_container" class="selected-allergeni-grid">
                             <div style="grid-column: 1/-1; text-align: center; color: #A3AED0; padding: 20px;">
-                                <i class="fa-solid fa-ban"
-                                    style="font-size: 24px; margin-bottom: 10px; display: block;"></i>
+                                <i class="fa-solid fa-ban" style="font-size: 24px; margin-bottom: 10px; display: block;"></i>
                                 Nessun allergene selezionato
                             </div>
                         </div>
 
                         <input type="hidden" name="allergeni" id="selected_allergeni_hidden" value="[]">
-                        <small id="allergeni_help"
-                            style="color: #A3AED0; font-size: 11px; display: block; margin-top: 5px;">
-                            <i class="fa-solid fa-info-circle"></i> Cerca e clicca per aggiungere allergeni. Clicca
-                            sull'allergene per rimuoverlo.
+                        <small id="allergeni_help" style="color: #A3AED0; font-size: 11px; display: block; margin-top: 5px;">
+                            <i class="fa-solid fa-info-circle"></i> Cerca e clicca per aggiungere allergeni. Clicca sull'allergene per rimuoverlo.
                         </small>
                     </div>
 
-                    <button type="submit" class="btn-add"
-                        style="background: #1A4D4E; color: white; padding: 6px 7px; border-radius: 12px; font-weight: 500; font-size: 13px; border: 1px solid var(--primary-brand); width: 100px; margin-top: 20px; height:auto">
-                        <span>Salva Piatto</span>
+                    <button type="submit" class="btn-add" style="width: 100%; margin-top: 10px;">
+                        <i class="fa-solid fa-plus"></i> Aggiungi Piatto
                     </button>
                 </form>
             </div>
@@ -777,8 +919,7 @@ function getAllergeni()
             <div class="card">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
                     <h3 style="color: #2B3674; margin:0;">Il tuo Menu</h3>
-                    <span
-                        style="background:#E6FAF5; color:#05CD99; padding:5px 12px; border-radius:15px; font-weight:600; font-size:12px;">
+                    <span style="background:#E6FAF5; color:#05CD99; padding:5px 12px; border-radius:15px; font-weight:600; font-size:12px;">
                         <?php echo count($menu_items); ?> Piatti
                     </span>
                 </div>
@@ -789,17 +930,13 @@ function getAllergeni()
                     <div class="menu-list">
                         <?php foreach ($menu_items as $item):
                             $allergeni = !empty($item['allergeni']) ? json_decode($item['allergeni'], true) : [];
-                            ?>
-                            <div class="menu-item"
-                                style="display: flex; gap: 15px; align-items: flex-start; position: relative;">
-                                <div class="dish-img"
-                                    style="width: 60px; height: 60px; border-radius: 10px; overflow: hidden; background: #f4f7fe; flex-shrink: 0;">
+                        ?>
+                            <div class="menu-item" style="display: flex; gap: 15px; align-items: flex-start; position: relative; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid #E0E5F2;">
+                                <div class="dish-img" style="width: 60px; height: 60px; border-radius: 10px; overflow: hidden; background: #f4f7fe; flex-shrink: 0;">
                                     <?php if (!empty($item['image_url'])): ?>
-                                        <img src="/assets/<?php echo htmlspecialchars(ltrim($item['image_url'], '')); ?>"
-                                            alt="Foto piatto" style="width: 100%; height: 100%; object-fit: cover;">
+                                        <img src="/assets/<?php echo htmlspecialchars(ltrim($item['image_url'], '')); ?>" alt="Foto piatto" style="width: 100%; height: 100%; object-fit: cover;">
                                     <?php else: ?>
-                                        <div
-                                            style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #A3AED0;">
+                                        <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #A3AED0;">
                                             <i class="fa-solid fa-utensils"></i>
                                         </div>
                                     <?php endif; ?>
@@ -808,8 +945,7 @@ function getAllergeni()
                                 <div class="dish-info" style="flex: 1;">
                                     <h4 style="margin: 0; font-size: 16px; color: #2B3674;">
                                         <?php echo htmlspecialchars($item['name']); ?>
-                                        <span
-                                            style="font-size: 12px; background: #F4F7FE; color: #4318FF; padding: 2px 8px; border-radius: 12px; margin-left: 8px;">
+                                        <span style="font-size: 12px; background: #F4F7FE; color: #4318FF; padding: 2px 8px; border-radius: 12px; margin-left: 8px;">
                                             <?php echo htmlspecialchars($item['categoria']); ?>
                                         </span>
                                     </h4>
@@ -829,10 +965,8 @@ function getAllergeni()
                                     <?php endif; ?>
                                 </div>
 
-                                <div class="dish-actions"
-                                    style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
-                                    <span class="dish-price" style="font-weight: bold; color: #2B3674;">€
-                                        <?php echo number_format($item['price'], 2); ?></span>
+                                <div class="dish-actions" style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+                                    <span class="dish-price" style="font-weight: bold; color: #2B3674;">€ <?php echo number_format($item['price'], 2); ?></span>
                                     <div style="display: flex; gap: 8px;">
                                         <button type="button" class="btn-open-edit" data-id="<?php echo $item['id']; ?>"
                                             data-name="<?php echo htmlspecialchars($item['name']); ?>"
@@ -844,13 +978,10 @@ function getAllergeni()
                                             style="background: none; border: none; color: #4318FF; cursor: pointer; font-size: 14px;">
                                             <i class="fa-solid fa-pen"></i>
                                         </button>
-
-                                        <form method="POST" style="margin:0;"
-                                            onsubmit="return confirm('Sei sicuro di voler eliminare questo piatto?');">
+                                        <form method="POST" style="margin:0;" onsubmit="return confirm('Sei sicuro di voler eliminare questo piatto?');">
                                             <input type="hidden" name="delete_dish" value="1">
                                             <input type="hidden" name="dish_id" value="<?php echo $item['id']; ?>">
-                                            <button type="submit"
-                                                style="background: none; border: none; color: #E31A1A; cursor: pointer; font-size: 14px;">
+                                            <button type="submit" style="background: none; border: none; color: #E31A1A; cursor: pointer; font-size: 14px;">
                                                 <i class="fa-solid fa-trash"></i>
                                             </button>
                                         </form>
@@ -861,9 +992,146 @@ function getAllergeni()
                     </div>
                 <?php endif; ?>
             </div>
-
         </div>
 
+        <!-- SEZIONE MENU GIORNALIERI (ORA SOPRA I TAVOLI) -->
+        <div class="full-width-section">
+            <div class="card">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+                    <div>
+                        <h3 style="color: #2B3674; margin:0; display: flex; align-items: center; gap: 10px;">
+                            <i class="fa-solid fa-calendar-alt" style="color: #4318FF;"></i>
+                            Menu Giornalieri
+                        </h3>
+                        <p style="color: #A3AED0; margin: 5px 0 0 0; font-size: 13px;">
+                            Configura menu diversi per ogni giorno della settimana. Il menu di fallback viene usato quando non c'è un menu per il giorno specifico.
+                        </p>
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <button type="button" class="btn-add" onclick="openMenuFallbackModal()"
+                                style="background: #4318FF; color: white; padding: 10px 20px; border-radius: 12px; border: none; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 14px;">
+                            <i class="fa-solid fa-umbrella"></i> Menu Fallback
+                        </button>
+                        <button type="button" class="btn-add" onclick="openMenuGiornalieroModal()"
+                                style="background: #1A4D4E; color: white; padding: 10px 20px; border-radius: 12px; border: none; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 14px;">
+                            <i class="fa-solid fa-plus"></i> Nuovo Menu
+                        </button>
+                    </div>
+                </div>
+
+                <div style="background: #F8F9FF; border-radius: 16px; padding: 20px; margin-bottom: 25px; border-left: 4px solid #4318FF; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <div style="width: 50px; height: 50px; background: #4318FF; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                            <i class="fa-solid fa-umbrella" style="color: white; font-size: 24px;"></i>
+                        </div>
+                        <div>
+                            <h4 style="margin: 0 0 5px 0; color: #2B3674; font-size: 16px;">Menu di Fallback</h4>
+                            <?php if ($menu_fallback): ?>
+                                <p style="margin: 0; color: #2B3674; font-weight: 500;">
+                                    <?php echo htmlspecialchars($menu_fallback['title']); ?>
+                                </p>
+                                <p style="margin: 3px 0 0 0; color: #A3AED0; font-size: 12px;">
+                                    <i class="fa-solid fa-utensils"></i> <?php echo count($menu_fallback['piatti']); ?> piatti
+                                </p>
+                            <?php else: ?>
+                                <p style="margin: 0; color: #A3AED0; font-style: italic;">
+                                    Nessun menu di fallback configurato
+                                </p>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                    <?php if ($menu_fallback): ?>
+                        <button type="button" class="btn-modifica" onclick='openEditMenuFallbackModal(<?php echo json_encode($menu_fallback); ?>)'
+                                style="background: #4318FF; color: white; border: none; padding: 8px 16px; border-radius: 30px; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                            <i class="fa-solid fa-pen"></i> Modifica Fallback
+                        </button>
+                    <?php else: ?>
+                        <button type="button" class="btn-add" onclick="openMenuFallbackModal()"
+                                style="background: #4318FF; color: white; border: none; padding: 8px 16px; border-radius: 30px; cursor: pointer;">
+                            <i class="fa-solid fa-plus"></i> Configura Fallback
+                        </button>
+                    <?php endif; ?>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;">
+                    <?php for ($i = 0; $i < 7; $i++): 
+                        $menu = $menu_giornalieri[$i] ?? null;
+                    ?>
+                        <div class="menu-giornaliero-card" style="background: <?php echo $menu ? 'linear-gradient(135deg, #E6FAF5 0%, #FFFFFF 100%)' : '#F8F9FF'; ?>; border-radius: 16px; padding: 20px; border: 1px solid <?php echo $menu ? '#05CD99' : '#E0E5F2'; ?>; position: relative;">
+                            
+                            <?php if ($menu && $menu['is_active']): ?>
+                                <div style="position: absolute; top: 10px; right: 10px;">
+                                    <span style="background: #05CD99; color: white; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600;">
+                                        <i class="fa-solid fa-check-circle"></i> Attivo
+                                    </span>
+                                </div>
+                            <?php endif; ?>
+
+                            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 15px;">
+                                <div style="width: 45px; height: 45px; background: <?php echo $menu ? '#05CD99' : '#A3AED0'; ?>; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 18px; font-weight: bold;">
+                                    <?php echo substr($giorni[$i], 0, 3); ?>
+                                </div>
+                                <div>
+                                    <h4 style="margin: 0; color: #2B3674; font-size: 16px;"><?php echo $giorni[$i]; ?></h4>
+                                    <?php if ($menu): ?>
+                                        <p style="margin: 3px 0 0 0; color: #05CD99; font-size: 12px; font-weight: 500;">
+                                            <?php echo count($menu['piatti']); ?> piatti
+                                        </p>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+
+                            <?php if ($menu): ?>
+                                <p style="margin: 0 0 15px 0; font-weight: 600; color: #2B3674;">
+                                    <?php echo htmlspecialchars($menu['title']); ?>
+                                </p>
+                                
+                                <div style="margin-bottom: 15px;">
+                                    <?php 
+                                    $piatti_mostra = array_slice($menu['piatti'], 0, 3);
+                                    foreach ($piatti_mostra as $piatto): 
+                                    ?>
+                                        <div style="font-size: 12px; color: #A3AED0; padding: 3px 0; display: flex; align-items: center; gap: 5px;">
+                                            <i class="fa-solid fa-circle" style="font-size: 6px; color: #05CD99;"></i>
+                                            <?php echo htmlspecialchars($piatto['name']); ?>
+                                        </div>
+                                    <?php endforeach; ?>
+                                    <?php if (count($menu['piatti']) > 3): ?>
+                                        <div style="font-size: 11px; color: #A3AED0; margin-top: 5px;">
+                                            +<?php echo count($menu['piatti']) - 3; ?> altri piatti
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
+
+                                <div style="display: flex; gap: 8px;">
+                                    <button type="button" class="btn-tavolo btn-modifica" onclick='openEditMenuGiornalieroModal(<?php echo json_encode($menu); ?>, <?php echo $i; ?>)'
+                                            style="flex: 1; padding: 8px; background: #4318FF; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 12px;">
+                                        <i class="fa-solid fa-pen"></i> Modifica
+                                    </button>
+                                    <form method="POST" style="flex: 1;" onsubmit="return confirm('Eliminare questo menu?');">
+                                        <input type="hidden" name="delete_menu" value="1">
+                                        <input type="hidden" name="menu_id" value="<?php echo $menu['id']; ?>">
+                                        <button type="submit" class="btn-tavolo btn-elimina" style="width: 100%; padding: 8px;">
+                                            <i class="fa-solid fa-trash"></i> Elimina
+                                        </button>
+                                    </form>
+                                </div>
+                            <?php else: ?>
+                                <p style="margin: 0 0 15px 0; color: #A3AED0; font-size: 13px; font-style: italic; text-align: center; padding: 20px 0;">
+                                    Nessun menu configurato
+                                </p>
+                                <button type="button" class="btn-add" onclick="openMenuGiornalieroModalForDay(<?php echo $i; ?>)"
+                                        style="width: 100%; padding: 10px; background: #1A4D4E; color: white; border: none; border-radius: 30px; cursor: pointer; font-size: 13px;">
+                                    <i class="fa-solid fa-plus"></i> Aggiungi Menu
+                                </button>
+                            <?php endif; ?>
+                        </div>
+                    <?php endfor; ?>
+                </div>
+            </div>
+        </div>
+
+        <!-- SEZIONE TAVOLI (ORA SOTTO I MENU GIORNALIERI) -->
         <div class="full-width-section">
             <div class="card">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
@@ -879,63 +1147,46 @@ function getAllergeni()
 
                 <?php if (empty($tavoli)): ?>
                     <div style="text-align:center; padding:50px 20px;">
-                        <i class="fa-solid fa-chair"
-                            style="font-size:48px; color:#A3AED0; display:block; margin-bottom:15px;"></i>
+                        <i class="fa-solid fa-chair" style="font-size:48px; color:#A3AED0; display:block; margin-bottom:15px;"></i>
                         <p style="color:#A3AED0; font-size:16px;">Nessun tavolo configurato.</p>
                         <p style="color:#A3AED0; margin-top:5px;">Clicca su "Aggiungi Tavolo" per iniziare!</p>
                     </div>
                 <?php else: ?>
                     <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px;">
                         <?php foreach ($tavoli as $tavolo): ?>
-                            <div class="tavolo-card"
-                                style="background: linear-gradient(135deg, #F8F9FF 0%, #FFFFFF 100%); border-radius: 16px; padding: 20px 15px; border: 1px solid #E0E5F2; box-shadow: 0 4px 12px rgba(0,0,0,0.02); position: relative; overflow: hidden;">
-                                <div
-                                    style="position: absolute; top: 0; right: 0; background: <?php echo $tavolo['disponibile'] ? '#05CD99' : '#A3AED0'; ?>; color: white; padding: 4px 12px; border-radius: 0 16px 0 16px; font-size: 11px; font-weight: 600;">
+                            <div class="tavolo-card" style="background: linear-gradient(135deg, #F8F9FF 0%, #FFFFFF 100%); border-radius: 16px; padding: 20px 15px; border: 1px solid #E0E5F2; box-shadow: 0 4px 12px rgba(0,0,0,0.02); position: relative; overflow: hidden;">
+                                <div style="position: absolute; top: 0; right: 0; background: <?php echo $tavolo['disponibile'] ? '#05CD99' : '#A3AED0'; ?>; color: white; padding: 4px 12px; border-radius: 0 16px 0 16px; font-size: 11px; font-weight: 600;">
                                     <i class="fa-solid fa-<?php echo $tavolo['disponibile'] ? 'check-circle' : 'ban'; ?>"></i>
                                     <?php echo $tavolo['disponibile'] ? 'Disponibile' : 'Non disponibile'; ?>
                                 </div>
-
                                 <div style="position: absolute; top: 10px; left: 10px; display: flex; gap: 5px;">
-                                    <button type="button" onclick='openModificaTavoloModal(<?php echo json_encode($tavolo); ?>)'
+                                    <button type="button" onclick='openModificaTavoloModal(<?php echo json_encode($tavolo); ?>)' 
                                         style="background: white; border: none; width: 30px; height: 30px; border-radius: 8px; color: #4318FF; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
                                         <i class="fa-solid fa-pen"></i>
                                     </button>
-
-                                    <form method="POST" style="display: inline;"
-                                        onsubmit="return confirm('Sei sicuro di voler eliminare questo tavolo?');">
+                                    <form method="POST" style="display: inline;" onsubmit="return confirm('Sei sicuro di voler eliminare questo tavolo?');">
                                         <input type="hidden" name="delete_tavolo" value="1">
                                         <input type="hidden" name="tavolo_id" value="<?php echo $tavolo['id']; ?>">
-                                        <button type="submit"
-                                            style="background: white; border: none; width: 30px; height: 30px; border-radius: 8px; color: #E31A1A; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                                        <button type="submit" style="background: white; border: none; width: 30px; height: 30px; border-radius: 8px; color: #E31A1A; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
                                             <i class="fa-solid fa-trash"></i>
                                         </button>
                                     </form>
                                 </div>
-
                                 <div style="text-align: center;">
-                                    <div
-                                        style="width: 60px; height: 60px; background: <?php echo $tavolo['disponibile'] ? '#05CD99' : '#A3AED0'; ?>; border-radius: 50%; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center;">
+                                    <div style="width: 60px; height: 60px; background: <?php echo $tavolo['disponibile'] ? '#05CD99' : '#A3AED0'; ?>; border-radius: 50%; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center;">
                                         <i class="fa-solid fa-chair" style="color: white; font-size: 24px;"></i>
                                     </div>
-
                                     <div style="font-size: 28px; font-weight: 700; color: #2B3674; line-height: 1;">
                                         <?php echo htmlspecialchars($tavolo['nome']); ?>
                                     </div>
-
                                     <div style="color: #A3AED0; font-size: 13px; margin: 5px 0 10px;">Tavolo</div>
-
-                                    <div
-                                        style="background: #F1F4FF; padding: 8px 12px; border-radius: 30px; display: inline-flex; align-items: center; gap: 6px;">
+                                    <div style="background: #F1F4FF; padding: 8px 12px; border-radius: 30px; display: inline-flex; align-items: center; gap: 6px;">
                                         <i class="fa-solid fa-users" style="color: #4318FF; font-size: 12px;"></i>
-                                        <span style="font-weight: 600; color: #2B3674;"><?php echo $tavolo['capacita']; ?>
-                                            posti</span>
+                                        <span style="font-weight: 600; color: #2B3674;"><?php echo $tavolo['capacita']; ?> posti</span>
                                     </div>
-
                                     <?php if (!empty($tavolo['posizione'])): ?>
-                                        <div
-                                            style="font-size: 11px; color: #A3AED0; margin-top: 8px; padding-top: 8px; border-top: 1px dashed #E0E5F2;">
-                                            <i class="fa-solid fa-note-sticky"></i>
-                                            <?php echo htmlspecialchars($tavolo['posizione']); ?>
+                                        <div style="font-size: 11px; color: #A3AED0; margin-top: 8px; padding-top: 8px; border-top: 1px dashed #E0E5F2;">
+                                            <i class="fa-solid fa-note-sticky"></i> <?php echo htmlspecialchars($tavolo['posizione']); ?>
                                         </div>
                                     <?php endif; ?>
                                 </div>
@@ -945,149 +1196,183 @@ function getAllergeni()
                 <?php endif; ?>
             </div>
         </div>
+    </div>
 
-        <div id="modalAggiungiTavolo" class="modal-overlay" style="display: none;">
-            <div class="modal-content" style="max-width: 400px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <h3 style="color: #2B3674; margin: 0;">Aggiungi Tavolo</h3>
-                    <button type="button" onclick="chiudiModali()"
-                        style="background: none; border: none; font-size: 20px; cursor: pointer; color: #A3AED0;">
-                        <i class="fa-solid fa-times"></i>
-                    </button>
-                </div>
-
-                <form method="POST">
-                    <input type="hidden" name="add_tavolo" value="1">
-
-                    <div class="input-wrapper" style="margin-bottom: 15px;">
-                        <i class="fa-solid fa-hashtag"></i>
-                        <input type="number" name="numero_tavolo" placeholder="Numero Tavolo" required min="1">
-                    </div>
-
-                    <div class="input-wrapper" style="margin-bottom: 15px;">
-                        <i class="fa-solid fa-users"></i>
-                        <input type="number" name="capacita" placeholder="Capacità (posti)" required min="1">
-                    </div>
-
-                    <div class="input-wrapper" style="margin-bottom: 15px;">
-                        <i class="fa-solid fa-note-sticky"></i>
-                        <input type="text" name="note" placeholder="Note (opzionale)">
-                    </div>
-
-                    <button type="submit" class="btn-save"
-                        style="width: 100%; background: #2B3674; color: white; padding: 12px; border: none; border-radius: 10px; font-weight: 600; cursor: pointer;">
-                        Salva Tavolo
-                    </button>
-                </form>
+    <!-- MODAL AGGIUNGI TAVOLO -->
+    <div id="modalAggiungiTavolo" class="modal-overlay" style="display: none;">
+        <div class="modal-content" style="max-width: 400px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="color: #2B3674; margin: 0;">Aggiungi Tavolo</h3>
+                <button type="button" onclick="chiudiModali()" style="background: none; border: none; font-size: 20px; cursor: pointer; color: #A3AED0;">
+                    <i class="fa-solid fa-times"></i>
+                </button>
             </div>
-        </div>
 
-        <div id="modalModificaTavolo" class="modal-overlay" style="display: none;">
-            <div class="modal-content" style="max-width: 400px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <h3 style="color: #2B3674; margin: 0;">Modifica Tavolo</h3>
-                    <button type="button" onclick="chiudiModali()"
-                        style="background: none; border: none; font-size: 20px; cursor: pointer; color: #A3AED0;">
-                        <i class="fa-solid fa-times"></i>
-                    </button>
+            <form method="POST">
+                <input type="hidden" name="add_tavolo" value="1">
+                
+                <div class="input-wrapper" style="margin-bottom: 15px;">
+                    <i class="fa-solid fa-hashtag"></i>
+                    <input type="number" name="numero_tavolo" placeholder="Numero Tavolo" required min="1">
                 </div>
 
-                <form method="POST" id="formModificaTavolo">
-                    <input type="hidden" name="edit_tavolo" value="1">
-                    <input type="hidden" name="tavolo_id" id="edit_tavolo_id">
+                <div class="input-wrapper" style="margin-bottom: 15px;">
+                    <i class="fa-solid fa-users"></i>
+                    <input type="number" name="capacita" placeholder="Capacità (posti)" required min="1">
+                </div>
 
-                    <div class="input-wrapper" style="margin-bottom: 15px;">
-                        <i class="fa-solid fa-hashtag"></i>
-                        <input type="number" name="numero_tavolo" id="edit_numero_tavolo" required min="1">
-                    </div>
+                <div class="input-wrapper" style="margin-bottom: 15px;">
+                    <i class="fa-solid fa-note-sticky"></i>
+                    <input type="text" name="note" placeholder="Note (opzionale)">
+                </div>
 
-                    <div class="input-wrapper" style="margin-bottom: 15px;">
-                        <i class="fa-solid fa-users"></i>
-                        <input type="number" name="capacita" id="edit_capacita" required min="1">
-                    </div>
-
-                    <div style="margin-bottom: 15px;">
-                        <label
-                            style="display: block; margin-bottom: 8px; color: #2B3674; font-weight: 500;">Stato</label>
-                        <select name="stato" id="edit_stato"
-                            style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #E0E5F2;">
-                            <option value="disponibile">Disponibile</option>
-                            <option value="non_disponibile">Non disponibile</option>
-                        </select>
-                    </div>
-
-                    <div class="input-wrapper" style="margin-bottom: 15px;">
-                        <i class="fa-solid fa-note-sticky"></i>
-                        <input type="text" name="note" id="edit_note" placeholder="Note (opzionale)">
-                    </div>
-
-                    <button type="submit" class="btn-save"
+                <button type="submit" class="btn-save" 
                         style="width: 100%; background: #2B3674; color: white; padding: 12px; border: none; border-radius: 10px; font-weight: 600; cursor: pointer;">
-                        Aggiorna Tavolo
-                    </button>
-                </form>
-            </div>
+                    Salva Tavolo
+                </button>
+            </form>
         </div>
+    </div>
 
-        <div id="editModal" class="modal-overlay">
-            <div class="modal-content" style="max-width: 500px; max-height: 90vh; overflow-y: auto;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <h3 style="color: #2B3674; margin: 0;">Modifica Piatto</h3>
-                    <button type="button" id="closeEditModal"
-                        style="background: none; border: none; font-size: 20px; cursor: pointer; color: #A3AED0;">
-                        <i class="fa-solid fa-times"></i>
-                    </button>
+    <!-- MODAL MODIFICA TAVOLO -->
+    <div id="modalModificaTavolo" class="modal-overlay" style="display: none;">
+        <div class="modal-content" style="max-width: 400px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="color: #2B3674; margin: 0;">Modifica Tavolo</h3>
+                <button type="button" onclick="chiudiModali()" style="background: none; border: none; font-size: 20px; cursor: pointer; color: #A3AED0;">
+                    <i class="fa-solid fa-times"></i>
+                </button>
+            </div>
+
+            <form method="POST" id="formModificaTavolo">
+                <input type="hidden" name="edit_tavolo" value="1">
+                <input type="hidden" name="tavolo_id" id="edit_tavolo_id">
+                
+                <div class="input-wrapper" style="margin-bottom: 15px;">
+                    <i class="fa-solid fa-hashtag"></i>
+                    <input type="number" name="numero_tavolo" id="edit_numero_tavolo" required min="1">
                 </div>
 
-                <form method="POST" enctype="multipart/form-data" id="edit-form">
-                    <input type="hidden" name="edit_dish" value="1">
-                    <input type="hidden" name="dish_id" id="edit_dish_id">
-                    <input type="hidden" name="existing_image" id="edit_existing_image">
+                <div class="input-wrapper" style="margin-bottom: 15px;">
+                    <i class="fa-solid fa-users"></i>
+                    <input type="number" name="capacita" id="edit_capacita" required min="1">
+                </div>
 
-                    <label for="edit-upload-img" class="card card-add"
-                        style="cursor: pointer; padding: 10px; min-height: auto;">
-                        <div class="icon-plus" style="width: 30px; height: 30px; font-size: 16px;">+</div>
-                        <div class="text-add" id="edit-file-name" style="font-size: 13px;">Sostituisci Immagine</div>
-                    </label>
-                    <input type="file" name="dish_image" id="edit-upload-img" style="display: none;" accept="image/*">
-
-                    <div
-                        style="display: grid; grid-template-columns: 2fr 1fr; gap: 15px; margin-bottom: 15px; margin-top: 15px;">
-                        <div class="input-wrapper">
-                            <i class="fa-solid fa-utensils"></i>
-                            <input type="text" name="name" id="edit_name" required>
-                        </div>
-                        <div class="input-wrapper">
-                            <i class="fa-solid fa-euro-sign"></i>
-                            <input type="number" step="0.50" name="price" id="edit_price" required>
-                        </div>
-                    </div>
-
-                    <div class="input-wrapper textarea-wrapper" style="margin-bottom: 15px;">
-                        <i class="fa-solid fa-align-left" style="top: 15px;"></i>
-                        <textarea name="description" id="edit_desc" rows="2" style="min-height: 80px;"></textarea>
-                    </div>
-
-                    <label
-                        style="display:block; margin-bottom:8px; font-weight:600; color: #2B3674; font-size: 14px;">Categoria</label>
-                    <select name="categoria_select" id="edit_piatto_select"
-                        style="width:100%; padding:10px; border-radius:8px; border:1px solid #d1d9e2; margin-bottom:12px;">
-                        <option value="pizza">Pizza</option>
-                        <option value="pasta">Pasta</option>
-                        <option value="panino">Panino</option>
-                        <option value="orientale">Orientale</option>
-                        <option value="altro">Altro</option>
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 8px; color: #2B3674; font-weight: 500;">Stato</label>
+                    <select name="stato" id="edit_stato" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #E0E5F2;">
+                        <option value="disponibile">Disponibile</option>
+                        <option value="non_disponibile">Non disponibile</option>
                     </select>
+                </div>
 
+                <div class="input-wrapper" style="margin-bottom: 15px;">
+                    <i class="fa-solid fa-note-sticky"></i>
+                    <input type="text" name="note" id="edit_note" placeholder="Note (opzionale)">
+                </div>
+
+                <button type="submit" class="btn-save" 
+                        style="width: 100%; background: #2B3674; color: white; padding: 12px; border: none; border-radius: 10px; font-weight: 600; cursor: pointer;">
+                    Aggiorna Tavolo
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODALE MODIFICA PIATTO -->
+    <div id="editModal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 500px; max-height: 90vh; overflow-y: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="color: #2B3674; margin: 0;">Modifica Piatto</h3>
+                <button type="button" id="closeEditModal"
+                    style="background: none; border: none; font-size: 20px; cursor: pointer; color: #A3AED0;">
+                    <i class="fa-solid fa-times"></i>
+                </button>
+            </div>
+
+            <form method="POST" enctype="multipart/form-data" id="edit-form">
+                <input type="hidden" name="edit_dish" value="1">
+                <input type="hidden" name="dish_id" id="edit_dish_id">
+                <input type="hidden" name="existing_image" id="edit_existing_image">
+
+                <label for="edit-upload-img" class="card card-add"
+                    style="cursor: pointer; padding: 10px; min-height: auto;">
+                    <div class="icon-plus" style="width: 30px; height: 30px; font-size: 16px;">+</div>
+                    <div class="text-add" id="edit-file-name" style="font-size: 13px;">Sostituisci Immagine</div>
+                </label>
+                <input type="file" name="dish_image" id="edit-upload-img" style="display: none;" accept="image/*">
+
+                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 15px; margin-bottom: 15px; margin-top: 15px;">
                     <div class="input-wrapper">
-                        <i class="fa-solid fa-plus-circle"></i>
-                        <input type="text" name="categoria_custom" id="edit_piatto_custom"
-                            placeholder="Oppure scrivi categoria personalizzata...">
+                        <i class="fa-solid fa-utensils"></i>
+                        <input type="text" name="name" id="edit_name" required>
                     </div>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-euro-sign"></i>
+                        <input type="number" step="0.50" name="price" id="edit_price" required>
+                    </div>
+                </div>
+
+                <div class="input-wrapper textarea-wrapper" style="margin-bottom: 15px;">
+                    <i class="fa-solid fa-align-left" style="top: 15px;"></i>
+                    <textarea name="description" id="edit_desc" rows="2" style="min-height: 80px;"></textarea>
+                </div>
+
+                <label style="display:block; margin-bottom:8px; font-weight:600; color: #2B3674; font-size: 14px;">Categoria</label>
+                <select name="categoria_select" id="edit_piatto_select"
+                    style="width:100%; padding:10px; border-radius:8px; border:1px solid #d1d9e2; margin-bottom:12px;">
+                    <option value="pizza">Pizza</option>
+                    <option value="pasta">Pasta</option>
+                    <option value="panino">Panino</option>
+                    <option value="orientale">Orientale</option>
+                    <option value="altro">Altro</option>
+                </select>
+
+                <div class="input-wrapper">
+                    <i class="fa-solid fa-plus-circle"></i>
+                    <input type="text" name="categoria_custom" id="edit_piatto_custom"
+                        placeholder="Oppure scrivi categoria personalizzata...">
+                </div>
+
+                <label style="display:block; margin-bottom:8px; font-weight:600; color: #2B3674; font-size: 14px; margin-top: 15px;">
+                    Allergeni
+                </label>
+
+                <div class="allergeni-container-edit">
+                    <div class="allergeni-search-container" style="position: relative; margin-bottom: 10px;">
+                        <div class="input-wrapper" style="position: relative;">
+                            <i class="fa-solid fa-search"></i>
+                            <input type="text" id="edit_allergene_search" placeholder="Cerca un allergene..."
+                                autocomplete="off" style="padding-right: 30px;">
+                            <i class="fa-solid fa-times-circle" id="edit_clear_allergene_search"
+                                style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: #A3AED0; cursor: pointer; display: none;"></i>
+                        </div>
+                        <div id="edit_allergeni_search_results" class="search-results-dropdown" style="display: none;">
+                        </div>
+                    </div>
+
+                    <div id="edit_allergeni_selected_container" class="selected-allergeni-grid">
+                        <div style="grid-column: 1/-1; text-align: center; color: #A3AED0; padding: 20px;">
+                            <i class="fa-solid fa-ban"
+                                style="font-size: 24px; margin-bottom: 10px; display: block;"></i>
+                            Nessun allergene selezionato
+                        </div>
+                    </div>
+
+                    <input type="hidden" name="allergeni" id="edit_selected_allergeni_hidden" value="[]">
+                </div>
+
+                <button type="submit" class="btn-save"
+                    style="width: 100%; margin-top: 20px; border: none; cursor: pointer; background: #2B3674; color: white; padding: 12px; border-radius: 10px; font-weight: 600;">
+                    Salva Modifiche
+                </button>
+            </form>
+        </div>
+    </div>
 
     <!-- MODAL MENU GIORNALIERO -->
     <div id="modalMenuGiornaliero" class="modal-overlay" style="display: none;">
-        <div class="modal-content" style="max-width: 600px;">
+        <div class="modal-content large">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                 <h3 style="color: #2B3674; margin: 0;" id="modalMenuTitle">
                     <i class="fa-solid fa-calendar-plus"></i> Nuovo Menu Giornaliero
@@ -1168,7 +1453,7 @@ function getAllergeni()
 
     <!-- MODAL MENU FALLBACK -->
     <div id="modalMenuFallback" class="modal-overlay" style="display: none;">
-        <div class="modal-content" style="max-width: 600px;">
+        <div class="modal-content large">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                 <h3 style="color: #2B3674; margin: 0;">
                     <i class="fa-solid fa-umbrella"></i> Menu di Fallback
@@ -1237,304 +1522,282 @@ function getAllergeni()
         const badWords = <?php echo json_encode(getBadWords()); ?>;
         const allergeniList = <?php echo json_encode(getAllergeni()); ?>;
 
-                    <div class="allergeni-container-edit">
-                        <div class="allergeni-search-container" style="position: relative; margin-bottom: 10px;">
-                            <div class="input-wrapper" style="position: relative;">
-                                <i class="fa-solid fa-search"></i>
-                                <input type="text" id="edit_allergene_search" placeholder="Cerca un allergene..."
-                                    autocomplete="off" style="padding-right: 30px;">
-                                <i class="fa-solid fa-times-circle" id="edit_clear_allergene_search"
-                                    style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: #A3AED0; cursor: pointer; display: none;"></i>
-                            </div>
-                            <div id="edit_allergeni_search_results" class="search-results-dropdown"
-                                style="display: none;">
-                            </div>
-                        </div>
+        let selectedAllergeni = [];
+        let selectedAllergeniEdit = [];
 
-                        <div id="edit_allergeni_selected_container" class="selected-allergeni-grid">
-                            <div style="grid-column: 1/-1; text-align: center; color: #A3AED0; padding: 20px;">
-                                <i class="fa-solid fa-ban"
-                                    style="font-size: 24px; margin-bottom: 10px; display: block;"></i>
-                                Nessun allergene selezionato
-                            </div>
-                        </div>
+        function checkBadWords(inputElement, selectElement, something, submitBtn) {
+            const value = inputElement.value.trim().toLowerCase();
+            const found = badWords.some(word => {
+                const regex = new RegExp("\\b" + word + "\\b", "i");
+                return regex.test(value);
+            });
+            if (submitBtn) {
+                submitBtn.disabled = found;
+                submitBtn.style.opacity = found ? '0.5' : '1';
+            }
+        }
 
-                        <input type="hidden" name="allergeni" id="edit_selected_allergeni_hidden" value="[]">
-                    </div>
+        document.addEventListener('DOMContentLoaded', function () {
+            const sidebar = document.querySelector('.sidebar');
+            const hamburger = document.querySelector('.hamburger-btn');
+            const closeBtn = document.getElementById('closeSidebarBtn');
 
-                    <button type="submit" class="btn-save"
-                        style="width: 100%; margin-top: 20px; border: none; cursor: pointer; background: #2B3674; color: white; padding: 12px; border-radius: 10px; font-weight: 600;">
-                        Salva Modifiche
-                    </button>
-                </form>
-            </div>
-        </div>
-
-        <script>
-            const foodCategories = <?php echo json_encode(getAllowedCategories()); ?>;
-            const badWords = <?php echo json_encode(getBadWords()); ?>;
-            const allergeniList = <?php echo json_encode(getAllergeni()); ?>;
-
-            let selectedAllergeni = [];
-            let selectedAllergeniEdit = [];
-
-            function checkBadWords(inputElement, selectElement, something, submitBtn) {
-                const value = inputElement.value.trim().toLowerCase();
-                const found = badWords.some(word => {
-                    const regex = new RegExp("\\b" + word + "\\b", "i");
-                    return regex.test(value);
-                });
-                if (submitBtn) {
-                    submitBtn.disabled = found;
-                    submitBtn.style.opacity = found ? '0.5' : '1';
-                }
+            let overlay = document.querySelector('.sidebar-overlay');
+            if (!overlay) {
+                overlay = document.createElement('div');
+                overlay.classList.add('sidebar-overlay');
+                document.body.appendChild(overlay);
             }
 
-            document.addEventListener('DOMContentLoaded', function () {
-                const sidebar = document.querySelector('.sidebar');
-                const hamburger = document.querySelector('.hamburger-btn');
-                const closeBtn = document.getElementById('closeSidebarBtn');
+            function openSidebar() { sidebar.classList.add('active'); overlay.classList.add('active'); }
+            function closeSidebar() { sidebar.classList.remove('active'); overlay.classList.remove('active'); }
 
-                let overlay = document.querySelector('.sidebar-overlay');
-                if (!overlay) {
-                    overlay = document.createElement('div');
-                    overlay.classList.add('sidebar-overlay');
-                    document.body.appendChild(overlay);
+            if (hamburger) hamburger.addEventListener('click', openSidebar);
+            if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
+            overlay.addEventListener('click', closeSidebar);
+
+            initCategorySelector();
+            initAllergeniSelector();
+        });
+
+        document.getElementById('upload-img').addEventListener('change', function (e) {
+            if (e.target.files.length > 0) {
+                document.getElementById('file-name').textContent = e.target.files[0].name;
+            }
+        });
+
+        function initCategorySelector() {
+            const searchInput = document.getElementById('category_search');
+            const resultsDiv = document.getElementById('search_results');
+            const clearBtn = document.getElementById('clear_search');
+            const selectedContainer = document.getElementById('selected_category_container');
+            const selectedName = document.getElementById('selected_category_name');
+            const selectedHidden = document.getElementById('selected_category_hidden');
+            const changeBtn = document.getElementById('change_category_btn');
+            const categoryHelp = document.getElementById('category_help');
+            const btnSave = document.querySelector('.btn-add');
+
+            if (!searchInput) return;
+
+            btnSave.disabled = true;
+            btnSave.style.opacity = '0.5';
+
+            searchInput.addEventListener('input', function () {
+                const searchTerm = this.value.trim().toLowerCase();
+                clearBtn.style.display = searchTerm.length > 0 ? 'block' : 'none';
+                if (searchTerm.length < 1) { resultsDiv.style.display = 'none'; return; }
+
+                const matches = foodCategories.filter(cat => cat.toLowerCase().includes(searchTerm)).slice(0, 10);
+                if (matches.length > 0) {
+                    showSearchResults(matches, searchTerm);
+                } else {
+                    resultsDiv.innerHTML = `<div style="padding: 20px; text-align: center; color: #A3AED0;"><i class="fa-solid fa-search" style="font-size: 24px; margin-bottom: 10px; display: block;"></i>Nessuna categoria trovata per "${searchTerm}"</div>`;
+                    resultsDiv.style.display = 'block';
                 }
-
-                function openSidebar() { sidebar.classList.add('active'); overlay.classList.add('active'); }
-                function closeSidebar() { sidebar.classList.remove('active'); overlay.classList.remove('active'); }
-
-                if (hamburger) hamburger.addEventListener('click', openSidebar);
-                if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
-                overlay.addEventListener('click', closeSidebar);
-
-                initCategorySelector();
-                initAllergeniSelector();
             });
 
-            document.getElementById('upload-img').addEventListener('change', function (e) {
-                if (e.target.files.length > 0) {
-                    document.getElementById('file-name').textContent = e.target.files[0].name;
-                }
-            });
-
-            function initCategorySelector() {
-                const searchInput = document.getElementById('category_search');
-                const resultsDiv = document.getElementById('search_results');
-                const clearBtn = document.getElementById('clear_search');
-                const selectedContainer = document.getElementById('selected_category_container');
-                const selectedName = document.getElementById('selected_category_name');
-                const selectedHidden = document.getElementById('selected_category_hidden');
-                const changeBtn = document.getElementById('change_category_btn');
-                const categoryHelp = document.getElementById('category_help');
-                const btnSave = document.querySelector('.btn-add');
-
-                if (!searchInput) return;
-
-                btnSave.disabled = true;
-                btnSave.style.opacity = '0.5';
-
-                searchInput.addEventListener('input', function () {
-                    const searchTerm = this.value.trim().toLowerCase();
-                    clearBtn.style.display = searchTerm.length > 0 ? 'block' : 'none';
-                    if (searchTerm.length < 1) { resultsDiv.style.display = 'none'; return; }
-
-                    const matches = foodCategories.filter(cat => cat.toLowerCase().includes(searchTerm)).slice(0, 10);
-                    if (matches.length > 0) {
-                        showSearchResults(matches, searchTerm);
-                    } else {
-                        resultsDiv.innerHTML = `<div style="padding: 20px; text-align: center; color: #A3AED0;"><i class="fa-solid fa-search" style="font-size: 24px; margin-bottom: 10px; display: block;"></i>Nessuna categoria trovata per "${searchTerm}"</div>`;
-                        resultsDiv.style.display = 'block';
-                    }
-                });
-
-                function showSearchResults(matches, searchTerm) {
-                    let html = '<div style="padding: 8px 0;">';
-                    matches.forEach(cat => {
-                        const highlighted = cat.replace(new RegExp(searchTerm, 'gi'), match => `<strong style="color: #4318FF;">${match}</strong>`);
-                        html += `<div class="category-result-item" data-category="${cat}" style="padding: 12px 15px; cursor: pointer; border-bottom: 1px solid #f0f0f0; transition: all 0.2s;">
+            function showSearchResults(matches, searchTerm) {
+                let html = '<div style="padding: 8px 0;">';
+                matches.forEach(cat => {
+                    const highlighted = cat.replace(new RegExp(searchTerm, 'gi'), match => `<strong style="color: #4318FF;">${match}</strong>`);
+                    html += `<div class="category-result-item" data-category="${cat}" style="padding: 12px 15px; cursor: pointer; border-bottom: 1px solid #f0f0f0; transition: all 0.2s;">
                     <div style="display: flex; align-items: center; gap: 10px;">
                         <i class="fa-solid fa-utensils" style="color: #4318FF; width: 20px;"></i>
                         <span style="flex: 1;">${highlighted}</span>
                         <i class="fa-solid fa-chevron-right" style="color: #A3AED0; font-size: 12px;"></i>
                     </div>
                 </div>`;
-                    });
-                    html += '</div>';
-                    resultsDiv.innerHTML = html;
-                    resultsDiv.style.display = 'block';
-
-                    document.querySelectorAll('.category-result-item').forEach(item => {
-                        item.addEventListener('click', function () { selectCategory(this.getAttribute('data-category')); });
-                        item.addEventListener('mouseenter', function () { this.style.backgroundColor = '#F4F7FE'; });
-                        item.addEventListener('mouseleave', function () { this.style.backgroundColor = ''; });
-                    });
-                }
-
-                function selectCategory(category) {
-                    selectedName.textContent = category;
-                    selectedHidden.value = category;
-                    selectedContainer.style.display = 'block';
-                    searchInput.value = '';
-                    resultsDiv.style.display = 'none';
-                    clearBtn.style.display = 'none';
-
-                    const found = badWords.some(word => new RegExp("\\b" + word + "\\b", "i").test(category));
-                    if (found) {
-                        categoryHelp.innerHTML = "<i class='fa-solid fa-ban' style='color: #ea4335;'></i> <span style='color: #ea4335;'>Termine non consentito</span>";
-                        btnSave.disabled = true;
-                        btnSave.style.opacity = "0.5";
-                    } else {
-                        categoryHelp.innerHTML = '<i class="fa-solid fa-check-circle" style="color: #05CD99;"></i> Categoria selezionata correttamente';
-                        categoryHelp.style.color = '#05CD99';
-                        btnSave.disabled = false;
-                        btnSave.style.opacity = '1';
-                    }
-                }
-
-                clearBtn.addEventListener('click', function () {
-                    searchInput.value = '';
-                    resultsDiv.style.display = 'none';
-                    clearBtn.style.display = 'none';
-                    searchInput.focus();
                 });
+                html += '</div>';
+                resultsDiv.innerHTML = html;
+                resultsDiv.style.display = 'block';
 
-                changeBtn.addEventListener('click', function () {
-                    selectedContainer.style.display = 'none';
-                    selectedHidden.value = '';
-                    searchInput.value = '';
-                    searchInput.focus();
-                    categoryHelp.innerHTML = '<i class="fa-solid fa-info-circle"></i> Cerca e seleziona una categoria dall\'elenco';
-                    categoryHelp.style.color = '#A3AED0';
-                    btnSave.disabled = true;
-                    btnSave.style.opacity = '0.5';
-                });
-
-                document.addEventListener('click', function (e) {
-                    if (!searchInput.contains(e.target) && !resultsDiv.contains(e.target)) {
-                        resultsDiv.style.display = 'none';
-                    }
-                });
-
-                searchInput.addEventListener('keydown', function (e) {
-                    if (e.key === 'Enter') {
-                        e.preventDefault();
-                        const firstResult = document.querySelector('.category-result-item');
-                        if (firstResult) firstResult.click();
-                    }
+                document.querySelectorAll('.category-result-item').forEach(item => {
+                    item.addEventListener('click', function () { selectCategory(this.getAttribute('data-category')); });
+                    item.addEventListener('mouseenter', function () { this.style.backgroundColor = '#F4F7FE'; });
+                    item.addEventListener('mouseleave', function () { this.style.backgroundColor = ''; });
                 });
             }
 
-            document.getElementById('form-piatto').addEventListener('submit', function (e) {
-                const selectedHidden = document.getElementById('selected_category_hidden');
-                if (!selectedHidden.value) {
-                    e.preventDefault();
-                    alert('Per favore, seleziona una categoria per il piatto.');
-                    document.getElementById('category_search').style.borderColor = '#E31A1A';
-                    setTimeout(() => { document.getElementById('category_search').style.borderColor = '#d1d9e2'; }, 3000);
+            function selectCategory(category) {
+                selectedName.textContent = category;
+                selectedHidden.value = category;
+                selectedContainer.style.display = 'block';
+                searchInput.value = '';
+                resultsDiv.style.display = 'none';
+                clearBtn.style.display = 'none';
+
+                const found = badWords.some(word => new RegExp("\\b" + word + "\\b", "i").test(category));
+                if (found) {
+                    categoryHelp.innerHTML = "<i class='fa-solid fa-ban' style='color: #ea4335;'></i> <span style='color: #ea4335;'>Termine non consentito</span>";
+                    btnSave.disabled = true;
+                    btnSave.style.opacity = "0.5";
+                } else {
+                    categoryHelp.innerHTML = '<i class="fa-solid fa-check-circle" style="color: #05CD99;"></i> Categoria selezionata correttamente';
+                    categoryHelp.style.color = '#05CD99';
+                    btnSave.disabled = false;
+                    btnSave.style.opacity = '1';
+                }
+            }
+
+            clearBtn.addEventListener('click', function () {
+                searchInput.value = '';
+                resultsDiv.style.display = 'none';
+                clearBtn.style.display = 'none';
+                searchInput.focus();
+            });
+
+            changeBtn.addEventListener('click', function () {
+                selectedContainer.style.display = 'none';
+                selectedHidden.value = '';
+                searchInput.value = '';
+                searchInput.focus();
+                categoryHelp.innerHTML = '<i class="fa-solid fa-info-circle"></i> Cerca e seleziona una categoria dall\'elenco';
+                categoryHelp.style.color = '#A3AED0';
+                btnSave.disabled = true;
+                btnSave.style.opacity = '0.5';
+            });
+
+            document.addEventListener('click', function (e) {
+                if (!searchInput.contains(e.target) && !resultsDiv.contains(e.target)) {
+                    resultsDiv.style.display = 'none';
                 }
             });
 
-            function initAllergeniSelector() {
-                const searchInput = document.getElementById('allergene_search');
-                const resultsDiv = document.getElementById('allergeni_search_results');
-                const clearBtn = document.getElementById('clear_allergene_search');
+            searchInput.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const firstResult = document.querySelector('.category-result-item');
+                    if (firstResult) firstResult.click();
+                }
+            });
+        }
 
-                if (!searchInput) return;
+        document.getElementById('form-piatto').addEventListener('submit', function (e) {
+            const selectedHidden = document.getElementById('selected_category_hidden');
+            if (!selectedHidden.value) {
+                e.preventDefault();
+                alert('Per favore, seleziona una categoria per il piatto.');
+                document.getElementById('category_search').style.borderColor = '#E31A1A';
+                setTimeout(() => { document.getElementById('category_search').style.borderColor = '#d1d9e2'; }, 3000);
+            }
 
-                searchInput.addEventListener('input', function () {
-                    const searchTerm = this.value.trim().toLowerCase();
-                    clearBtn.style.display = searchTerm.length > 0 ? 'block' : 'none';
+            const allergeniHidden = document.getElementById('selected_allergeni_hidden');
+            try {
+                const allergeni = JSON.parse(allergeniHidden.value || '[]');
+                if (allergeni.length === 0) {
+                    e.preventDefault();
+                    alert('Per favore, seleziona almeno un allergene per il piatto.');
+                    document.getElementById('allergene_search').style.borderColor = '#E31A1A';
+                    setTimeout(() => {
+                        document.getElementById('allergene_search').style.borderColor = '#d1d9e2';
+                    }, 3000);
+                }
+            } catch (e) {
+                e.preventDefault();
+                alert('Errore nella selezione degli allergeni.');
+            }
+        });
 
-                    if (searchTerm.length < 1) {
-                        resultsDiv.style.display = 'none';
-                        return;
-                    }
+        function initAllergeniSelector() {
+            const searchInput = document.getElementById('allergene_search');
+            const resultsDiv = document.getElementById('allergeni_search_results');
+            const clearBtn = document.getElementById('clear_allergene_search');
 
-                    const matches = allergeniList.filter(allergene =>
-                        allergene.toLowerCase().includes(searchTerm) &&
-                        !selectedAllergeni.includes(allergene)
-                    ).slice(0, 10);
+            if (!searchInput) return;
 
-                    if (matches.length > 0) {
-                        showAllergeniResults(matches, searchTerm, resultsDiv, false);
-                    } else {
-                        resultsDiv.innerHTML = `<div style="padding: 20px; text-align: center; color: #A3AED0;">
+            searchInput.addEventListener('input', function () {
+                const searchTerm = this.value.trim().toLowerCase();
+                clearBtn.style.display = searchTerm.length > 0 ? 'block' : 'none';
+
+                if (searchTerm.length < 1) {
+                    resultsDiv.style.display = 'none';
+                    return;
+                }
+
+                const matches = allergeniList.filter(allergene =>
+                    allergene.toLowerCase().includes(searchTerm) &&
+                    !selectedAllergeni.includes(allergene)
+                ).slice(0, 10);
+
+                if (matches.length > 0) {
+                    showAllergeniResults(matches, searchTerm, resultsDiv, false);
+                } else {
+                    resultsDiv.innerHTML = `<div style="padding: 20px; text-align: center; color: #A3AED0;">
                     <i class="fa-solid fa-search" style="font-size: 24px; margin-bottom: 10px; display: block;"></i>
                     Nessun allergene trovato per "${searchTerm}"
                 </div>`;
-                        resultsDiv.style.display = 'block';
-                    }
-                });
+                    resultsDiv.style.display = 'block';
+                }
+            });
 
-                clearBtn.addEventListener('click', function () {
-                    searchInput.value = '';
+            clearBtn.addEventListener('click', function () {
+                searchInput.value = '';
+                resultsDiv.style.display = 'none';
+                clearBtn.style.display = 'none';
+                searchInput.focus();
+            });
+
+            document.addEventListener('click', function (e) {
+                if (!searchInput.contains(e.target) && !resultsDiv.contains(e.target)) {
                     resultsDiv.style.display = 'none';
-                    clearBtn.style.display = 'none';
-                    searchInput.focus();
-                });
+                }
+            });
+        }
 
-                document.addEventListener('click', function (e) {
-                    if (!searchInput.contains(e.target) && !resultsDiv.contains(e.target)) {
-                        resultsDiv.style.display = 'none';
-                    }
-                });
-            }
+        function initEditAllergeniSelector() {
+            const searchInput = document.getElementById('edit_allergene_search');
+            const resultsDiv = document.getElementById('edit_allergeni_search_results');
+            const clearBtn = document.getElementById('edit_clear_allergene_search');
 
-            function initEditAllergeniSelector() {
-                const searchInput = document.getElementById('edit_allergene_search');
-                const resultsDiv = document.getElementById('edit_allergeni_search_results');
-                const clearBtn = document.getElementById('edit_clear_allergene_search');
+            if (!searchInput) return;
 
-                if (!searchInput) return;
+            searchInput.addEventListener('input', function () {
+                const searchTerm = this.value.trim().toLowerCase();
+                clearBtn.style.display = searchTerm.length > 0 ? 'block' : 'none';
 
-                searchInput.addEventListener('input', function () {
-                    const searchTerm = this.value.trim().toLowerCase();
-                    clearBtn.style.display = searchTerm.length > 0 ? 'block' : 'none';
+                if (searchTerm.length < 1) {
+                    resultsDiv.style.display = 'none';
+                    return;
+                }
 
-                    if (searchTerm.length < 1) {
-                        resultsDiv.style.display = 'none';
-                        return;
-                    }
+                const matches = allergeniList.filter(allergene =>
+                    allergene.toLowerCase().includes(searchTerm) &&
+                    !selectedAllergeniEdit.includes(allergene)
+                ).slice(0, 10);
 
-                    const matches = allergeniList.filter(allergene =>
-                        allergene.toLowerCase().includes(searchTerm) &&
-                        !selectedAllergeniEdit.includes(allergene)
-                    ).slice(0, 10);
-
-                    if (matches.length > 0) {
-                        showAllergeniResults(matches, searchTerm, resultsDiv, true);
-                    } else {
-                        resultsDiv.innerHTML = `<div style="padding: 20px; text-align: center; color: #A3AED0;">
+                if (matches.length > 0) {
+                    showAllergeniResults(matches, searchTerm, resultsDiv, true);
+                } else {
+                    resultsDiv.innerHTML = `<div style="padding: 20px; text-align: center; color: #A3AED0;">
                     <i class="fa-solid fa-search" style="font-size: 24px; margin-bottom: 10px; display: block;"></i>
                     Nessun allergene trovato per "${searchTerm}"
                 </div>`;
-                        resultsDiv.style.display = 'block';
-                    }
-                });
+                    resultsDiv.style.display = 'block';
+                }
+            });
 
-                clearBtn.addEventListener('click', function () {
-                    searchInput.value = '';
+            clearBtn.addEventListener('click', function () {
+                searchInput.value = '';
+                resultsDiv.style.display = 'none';
+                clearBtn.style.display = 'none';
+                searchInput.focus();
+            });
+
+            document.addEventListener('click', function (e) {
+                if (!searchInput.contains(e.target) && !resultsDiv.contains(e.target)) {
                     resultsDiv.style.display = 'none';
-                    clearBtn.style.display = 'none';
-                    searchInput.focus();
-                });
+                }
+            });
+        }
 
-                document.addEventListener('click', function (e) {
-                    if (!searchInput.contains(e.target) && !resultsDiv.contains(e.target)) {
-                        resultsDiv.style.display = 'none';
-                    }
-                });
-            }
-
-            function showAllergeniResults(matches, searchTerm, resultsDiv, isEdit = false) {
-                let html = '<div style="padding: 8px 0;">';
-                matches.forEach(allergene => {
-                    const escapedAllergene = allergene.replace(/'/g, "\\'").replace(/"/g, '&quot;');
-                    const highlighted = allergene.replace(new RegExp(searchTerm, 'gi'),
-                        match => `<strong style="color: #FF6B6B;">${match}</strong>`);
-                    html += `<div class="category-result-item allergene-item" 
+        function showAllergeniResults(matches, searchTerm, resultsDiv, isEdit = false) {
+            let html = '<div style="padding: 8px 0;">';
+            matches.forEach(allergene => {
+                const escapedAllergene = allergene.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                const highlighted = allergene.replace(new RegExp(searchTerm, 'gi'),
+                    match => `<strong style="color: #FF6B6B;">${match}</strong>`);
+                html += `<div class="category-result-item allergene-item" 
                         data-allergene="${escapedAllergene}" 
                         style="padding: 12px 15px; cursor: pointer; border-bottom: 1px solid #f0f0f0;">
                 <div style="display: flex; align-items: center; gap: 10px;">
@@ -1543,258 +1806,219 @@ function getAllergeni()
                     <i class="fa-solid fa-plus-circle" style="color: #05CD99;"></i>
                 </div>
             </div>`;
-                });
-                html += '</div>';
-                resultsDiv.innerHTML = html;
-                resultsDiv.style.display = 'block';
+            });
+            html += '</div>';
+            resultsDiv.innerHTML = html;
+            resultsDiv.style.display = 'block';
 
-                document.querySelectorAll('#' + resultsDiv.id + ' .allergene-item').forEach(item => {
-                    item.removeEventListener('click', window.allergeneClickHandler);
+            document.querySelectorAll('#' + resultsDiv.id + ' .allergene-item').forEach(item => {
+                item.removeEventListener('click', window.allergeneClickHandler);
 
-                    window.allergeneClickHandler = function (e) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        const allergene = this.getAttribute('data-allergene');
-                        addAllergene(allergene, isEdit);
-                    };
+                window.allergeneClickHandler = function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const allergene = this.getAttribute('data-allergene');
+                    addAllergene(allergene, isEdit);
+                };
 
-                    item.addEventListener('click', window.allergeneClickHandler);
-                    item.addEventListener('mouseenter', function () { this.style.backgroundColor = '#F4F7FE'; });
-                    item.addEventListener('mouseleave', function () { this.style.backgroundColor = ''; });
-                });
-            }
+                item.addEventListener('click', window.allergeneClickHandler);
+                item.addEventListener('mouseenter', function () { this.style.backgroundColor = '#F4F7FE'; });
+                item.addEventListener('mouseleave', function () { this.style.backgroundColor = ''; });
+            });
+        }
 
-            function addAllergene(allergene, isEdit = false) {
-                if (!allergene) return;
+        function addAllergene(allergene, isEdit = false) {
+            if (!allergene) return;
 
-                if (isEdit) {
-                    if (!selectedAllergeniEdit.includes(allergene)) {
-                        selectedAllergeniEdit.push(allergene);
-                        updateAllergeniDisplay(true);
-
-                        const searchInput = document.getElementById('edit_allergene_search');
-                        const resultsDiv = document.getElementById('edit_allergeni_search_results');
-                        const clearBtn = document.getElementById('edit_clear_allergene_search');
-
-                        if (searchInput) searchInput.value = '';
-                        if (resultsDiv) resultsDiv.style.display = 'none';
-                        if (clearBtn) clearBtn.style.display = 'none';
-                    }
-                } else {
-                    if (!selectedAllergeni.includes(allergene)) {
-                        selectedAllergeni.push(allergene);
-                        updateAllergeniDisplay(false);
-
-                        const searchInput = document.getElementById('allergene_search');
-                        const resultsDiv = document.getElementById('allergeni_search_results');
-                        const clearBtn = document.getElementById('clear_allergene_search');
-
-                        if (searchInput) searchInput.value = '';
-                        if (resultsDiv) resultsDiv.style.display = 'none';
-                        if (clearBtn) clearBtn.style.display = 'none';
-                    }
-                }
-            }
-
-            function removeAllergene(allergene, isEdit = false) {
-                if (!allergene) return;
-
-                if (isEdit) {
-                    selectedAllergeniEdit = selectedAllergeniEdit.filter(a => a !== allergene);
+            if (isEdit) {
+                if (!selectedAllergeniEdit.includes(allergene)) {
+                    selectedAllergeniEdit.push(allergene);
                     updateAllergeniDisplay(true);
-                } else {
-                    selectedAllergeni = selectedAllergeni.filter(a => a !== allergene);
+
+                    const searchInput = document.getElementById('edit_allergene_search');
+                    const resultsDiv = document.getElementById('edit_allergeni_search_results');
+                    const clearBtn = document.getElementById('edit_clear_allergene_search');
+
+                    if (searchInput) searchInput.value = '';
+                    if (resultsDiv) resultsDiv.style.display = 'none';
+                    if (clearBtn) clearBtn.style.display = 'none';
+                }
+            } else {
+                if (!selectedAllergeni.includes(allergene)) {
+                    selectedAllergeni.push(allergene);
                     updateAllergeniDisplay(false);
+
+                    const searchInput = document.getElementById('allergene_search');
+                    const resultsDiv = document.getElementById('allergeni_search_results');
+                    const clearBtn = document.getElementById('clear_allergene_search');
+
+                    if (searchInput) searchInput.value = '';
+                    if (resultsDiv) resultsDiv.style.display = 'none';
+                    if (clearBtn) clearBtn.style.display = 'none';
                 }
             }
+        }
 
-            function updateAllergeniDisplay(isEdit = false) {
-                const container = isEdit ?
-                    document.getElementById('edit_allergeni_selected_container') :
-                    document.getElementById('allergeni_selected_container');
-                const hiddenInput = isEdit ?
-                    document.getElementById('edit_selected_allergeni_hidden') :
-                    document.getElementById('selected_allergeni_hidden');
-                const list = isEdit ? selectedAllergeniEdit : selectedAllergeni;
+        function removeAllergene(allergene, isEdit = false) {
+            if (!allergene) return;
 
-                if (!container) return;
+            if (isEdit) {
+                selectedAllergeniEdit = selectedAllergeniEdit.filter(a => a !== allergene);
+                updateAllergeniDisplay(true);
+            } else {
+                selectedAllergeni = selectedAllergeni.filter(a => a !== allergene);
+                updateAllergeniDisplay(false);
+            }
+        }
 
-                if (list.length === 0) {
-                    container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #A3AED0; padding: 20px;"><i class="fa-solid fa-ban" style="font-size: 24px; margin-bottom: 10px; display: block;"></i>Nessun allergene selezionato</div>';
-                    hiddenInput.value = '[]';
-                } else {
-                    let html = '';
-                    list.forEach(allergene => {
-                        const escapedAllergene = allergene.replace(/'/g, "\\'");
-                        html += `<div class="allergene-tag" onclick="removeAllergene('${escapedAllergene}', ${isEdit})" title="Clicca per rimuovere">
+        function updateAllergeniDisplay(isEdit = false) {
+            const container = isEdit ?
+                document.getElementById('edit_allergeni_selected_container') :
+                document.getElementById('allergeni_selected_container');
+            const hiddenInput = isEdit ?
+                document.getElementById('edit_selected_allergeni_hidden') :
+                document.getElementById('selected_allergeni_hidden');
+            const list = isEdit ? selectedAllergeniEdit : selectedAllergeni;
+
+            if (!container) return;
+
+            if (list.length === 0) {
+                container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #A3AED0; padding: 20px;"><i class="fa-solid fa-ban" style="font-size: 24px; margin-bottom: 10px; display: block;"></i>Nessun allergene selezionato</div>';
+                hiddenInput.value = '[]';
+            } else {
+                let html = '';
+                list.forEach(allergene => {
+                    const escapedAllergene = allergene.replace(/'/g, "\\'");
+                    html += `<div class="allergene-tag" onclick="removeAllergene('${escapedAllergene}', ${isEdit})" title="Clicca per rimuovere">
                     <span>${allergene}</span>
                     <i class="fa-solid fa-times-circle"></i>
                 </div>`;
-                    });
-                    container.innerHTML = html;
-                    hiddenInput.value = JSON.stringify(list);
-                }
-            }
-
-            const editModal = document.getElementById('editModal');
-            const closeEditModal = document.getElementById('closeEditModal');
-
-            document.querySelectorAll('.btn-open-edit').forEach(btn => {
-                btn.addEventListener('click', function () {
-                    document.getElementById('edit_dish_id').value = this.dataset.id;
-                    document.getElementById('edit_name').value = this.dataset.name;
-                    document.getElementById('edit_price').value = this.dataset.price;
-                    document.getElementById('edit_desc').value = this.dataset.desc;
-                    document.getElementById('edit_existing_image').value = this.dataset.img;
-                    document.getElementById('edit-file-name').textContent = "Sostituisci Immagine";
-
-                    const cat = this.dataset.cat.toLowerCase();
-                    const select = document.getElementById('edit_piatto_select');
-                    const custom = document.getElementById('edit_piatto_custom');
-                    let found = false;
-
-                    Array.from(select.options).forEach(opt => {
-                        if (opt.value === cat) { opt.selected = true; found = true; }
-                    });
-
-                    if (!found && cat !== '') {
-                        select.value = 'altro';
-                        custom.value = this.dataset.cat;
-                        select.disabled = true;
-                    } else {
-                        custom.value = '';
-                        select.disabled = false;
-                    }
-
-                    try {
-                        const allergeniData = this.dataset.allergeni ? JSON.parse(this.dataset.allergeni) : [];
-                        selectedAllergeniEdit = Array.isArray(allergeniData) ? allergeniData : [];
-                    } catch (e) {
-                        selectedAllergeniEdit = [];
-                    }
-
-                    updateAllergeniDisplay(true);
-
-                    if (!document.getElementById('edit_allergene_search')._initialized) {
-                        initEditAllergeniSelector();
-                        document.getElementById('edit_allergene_search')._initialized = true;
-                    }
-
-                    editModal.style.display = 'flex';
                 });
-            });
-
-            closeEditModal.addEventListener('click', () => {
-                editModal.style.display = 'none';
-                selectedAllergeniEdit = [];
-            });
-
-            window.addEventListener('click', (e) => {
-                if (e.target === editModal) {
-                    editModal.style.display = 'none';
-                    selectedAllergeniEdit = [];
-                }
-            });
-
-            document.getElementById('edit-upload-img').addEventListener('change', function (e) {
-                if (e.target.files.length > 0) {
-                    document.getElementById('edit-file-name').textContent = e.target.files[0].name;
-                }
-            });
-
-            const editCustomInput = document.getElementById('edit_piatto_custom');
-            const editSelect = document.getElementById('edit_piatto_select');
-            const editSubmitBtn = editModal.querySelector('.btn-save');
-
-            if (editCustomInput) {
-                editCustomInput.addEventListener('input', function () {
-                    checkBadWords(this, editSelect, null, editSubmitBtn);
-                });
+                container.innerHTML = html;
+                hiddenInput.value = JSON.stringify(list);
             }
+        }
 
-            if (editModal) {
-                editModal.querySelector('form').addEventListener('submit', function () {
-                    if (editSelect) editSelect.disabled = false;
+        const editModal = document.getElementById('editModal');
+        const closeEditModal = document.getElementById('closeEditModal');
+
+        document.querySelectorAll('.btn-open-edit').forEach(btn => {
+            btn.addEventListener('click', function () {
+                document.getElementById('edit_dish_id').value = this.dataset.id;
+                document.getElementById('edit_name').value = this.dataset.name;
+                document.getElementById('edit_price').value = this.dataset.price;
+                document.getElementById('edit_desc').value = this.dataset.desc;
+                document.getElementById('edit_existing_image').value = this.dataset.img;
+                document.getElementById('edit-file-name').textContent = "Sostituisci Immagine";
+
+                const cat = this.dataset.cat.toLowerCase();
+                const select = document.getElementById('edit_piatto_select');
+                const custom = document.getElementById('edit_piatto_custom');
+                let found = false;
+
+                Array.from(select.options).forEach(opt => {
+                    if (opt.value === cat) { opt.selected = true; found = true; }
                 });
-            }
 
-            document.getElementById('form-piatto').addEventListener('submit', function (e) {
-                const selectedHidden = document.getElementById('selected_category_hidden');
-                const allergeniHidden = document.getElementById('selected_allergeni_hidden');
-
-                if (!selectedHidden.value) {
-                    e.preventDefault();
-                    alert('Per favore, seleziona una categoria per il piatto.');
-                    return;
+                if (!found && cat !== '') {
+                    select.value = 'altro';
+                    custom.value = this.dataset.cat;
+                    select.disabled = true;
+                } else {
+                    custom.value = '';
+                    select.disabled = false;
                 }
 
                 try {
-                    const allergeni = JSON.parse(allergeniHidden.value || '[]');
-                    if (allergeni.length === 0) {
-                        e.preventDefault();
-                        alert('Per favore, seleziona almeno un allergene per il piatto.');
-                        document.getElementById('allergene_search').style.borderColor = '#E31A1A';
-                        setTimeout(() => {
-                            document.getElementById('allergene_search').style.borderColor = '#d1d9e2';
-                        }, 3000);
-                    }
+                    const allergeniData = this.dataset.allergeni ? JSON.parse(this.dataset.allergeni) : [];
+                    selectedAllergeniEdit = Array.isArray(allergeniData) ? allergeniData : [];
                 } catch (e) {
-                    e.preventDefault();
-                    alert('Errore nella selezione degli allergeni.');
+                    selectedAllergeniEdit = [];
                 }
-            });
 
-            function openAggiungiTavoloModal() {
-                document.getElementById('modalAggiungiTavolo').style.display = 'flex';
-            }
+                updateAllergeniDisplay(true);
 
-            function openModificaTavoloModal(tavolo) {
-                document.getElementById('edit_tavolo_id').value = tavolo.id;
-                document.getElementById('edit_numero_tavolo').value = tavolo.nome.replace('Tavolo ', '');
-                document.getElementById('edit_capacita').value = tavolo.capacita;
-                document.getElementById('edit_stato').value = tavolo.disponibile ? 'disponibile' : 'non_disponibile';
-                document.getElementById('edit_note').value = tavolo.posizione || '';
+                if (!document.getElementById('edit_allergene_search')._initialized) {
+                    initEditAllergeniSelector();
+                    document.getElementById('edit_allergene_search')._initialized = true;
+                }
 
-                document.getElementById('modalModificaTavolo').style.display = 'flex';
-            }
-
-            function chiudiModali() {
-                document.getElementById('modalAggiungiTavolo').style.display = 'none';
-                document.getElementById('modalModificaTavolo').style.display = 'none';
-            }
-        });
-
-        function openDeleteConfirm(tavoloId, tavoloNome) {
-            document.getElementById('delete_tavolo_id').value = tavoloId;
-            document.getElementById('confirmDeleteMessage').textContent = `Sei sicuro di voler eliminare il ${tavoloNome}?`;
-            document.getElementById('confirmDeleteModal').style.display = 'flex';
-        }
-
-        function closeDeleteConfirm() {
-            document.getElementById('confirmDeleteModal').style.display = 'none';
-        }
-
-        document.querySelectorAll('.delete-dish-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const dishId = this.dataset.id;
-                document.getElementById('delete_dish_id').value = dishId;
-                document.getElementById('confirmDeleteDishModal').style.display = 'flex';
+                editModal.style.display = 'flex';
             });
         });
 
-        function closeDeleteDishConfirm() {
-            document.getElementById('confirmDeleteDishModal').style.display = 'none';
+        closeEditModal.addEventListener('click', () => {
+            editModal.style.display = 'none';
+            selectedAllergeniEdit = [];
+        });
+
+        window.addEventListener('click', (e) => {
+            if (e.target === editModal) {
+                editModal.style.display = 'none';
+                selectedAllergeniEdit = [];
+            }
+        });
+
+        document.getElementById('edit-upload-img').addEventListener('change', function (e) {
+            if (e.target.files.length > 0) {
+                document.getElementById('edit-file-name').textContent = e.target.files[0].name;
+            }
+        });
+
+        const editCustomInput = document.getElementById('edit_piatto_custom');
+        const editSelect = document.getElementById('edit_piatto_select');
+        const editSubmitBtn = editModal.querySelector('.btn-save');
+
+        if (editCustomInput) {
+            editCustomInput.addEventListener('input', function () {
+                checkBadWords(this, editSelect, null, editSubmitBtn);
+            });
+        }
+
+        if (editModal) {
+            editModal.querySelector('form').addEventListener('submit', function () {
+                if (editSelect) editSelect.disabled = false;
+            });
+        }
+
+        function openAggiungiTavoloModal() {
+            document.getElementById('modalAggiungiTavolo').style.display = 'flex';
+        }
+
+        function openModificaTavoloModal(tavolo) {
+            document.getElementById('edit_tavolo_id').value = tavolo.id;
+            document.getElementById('edit_numero_tavolo').value = tavolo.nome.replace('Tavolo ', '');
+            document.getElementById('edit_capacita').value = tavolo.capacita;
+            document.getElementById('edit_stato').value = tavolo.disponibile ? 'disponibile' : 'non_disponibile';
+            document.getElementById('edit_note').value = tavolo.posizione || '';
+            
+            document.getElementById('modalModificaTavolo').style.display = 'flex';
+        }
+
+        function chiudiModali() {
+            document.getElementById('modalAggiungiTavolo').style.display = 'none';
+            document.getElementById('modalModificaTavolo').style.display = 'none';
         }
 
         window.addEventListener('click', function(e) {
-            const confirmModal = document.getElementById('confirmDeleteModal');
-            const confirmDishModal = document.getElementById('confirmDeleteDishModal');
+            const modaleAggiungi = document.getElementById('modalAggiungiTavolo');
+            const modaleModifica = document.getElementById('modalModificaTavolo');
             
-            if (e.target === confirmModal) {
-                confirmModal.style.display = 'none';
+            if (e.target === modaleAggiungi) {
+                modaleAggiungi.style.display = 'none';
             }
-            if (e.target === confirmDishModal) {
-                confirmDishModal.style.display = 'none';
+            if (e.target === modaleModifica) {
+                modaleModifica.style.display = 'none';
+            }
+
+            const modalGiornaliero = document.getElementById('modalMenuGiornaliero');
+            const modalFallback = document.getElementById('modalMenuFallback');
+            
+            if (e.target === modalGiornaliero) {
+                modalGiornaliero.style.display = 'none';
+            }
+            if (e.target === modalFallback) {
+                modalFallback.style.display = 'none';
             }
         });
 
@@ -1862,18 +2086,6 @@ function getAllergeni()
             document.getElementById('modalMenuGiornaliero').style.display = 'none';
             document.getElementById('modalMenuFallback').style.display = 'none';
         }
-
-        window.addEventListener('click', function(e) {
-            const modalGiornaliero = document.getElementById('modalMenuGiornaliero');
-            const modalFallback = document.getElementById('modalMenuFallback');
-            
-            if (e.target === modalGiornaliero) {
-                modalGiornaliero.style.display = 'none';
-            }
-            if (e.target === modalFallback) {
-                modalFallback.style.display = 'none';
-            }
-        });
     </script>
 </body>
 </html>

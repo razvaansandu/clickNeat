@@ -12,9 +12,9 @@ class MenuGiornalieroModel
     public function getByRistorante($ristorante_id)
     {
         $sql = "SELECT * FROM menus 
-                WHERE ristorante_id = ? 
-                ORDER BY FIELD(type, 'giornaliero', 'fallback'), 
-                         CASE WHEN type = 'giornaliero' THEN weekday ELSE 7 END";
+        WHERE ristorante_id = ? 
+        ORDER BY FIELD(type, 'daily', 'fallback'), 
+                 CASE WHEN type = 'daily' THEN weekday ELSE 7 END";
         $menus = $this->db->select($sql, [$ristorante_id]);
         
         foreach ($menus as &$menu) {
@@ -39,7 +39,7 @@ class MenuGiornalieroModel
     public function getByGiorno($ristorante_id, $giorno)
     {
         $sql = "SELECT * FROM menus 
-                WHERE ristorante_id = ? AND type = 'giornaliero' AND weekday = ? AND is_active = 1";
+        WHERE ristorante_id = ? AND type = 'daily' AND weekday = ? AND is_active = 1";
         $menu = $this->db->selectOne($sql, [$ristorante_id, $giorno]);
         
         if ($menu) {
@@ -72,42 +72,42 @@ class MenuGiornalieroModel
     }
 
     public function saveMenuGiornaliero($ristorante_id, $giorno, $titolo, $piatti_ids)
-    {
-        $esistente = $this->db->selectOne(
-            "SELECT id FROM menus WHERE ristorante_id = ? AND type = 'giornaliero' AND weekday = ?",
-            [$ristorante_id, $giorno]
-        );
+{
+   $esistente = $this->db->selectOne(
+    "SELECT id FROM menus WHERE ristorante_id = ? AND type = 'daily' AND weekday = ?",
+    [$ristorante_id, $giorno]
+    );
+    
+    if ($esistente) {
+        $menu_id = $esistente['id'];
+        $this->db->update('menus', [
+            'title' => $titolo,
+            'is_active' => 1
+        ], 'id = ?', [$menu_id]);
+    } else {
+       $menu_id = $this->db->insert('menus', [
+    'ristorante_id' => $ristorante_id,
+    'type' => 'daily',
+    'weekday' => $giorno,
+    'title' => $titolo,
+    'is_active' => 1
+        ]);
+    }
+    
+    if ($menu_id) {
+        $this->db->delete('menu_entries', 'menu_id = ?', [$menu_id]);
         
-        if ($esistente) {
-            $menu_id = $esistente['id'];
-            $this->db->update('menus', [
-                'title' => $titolo,
-                'is_active' => 1
-            ], 'id = ?', [$menu_id]);
-        } else {
-            $menu_id = $this->db->insert('menus', [
-                'ristorante_id' => $ristorante_id,
-                'type' => 'daily',
-                'weekday' => $giorno,
-                'title' => $titolo,
-                'is_active' => 1
+        foreach ($piatti_ids as $index => $piatto_id) {
+            $this->db->insert('menu_entries', [
+                'menu_id' => $menu_id,
+                'menu_item_id' => $piatto_id,
+                'sort_order' => $index
             ]);
         }
-        
-        if ($menu_id) {
-            $this->db->delete('menu_entries', 'menu_id = ?', [$menu_id]);
-            
-            foreach ($piatti_ids as $index => $piatto_id) {
-                $this->db->insert('menu_entries', [
-                    'menu_id' => $menu_id,
-                    'menu_item_id' => $piatto_id,
-                    'sort_order' => $index
-                ]);
-            }
-        }
-        
-        return $menu_id;
     }
+    
+    return $menu_id;
+}
 
     public function saveMenuFallback($ristorante_id, $titolo, $piatti_ids)
     {
@@ -161,30 +161,30 @@ class MenuGiornalieroModel
     }
 
     public function getMenuAttivo($ristorante_id, $giorno)
-    {
-        $menu_giornaliero = $this->getByGiorno($ristorante_id, $giorno);
-        
-        if ($menu_giornaliero && !empty($menu_giornaliero['piatti'])) {
-            return [
-                'tipo' => 'giornaliero',
-                'giorno' => $giorno,
-                'titolo' => $menu_giornaliero['title'],
-                'piatti' => $menu_giornaliero['piatti']
-            ];
-        }
-        
-        $menu_fallback = $this->getFallback($ristorante_id);
-        
-        if ($menu_fallback && !empty($menu_fallback['piatti'])) {
-            return [
-                'tipo' => 'fallback',
-                'titolo' => $menu_fallback['title'],
-                'piatti' => $menu_fallback['piatti']
-            ];
-        }
-        
-        return null;
+{
+    $menu_giornaliero = $this->getByGiorno($ristorante_id, $giorno);
+    
+    if ($menu_giornaliero && !empty($menu_giornaliero['piatti'])) {
+        return [
+            'tipo' => 'giornaliero',
+            'giorno' => $giorno,
+            'titolo' => $menu_giornaliero['title'],
+            'piatti' => $menu_giornaliero['piatti']
+        ];
     }
+    
+    $menu_fallback = $this->getFallback($ristorante_id);
+    
+    if ($menu_fallback && !empty($menu_fallback['piatti'])) {
+        return [
+            'tipo' => 'fallback',
+            'titolo' => $menu_fallback['title'],
+            'piatti' => $menu_fallback['piatti']
+        ];
+    }
+    
+    return null;
+}
 
     public function getGiornoNome($giorno)
     {
