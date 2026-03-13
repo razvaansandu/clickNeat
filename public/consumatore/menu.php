@@ -61,18 +61,7 @@ if (isset($_SESSION['cart']) && !empty($_SESSION['cart']['items'])) {
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         .restaurant-header-custom {
-            <?php 
-            $bg_url = "";
-            if (!empty($ristorante['image_url'])) {
-                 $clean_path = ltrim($ristorante['image_url'], '/');
-                $bg_url = "../../assets/" . $clean_path;
-            }
-            
-            if ($bg_url): ?>
-            background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.7)), url('<?php echo $bg_url; ?>') no-repeat center center;
-            <?php else: ?>
             background: linear-gradient(105deg, var(--accent-orange) 0%, var(--accent-red) 100%);
-            <?php endif; ?>
             background-size: cover;
             padding: 80px 60px;
             color: var(--white);
@@ -452,17 +441,7 @@ if (isset($_SESSION['cart']) && !empty($_SESSION['cart']['items'])) {
         </div>
     </nav>
 
-    <header class="restaurant-header-custom"> 
-        <?php 
-        $bg_url = "";
-        if (!empty($ristorante['image_url'])) {
-            $clean_path = ltrim($ristorante['image_url'], '/');
-            $bg_url = "../../assets/" . $clean_path;
-        }
-        
-        if ($bg_url): ?>
-            <img src="<?php echo $bg_url; ?>" alt="Background" class="restaurant-header-bg">
-        <?php endif; ?>
+    <header class="restaurant-header-custom">
 
         <div class="restaurant-header-content">
             <a href="dashboard_consumatore.php" class="btn-back-hero">
@@ -565,7 +544,7 @@ if (isset($_SESSION['cart']) && !empty($_SESSION['cart']['items'])) {
             <i class="fa-solid fa-circle-question"></i>
             <span>Aiuto</span>
         </a>
-    </div> 
+    </div>  
 
 </body>
-</html>  
+</html>   
