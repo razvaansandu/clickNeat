@@ -3,6 +3,7 @@ require_once "../../config/db.php";
 require_once "../../models/RistoranteModel.php";
 require_once "../../models/MenuModel.php";
 require_once "../../models/WalletModel.php";
+require_once "../../models/MenuGiornalieroModel.php";
 
 if (session_status() !== PHP_SESSION_ACTIVE)
     session_start();
@@ -18,10 +19,12 @@ if (!isset($_GET['id']) || empty($_GET['id'])) {
 }
 
 $ristorante_id = intval($_GET['id']);
+$giorno_richiesto = isset($_GET['giorno']) ? intval($_GET['giorno']) : date('w');
 
 $ristoranteModel = new RistoranteModel($db);
 $menuModel = new MenuModel($db);
 $walletModel = new WalletModel($db);
+$menuGiornalieroModel = new MenuGiornalieroModel($db);
 
 $ristorante = $ristoranteModel->getById($ristorante_id);
 $creditoEuro = $walletModel->getBalanceEuro($_SESSION['id']);
@@ -30,15 +33,68 @@ if (!$ristorante) {
     die("Ristorante non trovato.");
 }
 
-$raw_piatti = $menuModel->getByRestaurant($ristorante_id);
-$lista_piatti = [];
+$giorni = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
 
-foreach ($raw_piatti as $row) {
-    if (!empty($row['image_url'])) {
-        $row['image_url'] = htmlspecialchars($row['image_url']);
-    }
+// Query diretta per bypassare eventuali problemi del modello
+$sql_menu = "SELECT * FROM menus 
+             WHERE ristorante_id = ? AND type = 'daily' AND weekday = ? AND is_active = 1";
+$menu_giornaliero = $db->selectOne($sql_menu, [$ristorante_id, $giorno_richiesto]);
+
+$lista_piatti = [];
+$tipo_menu = 'completo';
+$titolo_menu = 'Menu del Giorno';
+
+if ($menu_giornaliero) {
+    // Prendi i piatti di questo menu
+    $sql_piatti = "SELECT mi.* FROM menu_entries me
+                   JOIN menu_items mi ON me.menu_item_id = mi.id
+                   WHERE me.menu_id = ? AND mi.deleted_at IS NULL
+                   ORDER BY me.sort_order ASC";
+    $lista_piatti = $db->select($sql_piatti, [$menu_giornaliero['id']]);
     
-    $lista_piatti[] = $row;
+    if (!empty($lista_piatti)) {
+        $tipo_menu = 'giornaliero';
+        $titolo_menu = $menu_giornaliero['title'];
+    }
+}
+
+// Se non ci sono piatti nel menu giornaliero, prova il fallback
+if (empty($lista_piatti)) {
+    $sql_fallback = "SELECT * FROM menus 
+                     WHERE ristorante_id = ? AND type = 'fallback' AND is_active = 1";
+    $menu_fallback = $db->selectOne($sql_fallback, [$ristorante_id]);
+    
+    if ($menu_fallback) {
+        $sql_piatti = "SELECT mi.* FROM menu_entries me
+                       JOIN menu_items mi ON me.menu_item_id = mi.id
+                       WHERE me.menu_id = ? AND mi.deleted_at IS NULL
+                       ORDER BY me.sort_order ASC";
+        $lista_piatti = $db->select($sql_piatti, [$menu_fallback['id']]);
+        
+        if (!empty($lista_piatti)) {
+            $tipo_menu = 'fallback';
+            $titolo_menu = $menu_fallback['title'];
+        }
+    }
+}
+
+// Se ancora non ci sono piatti, mostra tutti i piatti del ristorante
+if (empty($lista_piatti)) {
+    $raw_piatti = $menuModel->getByRestaurant($ristorante_id);
+    foreach ($raw_piatti as $row) {
+        if (!empty($row['image_url'])) {
+            $row['image_url'] = htmlspecialchars($row['image_url']);
+        }
+        $lista_piatti[] = $row;
+    }
+    $titolo_menu = 'Il nostro Menu';
+}
+
+// Gestione immagini
+foreach ($lista_piatti as &$piatto) {
+    if (!empty($piatto['image_url'])) {
+        $piatto['image_url'] = htmlspecialchars($piatto['image_url']);
+    }
 }
 
 $total_qty = 0;
@@ -51,7 +107,6 @@ if (isset($_SESSION['cart']) && !empty($_SESSION['cart']['items'])) {
 
 <!DOCTYPE html>
 <html lang="it">
-
 <head>
     <meta charset="UTF-8"> 
     <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
@@ -64,7 +119,7 @@ if (isset($_SESSION['cart']) && !empty($_SESSION['cart']['items'])) {
             <?php 
             $bg_url = "";
             if (!empty($ristorante['image_url'])) {
-                 $clean_path = ltrim($ristorante['image_url'], '/');
+                $clean_path = ltrim($ristorante['image_url'], '/');
                 $bg_url = "../../assets/" . $clean_path;
             }
             
@@ -122,6 +177,51 @@ if (isset($_SESSION['cart']) && !empty($_SESSION['cart']['items'])) {
 
         .restaurant-header-custom i {
             margin-right: 8px;
+        }
+
+        .giorno-selector {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .giorno-selector select {
+            padding: 12px 20px;
+            border-radius: 50px;
+            border: 1px solid rgba(255,255,255,0.3);
+            background: rgba(255,255,255,0.15);
+            color: white;
+            font-weight: 500;
+            font-size: 15px;
+            backdrop-filter: blur(5px);
+            cursor: pointer;
+            min-width: 200px;
+        }
+        
+        .giorno-selector select option {
+            background: #FF9F43;
+            color: white;
+            border-radius: 12px;
+            
+        }
+        
+        .menu-badge {
+            background: <?php echo $tipo_menu == 'giornaliero' ? '#05CD99' : ($tipo_menu == 'fallback' ? '#4318FF' : '#FF9F43'); ?>;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        
+        .menu-badge i {
+            font-size: 14px;
         }
 
         .dish-image-container { 
@@ -184,6 +284,14 @@ if (isset($_SESSION['cart']) && !empty($_SESSION['cart']['items'])) {
             height: 4px;
             background: var(--accent-orange);
             border-radius: 4px;
+        }
+
+        .menu-subtitle {
+            font-size: 18px;
+            color: var(--text-grey);
+            margin-top: -15px;
+            margin-bottom: 30px;
+            font-weight: 400;
         }
 
         .dish-desc {
@@ -338,6 +446,15 @@ if (isset($_SESSION['cart']) && !empty($_SESSION['cart']['items'])) {
             .empty-menu-custom p {
                 font-size: 1em;
             }
+            
+            .giorno-selector {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .giorno-selector select {
+                width: 100%;
+            }
         }
 
         @media (max-width: 768px) {
@@ -404,9 +521,7 @@ if (isset($_SESSION['cart']) && !empty($_SESSION['cart']['items'])) {
         }
     </style>
 </head>
-
 <body>
-
     <div class="mobile-header-fixed">
         <div class="mobile-top-row">
             <a href="dashboard_consumatore.php" class="brand-logo">
@@ -453,17 +568,6 @@ if (isset($_SESSION['cart']) && !empty($_SESSION['cart']['items'])) {
     </nav>
 
     <header class="restaurant-header-custom"> 
-        <?php 
-        $bg_url = "";
-        if (!empty($ristorante['image_url'])) {
-            $clean_path = ltrim($ristorante['image_url'], '/');
-            $bg_url = "../../assets/" . $clean_path;
-        }
-        
-        if ($bg_url): ?>
-            <img src="<?php echo $bg_url; ?>" alt="Background" class="restaurant-header-bg">
-        <?php endif; ?>
-
         <div class="restaurant-header-content">
             <a href="dashboard_consumatore.php" class="btn-back-hero">
                 <i class="fa-solid fa-arrow-left"></i> Torna ai Ristoranti
@@ -471,10 +575,30 @@ if (isset($_SESSION['cart']) && !empty($_SESSION['cart']['items'])) {
             <h1><?php echo htmlspecialchars($ristorante['nome']); ?></h1>
             <p><i class="fa-solid fa-location-dot"></i> <?php echo htmlspecialchars($ristorante['indirizzo']); ?></p>
             <p><i class="fa-solid fa-clock"></i> Orari: 12:00 - 23:00</p>
+            
+            <!-- Selettore giorno e badge menu -->
+            <div class="giorno-selector">
+                <select onchange="cambiaGiorno(this.value)">
+                    <?php for ($i = 0; $i < 7; $i++): ?>
+                        <option value="<?php echo $i; ?>" <?php echo $i == $giorno_richiesto ? 'selected' : ''; ?>>
+                            <?php echo $giorni[$i]; ?>
+                        </option>
+                    <?php endfor; ?>
+                </select>
+                
+                <div class="menu-badge">
+                    <i class="fa-solid fa-<?php echo $tipo_menu == 'giornaliero' ? 'sun' : ($tipo_menu == 'fallback' ? 'umbrella' : 'utensils'); ?>"></i>
+                    <?php 
+                    if ($tipo_menu == 'giornaliero') echo 'Menu del Giorno';
+                    elseif ($tipo_menu == 'fallback') echo 'Menu Standard';
+                    else echo 'Menu Completo';
+                    ?>
+                </div>
+            </div>
+            
             <div class="wallet-badge-header" style="margin-top: 15px; display: inline-flex; align-items: center; background: rgba(255,255,255,0.2); padding: 8px 15px; border-radius: 50px; border: 1px solid rgba(255,255,255,0.4); backdrop-filter: blur(5px);">
                 <i class="fa-solid fa-wallet" style="margin-right: 10px; color: #fff;"></i>
                 <span style="color: #fff; font-weight: 600;">Credito: &euro; <?php echo $creditoEuro; ?></span> 
-             
             </div> 
             <div style="margin-top: 18px;">
                 <a href="prenota_tavolo_g.php?id=<?php echo $ristorante_id; ?>"
@@ -490,13 +614,24 @@ if (isset($_SESSION['cart']) && !empty($_SESSION['cart']['items'])) {
                 </a>
             </div>
         </div> 
-        
     </header>
 
     <div class="main-container"> 
         <h3 class="section-title-with-icon">
-            <i class="fa-solid fa-utensils"></i> Menu del Giorno
-        </h3> 
+            <i class="fa-solid fa-utensils"></i> <?php echo htmlspecialchars($titolo_menu); ?>
+        </h3>
+        
+        <?php if ($tipo_menu == 'giornaliero'): ?>
+            <p class="menu-subtitle">
+                <i class="fa-solid fa-calendar-day"></i> 
+                Menu speciale per <?php echo $giorni[$giorno_richiesto]; ?>
+            </p>
+        <?php elseif ($tipo_menu == 'fallback'): ?>
+            <p class="menu-subtitle">
+                <i class="fa-solid fa-umbrella"></i> 
+                Menu standard (usato quando non c'è menu specifico per il giorno)
+            </p>
+        <?php endif; ?>
  
         <div class="grid-container">
             <?php if (!empty($lista_piatti)): ?>
@@ -534,8 +669,13 @@ if (isset($_SESSION['cart']) && !empty($_SESSION['cart']['items'])) {
             <?php else: ?> 
                 <div class="empty-menu-custom">
                     <i class="fa-solid fa-utensils"></i>
-                    <h3>Menu in preparazione</h3>
-                    <p>Il ristorante sta aggiornando il suo menu. Torna presto per scoprire le nostre specialità!</p>
+                    <h3>Nessun piatto disponibile</h3>
+                    <p>Il ristorante non ha ancora configurato il menu per questo giorno.</p>
+                    <?php if ($giorno_richiesto != date('w')): ?>
+                        <a href="?id=<?php echo $ristorante_id; ?>" class="btn-add" style="margin-top: 20px; display: inline-block;">
+                            <i class="fa-solid fa-calendar-day"></i> Vedi menu di oggi
+                        </a>
+                    <?php endif; ?>
                 </div>
             <?php endif; ?>
         </div>
@@ -548,7 +688,7 @@ if (isset($_SESSION['cart']) && !empty($_SESSION['cart']['items'])) {
         </a> 
     <?php endif; ?>
 
-     <div class="bottom-nav">
+    <div class="bottom-nav">
         <a href="dashboard_consumatore.php" class="nav-item-bottom active">
             <i class="fa-solid fa-house"></i>
             <span>Home</span>
@@ -567,5 +707,10 @@ if (isset($_SESSION['cart']) && !empty($_SESSION['cart']['items'])) {
         </a>
     </div> 
 
+    <script>
+        function cambiaGiorno(giorno) {
+            window.location.href = window.location.pathname + '?id=<?php echo $ristorante_id; ?>&giorno=' + giorno;
+        }
+    </script>
 </body>
-</html>  
+</html>
