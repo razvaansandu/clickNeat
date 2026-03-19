@@ -1,7 +1,8 @@
 <?php
 require_once "../../config/db.php";
 require_once "../../models/RistoranteModel.php";
-
+require_once "../../models/WalletModel.php";
+ 
 if (session_status() !== PHP_SESSION_ACTIVE) session_start();
 
 if (!isset($_SESSION["loggedin"]) || $_SESSION["ruolo"] !== 'consumatore') {
@@ -12,7 +13,8 @@ if (!isset($_SESSION["loggedin"]) || $_SESSION["ruolo"] !== 'consumatore') {
 $user_id = $_SESSION["id"];
 $username = $_SESSION["username"];
 $restaurants = [];
-
+$walletModel = new WalletModel($db);
+$creditoEuro = $walletModel->getBalanceEuro($user_id);
 $ristoranteModel = new RistoranteModel($db);
 $raw_restaurants = $ristoranteModel->getAll();
 
@@ -21,7 +23,7 @@ foreach ($raw_restaurants as $row) {
         $row['image_url'] = "" . htmlspecialchars($row['image_url']);
     } else {
         $row['image_url'] = "/public/img/placeholder_restaurant.jpg";
-    }
+    } 
 
     $db_cat = strtolower($row['categoria'] ?? ''); 
     $nome_lower = strtolower($row['nome']);
@@ -77,14 +79,16 @@ foreach ($raw_restaurants as $row) {
             </a>
             <a href="profile_consumatore.php" class="nav-item">
                 <i class="fa-solid fa-user"></i> <span>Profilo</span>
-            </a>
-            
+            </a> 
+            <a href="ricarica_credito.php" class="nav-item">    
+              Credito:   <?php echo $creditoEuro; ?> € 
+</a> 
             <a href="../auth/logout.php" class="btn-logout-nav">
                 <i class="fa-solid fa-right-from-bracket"></i> Esci
             </a>
         </div>
     </nav>
-
+ 
     <div class="mobile-header-fixed">
         <div class="mobile-top-row">
             <a href="dashboard_consumatore.php" class="brand-logo">

@@ -33,7 +33,7 @@ if (!$ristorante) {
     die("Ristorante non trovato.");
 } 
 $giorni = [ 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato', 'Domenica'];
-
+ 
 // Query diretta per bypassare eventuali problemi del modello
 $sql_menu = "SELECT * FROM menus 
              WHERE ristorante_id = ? AND type = 'daily' AND weekday = ? AND is_active = 1";
@@ -177,7 +177,7 @@ if (isset($_SESSION['cart']) && !empty($_SESSION['cart']['items'])) {
 
         .giorno-selector-wrapper {
             position: relative;
-            display: inline-block;
+            display: inline-block; 
         }
 
         .giorno-selector-btn {
@@ -398,7 +398,7 @@ if (isset($_SESSION['cart']) && !empty($_SESSION['cart']['items'])) {
             border-radius: var(--border-radius);
             box-shadow: var(--shadow-sm);
             border: 1px solid rgba(0,0,0,0.03);
-        }
+        } 
 
         .empty-menu-custom i {
             font-size: 5em;
@@ -412,7 +412,7 @@ if (isset($_SESSION['cart']) && !empty($_SESSION['cart']['items'])) {
             font-size: 2em;
             color: var(--primary-dark);
             margin-bottom: 15px;
-            font-weight: 700;
+            font-weight: 700; 
         }
 
         .empty-menu-custom p {
@@ -464,7 +464,7 @@ if (isset($_SESSION['cart']) && !empty($_SESSION['cart']['items'])) {
 
         .dish-body {
             padding: 24px;
-            display: flex;
+            display: flex; 
             flex-direction: column;
             flex: 1;
             background: var(--white);
@@ -616,13 +616,13 @@ if (isset($_SESSION['cart']) && !empty($_SESSION['cart']['items'])) {
             </a>
             <a href="help.php" class="nav-item">
                 <i class="fa-solid fa-circle-question"></i> <span>Aiuto</span>
-            </a>
+            </a> 
             <a href="../auth/logout.php" class="btn-logout-nav">
                 <i class="fa-solid fa-right-from-bracket"></i> Esci
             </a>
         </div>
     </nav>
-
+  
     <header class="restaurant-header-custom">
 
         <div class="restaurant-header-content">

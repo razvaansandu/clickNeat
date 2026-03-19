@@ -43,7 +43,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 
-    if (isset($_POST['delete_account'])) {
+    if (isset($_POST['delete_account'])) { 
         if ($profileModel->deleteAccount($user_id)) {
             session_unset();
             session_destroy();

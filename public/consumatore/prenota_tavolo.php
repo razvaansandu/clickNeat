@@ -345,7 +345,7 @@
             { id: 1, nome: 'Tavolo 1', capacita: 2, posizione: 'Interno' }
         ];
 
-        function renderTavoli() {
+        function renderTavoli() { 
             var grid = document.getElementById('tables-grid');
             grid.innerHTML = tavoli.map(function(t) {
                 return '<div class="table-card" onclick="selezionaTavolo(' + t.id + ', \'' + t.nome + '\')">' +
@@ -357,7 +357,7 @@
                     '</div>' +
                 '</div>';
             }).join('');
-        }
+        } 
 
         var selectedTavoloId = null;
         var selectedTavoloNome = '';
@@ -393,7 +393,7 @@
 
             setTimeout(function() {
                 document.getElementById('step2').scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }, 50);
+            }, 50); 
         }
 
         function selezionaTavolo(id, nome) {
@@ -431,7 +431,7 @@
             document.getElementById('success-box').style.display = 'block';
             document.getElementById('success-box').scrollIntoView({ behavior: 'smooth' });
         }
-    </script>
+    </script> 
 
 </body>
 </html>
