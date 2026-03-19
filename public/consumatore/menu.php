@@ -34,7 +34,6 @@ if (!$ristorante) {
 } 
 $giorni = [ 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato', 'Domenica'];
 
-// Query diretta per bypassare eventuali problemi del modello
 $sql_menu = "SELECT * FROM menus 
              WHERE ristorante_id = ? AND type = 'daily' AND weekday = ? AND is_active = 1";
 $menu_giornaliero = $db->selectOne($sql_menu, [$ristorante_id, $giorno_richiesto]);
@@ -44,7 +43,6 @@ $tipo_menu = 'completo';
 $titolo_menu = 'Menu del Giorno';
 
 if ($menu_giornaliero) {
-    // Prendi i piatti di questo menu
     $sql_piatti = "SELECT mi.* FROM menu_entries me
                    JOIN menu_items mi ON me.menu_item_id = mi.id
                    WHERE me.menu_id = ? AND mi.deleted_at IS NULL
@@ -57,7 +55,6 @@ if ($menu_giornaliero) {
     }
 }
 
-// Se non ci sono piatti nel menu giornaliero, prova il fallback
 if (empty($lista_piatti)) {
     $sql_fallback = "SELECT * FROM menus 
                      WHERE ristorante_id = ? AND type = 'fallback' AND is_active = 1";
@@ -77,7 +74,6 @@ if (empty($lista_piatti)) {
     }
 }
 
-// Se ancora non ci sono piatti, mostra tutti i piatti del ristorante
 if (empty($lista_piatti)) {
     $raw_piatti = $menuModel->getByRestaurant($ristorante_id);
     foreach ($raw_piatti as $row) {
@@ -89,7 +85,6 @@ if (empty($lista_piatti)) {
     $titolo_menu = 'Il nostro Menu';
 }
 
-// Gestione immagini
 foreach ($lista_piatti as &$piatto) {
     if (!empty($piatto['image_url'])) {
         $piatto['image_url'] = htmlspecialchars($piatto['image_url']);
@@ -630,7 +625,6 @@ if (isset($_SESSION['cart']) && !empty($_SESSION['cart']['items'])) {
             <p><i class="fa-solid fa-location-dot"></i> <?php echo htmlspecialchars($ristorante['indirizzo']); ?></p>
             <p><i class="fa-solid fa-clock"></i> Orari: 12:00 - 23:00</p>
             
-            <!-- Selettore giorno e badge menu -->
             <div class="giorno-selector">
                 <div class="giorno-selector-wrapper">
                     <div class="giorno-selector-btn" id="giornoBtn" onclick="toggleGiornoDropdown()" role="combobox" aria-expanded="false" aria-haspopup="listbox" tabindex="0">
