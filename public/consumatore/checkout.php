@@ -82,9 +82,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && (isset($_POST['place_order']) || iss
             <a href="profile_consumatore.php" class="nav-item">
                 <i class="fa-solid fa-user"></i> <span>Profilo</span>
             </a>
-            <a href="help.php" class="nav-item">
-                <i class="fa-solid fa-circle-question"></i> <span>Aiuto</span>
-            </a>
             <a href="../auth/logout.php" class="btn-logout-nav">
                 <i class="fa-solid fa-right-from-bracket"></i> Esci
             </a>
