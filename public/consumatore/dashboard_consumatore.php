@@ -9,7 +9,6 @@ if (!isset($_SESSION["loggedin"]) || $_SESSION["ruolo"] !== 'consumatore') {
     exit;
 }
 
-// Funzione per leggere le categorie dal file JSON
 function getCategorieDaJSON() {
     $jsonPath = __DIR__ . "/../../config/categorie.json";
     if (file_exists($jsonPath)) {
@@ -28,7 +27,6 @@ $categorie_disponibili = getCategorieDaJSON();
 $ristoranteModel = new RistoranteModel($db);
 $raw_restaurants = $ristoranteModel->getAll();
 
-// Mappa di categorizzazione basata sulle parole chiave
 $categoria_map = [
     'giapponese' => ['sushi', 'giapponese', 'ramen', 'sashimi', 'giappone'],
     'pizzeria' => ['pizza', 'pizzeria', 'margherita', 'diavola'],
@@ -54,7 +52,6 @@ foreach ($raw_restaurants as $row) {
     $nome_lower = strtolower($row['nome']);
     $desc_lower = strtolower($row['descrizione'] ?? '');
 
-    // Determina la categoria basata sulle parole chiave
     $display_cat = 'Ristorante';
     foreach ($categoria_map as $categoria_key => $keywords) {
         foreach ($keywords as $keyword) {
@@ -67,7 +64,7 @@ foreach ($raw_restaurants as $row) {
         }
     }
 
-    // Se non trovata, usa la categoria dal DB o default
+
     if ($display_cat === 'Ristorante' && !empty($row['categoria'])) {
         $display_cat = ucfirst($row['categoria']);
     }
@@ -166,7 +163,6 @@ foreach ($raw_restaurants as $row) {
             color: white;
         }
         
-        /* Modal styles */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -366,10 +362,10 @@ foreach ($raw_restaurants as $row) {
                 <i class="fa-solid fa-utensils"></i> Tutti
             </div>
             <?php 
-            // Mostra solo le prime 5 categorie dal file JSON
+
             $prime_categorie = array_slice($categorie_disponibili, 0, 5);
             foreach ($prime_categorie as $categoria): 
-                // Mappa l'icona in base alla categoria
+
                 $icona = 'fa-solid fa-tag';
                 $categoria_lower = strtolower($categoria);
                 
@@ -403,7 +399,7 @@ foreach ($raw_restaurants as $row) {
         </div>
     </div>
 
-    <!-- MODALE CATEGORIE -->
+
     <div id="categorieModal" class="modal-overlay" style="display: none;">
         <div class="modal-content">
             <div class="modal-header">
@@ -415,7 +411,7 @@ foreach ($raw_restaurants as $row) {
             
             <div class="categorie-grid">
                 <?php foreach ($categorie_disponibili as $categoria): 
-                    // Mappa l'icona in base alla categoria
+
                     $icona = 'fa-solid fa-tag';
                     $categoria_lower = strtolower($categoria);
                     
@@ -517,7 +513,7 @@ foreach ($raw_restaurants as $row) {
             this.classList.add('active');
             currentCategory = this.dataset.category;
             filterCards(searchInput ? searchInput.value : '');
-            closeCategorieModal(); // Chiudi il modale se aperto
+            closeCategorieModal(); 
         });
     });
 
@@ -528,7 +524,7 @@ foreach ($raw_restaurants as $row) {
         searchInputMobile.addEventListener('input', () => filterCards(searchInputMobile.value));
     }
 
-    // Funzioni per il modale
+
     function openCategorieModal() {
         document.getElementById('categorieModal').style.display = 'flex';
     }
@@ -538,19 +534,19 @@ foreach ($raw_restaurants as $row) {
     }
     
     function selezionaCategoria(categoria) {
-        // Trova il pill corrispondente e simula il click
+
         const pill = Array.from(categoryPills).find(p => p.dataset.category === categoria);
         if (pill) {
             pill.click();
         } else {
-            // Se non esiste un pill per questa categoria, crea una selezione temporanea
+
             currentCategory = categoria;
             filterCards(searchInput ? searchInput.value : '');
         }
         closeCategorieModal();
     }
 
-    // Chiudi modale cliccando fuori
+
     window.addEventListener('click', function(e) {
         const modal = document.getElementById('categorieModal');
         if (e.target === modal) {
@@ -558,7 +554,7 @@ foreach ($raw_restaurants as $row) {
         }
     });
 
-    // Inizializza il filtro con il valore attuale della search
+
     if (searchInput && searchInput.value) {
         filterCards(searchInput.value);
     }
