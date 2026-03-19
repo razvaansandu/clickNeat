@@ -166,7 +166,7 @@ $creditoEuro = $walletModel->getBalanceEuro($user_id);
                 <input type="hidden" name="amount" id="form-amount" value="10.00">
                 <input type="hidden" name="paypal_transaction_id" id="paypal_tx_id">
                 
-               
+                
             </form>
         </div>
     </div>

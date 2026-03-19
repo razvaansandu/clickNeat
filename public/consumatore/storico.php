@@ -34,9 +34,9 @@ try {
     $error_message = "Errore nel recupero ordini: " . $e->getMessage();
 }
 ?>
-
+ 
 <!DOCTYPE html>
-<html lang="it">
+<html lang="it"> 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -197,6 +197,11 @@ try {
             </a>
             <a href="profile_consumatore.php" class="nav-item">
                 <i class="fa-solid fa-user"></i> <span>Profilo</span>
+            </a> 
+            <a href="help.php" class="nav-item">
+                
+            
+            <i class="fa-solid fa-circle-question"></i> <span>Aiuto</span>
             </a>
             <a href="../auth/logout.php" class="btn-logout-nav">
                 <i class="fa-solid fa-right-from-bracket"></i> Esci
@@ -244,7 +249,7 @@ try {
                 <?php echo htmlspecialchars($msg); ?>
             </div>
         <?php endif; ?>
-
+    
         <?php if (!empty($error_message)): ?>
             <div style="background: #ffebee; color: #c62828; padding: 20px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #ffcdd2;">
                 <strong><i class="fa-solid fa-triangle-exclamation"></i> Ops! C'è un problema:</strong><br>
@@ -395,11 +400,11 @@ try {
                     btn.innerHTML = '<i class="fa-solid fa-envelope"></i> Invia Email';
                 })
                 .catch(() => {
-                    showToast('Errore di connessione.', 'error');
+                    showToast('Errore di connessione.', 'error'); 
                     btn.disabled = false;
                     btn.innerHTML = '<i class="fa-solid fa-envelope"></i> Invia Email';
-                });
-        }
+                }); 
+        } 
 
         function showToast(message, type) {
             const toast = document.getElementById('toast');
@@ -416,5 +421,5 @@ try {
         <?php endif; ?>
     </script>
 
-</body>
+</body> 
 </html>

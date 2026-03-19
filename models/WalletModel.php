@@ -57,34 +57,5 @@ class WalletModel {
         ]);
         
         return true;
-    }
-
-    public function deductFunds(int $userId, int $amountCents): bool {
-        if ($amountCents <= 0) return false;
-
-        $this->ensureWallet($userId);
-
-        $currentBalance = $this->getBalanceCents($userId);
-        if ($currentBalance < $amountCents) return false;
-
-        $newBalance = $currentBalance - $amountCents;
-
-        $this->db->update('wallets',
-            ['balance_cents' => $newBalance],
-            'user_id = ?',
-            [$userId]
-        );
-
-        $this->db->insert('wallet_transactions', [
-            'user_id' => $userId,
-            'type' => 'debit',
-            'amount_cents' => $amountCents
-        ]);
-
-        return true;
-    }
-
-    public function hasSufficientFunds(int $userId, int $amountCents): bool {
-        return $this->getBalanceCents($userId) >= $amountCents;
-    }
+    } 
 }  
