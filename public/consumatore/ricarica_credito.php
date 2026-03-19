@@ -15,7 +15,6 @@ $walletModel = new WalletModel($db);
 $msg = "";
 $msg_type = "";
 
-// Handle Top-up Submission
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (isset($_POST['paypal_transaction_id']) || isset($_POST['test_mode'])) {
         $amount_euros = floatval($_POST['amount']);
@@ -46,7 +45,6 @@ $creditoEuro = $walletModel->getBalanceEuro($user_id);
     <link rel="stylesheet" href="../../css/style_consumatori.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- PayPal SDK -->
     <script src="https://www.paypal.com/sdk/js?client-id=ATHTb2gXY3GKqi99hQwcNXNVsHisCXgf7iYt5stbRypxjqjEe-qBPaffW9hC9-LEq9ZqgitpD0UYKGkY&currency=EUR&disable-funding=card,mybank"></script>
     <style>
         .recharge-card {

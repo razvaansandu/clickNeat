@@ -10,6 +10,16 @@ if (!isset($_SESSION["loggedin"]) || $_SESSION["ruolo"] !== 'consumatore') {
     exit;
 }
 
+function getCategorieDaJSON() {
+    $jsonPath = __DIR__ . "/../../config/categorie.json";
+    if (file_exists($jsonPath)) {
+        $jsonData = file_get_contents($jsonPath);
+        $categorie = json_decode($jsonData, true);
+        return is_array($categorie) ? $categorie : [];
+    }
+    return [];
+}
+
 $user_id = $_SESSION["id"];
 $username = $_SESSION["username"];
 $restaurants = [];
@@ -17,6 +27,20 @@ $walletModel = new WalletModel($db);
 $creditoEuro = $walletModel->getBalanceEuro($user_id);
 $ristoranteModel = new RistoranteModel($db);
 $raw_restaurants = $ristoranteModel->getAll();
+
+$categoria_map = [
+    'giapponese' => ['sushi', 'giapponese', 'ramen', 'sashimi', 'giappone'],
+    'pizzeria' => ['pizza', 'pizzeria', 'margherita', 'diavola'],
+    'hamburgeria' => ['burger', 'hamburger', 'panino', 'cheeseburger'],
+    'italiano' => ['pasta', 'trattoria', 'italiano', 'lasagna', 'risotto'],
+    'dolci' => ['dolci', 'gelato', 'pasticceria', 'torta', 'cannolo'],
+    'messicano' => ['messicano', 'taco', 'burrito', 'quesadilla'],
+    'kebab' => ['kebab', 'kebap', 'doner', 'gyros'],
+    'cinese' => ['cinese', 'ravioli', 'riso cantonese', 'wok'],
+    'indiano' => ['indiano', 'curry', 'tandoori'],
+    'thailandese' => ['thai', 'thailandese', 'pad thai'],
+    'pesce' => ['pesce', 'frittura', 'crostacei', 'molluschi']
+];
 
 foreach ($raw_restaurants as $row) {
     if (!empty($row['image_url'])) {
@@ -29,18 +53,21 @@ foreach ($raw_restaurants as $row) {
     $nome_lower = strtolower($row['nome']);
     $desc_lower = strtolower($row['descrizione'] ?? '');
 
-    if (strpos($db_cat, 'giapponese') !== false || strpos($nome_lower, 'sushi') !== false) {
-        $display_cat = 'Giapponese';
-    } elseif (strpos($db_cat, 'pizza') !== false || strpos($nome_lower, 'pizza') !== false) {
-        $display_cat = 'Pizzeria';
-    } elseif (strpos($db_cat, 'panino') !== false || strpos($nome_lower, 'burger') !== false || strpos($nome_lower, 'hamburger') !== false) {
-        $display_cat = 'Hamburgeria';
-    } elseif (strpos($db_cat, 'pasta') !== false || strpos($nome_lower, 'trattoria') !== false) {
-        $display_cat = 'Italiano';
-    } elseif (strpos($db_cat, 'dolci') !== false || strpos($nome_lower, 'gelat') !== false || strpos($nome_lower, 'pasticceria') !== false) {
-        $display_cat = 'Dolci';
-    } else {
-        $display_cat = ucfirst($row['categoria'] ?: 'Ristorante');
+    $display_cat = 'Ristorante';
+    foreach ($categoria_map as $categoria_key => $keywords) {
+        foreach ($keywords as $keyword) {
+            if (strpos($db_cat, $keyword) !== false || 
+                strpos($nome_lower, $keyword) !== false || 
+                strpos($desc_lower, $keyword) !== false) {
+                $display_cat = ucfirst($categoria_key);
+                break 2;
+            }
+        }
+    }
+
+
+    if ($display_cat === 'Ristorante' && !empty($row['categoria'])) {
+        $display_cat = ucfirst($row['categoria']);
     }
 
     $row['category_label'] = $display_cat;
@@ -57,6 +84,201 @@ foreach ($raw_restaurants as $row) {
     <title>Dashboard - ClickNeat</title>
     <link rel="stylesheet" href="../css/style_consumatori.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .categories-wrapper {
+            margin: 20px 0;
+            position: relative;
+        }
+        
+        .categories-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 10px 0;
+        }
+        
+        .category-pill {
+            background: white;
+            border: 1px solid #E0E5F2;
+            border-radius: 30px;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #2B3674;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .category-pill i {
+            font-size: 14px;
+        }
+        
+        .category-pill:hover {
+            background: #FF9F43;
+            border-color: #ffffff;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(67, 24, 255, 0.2);
+        }
+        
+        .category-pill:hover i {
+            color: white;
+        }
+        
+        .category-pill.active {
+            background: #FF9F43;
+            border-color: #FF9F43;
+            color: white;
+        }
+        
+        .category-pill.active i {
+            color: white;
+        }
+        
+        .show-all-btn {
+            background: white;
+            border: 1px solid #E0E5F2;
+            border-radius: 30px;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #2B3674;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            
+        }
+        
+        .show-all-btn:hover {
+            background: #FF9F43;
+            border-color: #FF9F43;
+            color: white;
+        }
+        
+        .show-all-btn:hover i {
+            color: white;
+        }
+        
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #E0E5F2;
+        }
+        
+        .modal-header h3 {
+            color: #2B3674;
+            margin: 0;
+            font-size: 20px;
+            font-weight: 600;
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #A3AED0;
+            transition: color 0.3s ease;
+        }
+        
+        .close-modal:hover {
+            color: #E31A1A;
+        }
+        
+        .categorie-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+        }
+        
+        .categoria-item {
+            background: #F8F9FF;
+            border: 1px solid #E0E5F2;
+            border-radius: 12px;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .categoria-item:hover {
+            background: #FF9F43;
+            border-color: #FF9F43;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(67, 24, 255, 0.2);
+        }
+        
+        .categoria-item:hover .categoria-nome,
+        .categoria-item:hover i {
+            color: white;
+        }
+        
+        .categoria-item i {
+            font-size: 24px;
+            color: #FF9F43;
+        }
+        
+        .categoria-nome {
+            font-size: 14px;
+            font-weight: 500;
+            color: #2B3674;
+        }
+        
+        @media (max-width: 768px) {
+            .categorie-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
 </head>
 <body>
 
@@ -133,26 +355,96 @@ foreach ($raw_restaurants as $row) {
     </header>
 
     <div class="categories-wrapper">
-       <div class="categories-container">
-    <div class="category-pill active" data-category="all">
-        <i class="fa-solid fa-utensils"></i> Tutti
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <h3 style="color: #2B3674; font-size: 16px; margin: 0;">Filtra per categoria</h3>
+            
+        </div>
+        
+        <div class="categories-container">
+            <div class="category-pill active" data-category="all">
+                <i class="fa-solid fa-utensils"></i> Tutti
+            </div>
+            <?php 
+
+            $prime_categorie = array_slice($categorie_disponibili, 0, 5);
+            foreach ($prime_categorie as $categoria): 
+
+                $icona = 'fa-solid fa-tag';
+                $categoria_lower = strtolower($categoria);
+                
+                if (strpos($categoria_lower, 'pizza') !== false) {
+                    $icona = 'fa-solid fa-pizza-slice';
+                } elseif (strpos($categoria_lower, 'burger') !== false || strpos($categoria_lower, 'panino') !== false) {
+                    $icona = 'fa-solid fa-burger';
+                } elseif (strpos($categoria_lower, 'giapponese') !== false || strpos($categoria_lower, 'sushi') !== false) {
+                    $icona = 'fa-solid fa-fish';
+                } elseif (strpos($categoria_lower, 'dolci') !== false || strpos($categoria_lower, 'gelato') !== false) {
+                    $icona = 'fa-solid fa-seedling';
+                } elseif (strpos($categoria_lower, 'messicano') !== false) {
+                    $icona = 'fa-solid fa-pepper-hot';
+                } elseif (strpos($categoria_lower, 'kebab') !== false) {
+                    $icona = 'fa-solid fa-drumstick-bite';
+                } elseif (strpos($categoria_lower, 'cinese') !== false) {
+                    $icona = 'fa-solid fa-egg';
+                } elseif (strpos($categoria_lower, 'indiano') !== false) {
+                    $icona = 'fa-solid fa-spoon';
+                } elseif (strpos($categoria_lower, 'pesce') !== false) {
+                    $icona = 'fa-solid fa-fish';
+                }
+            ?>
+                <div class="category-pill" data-category="<?php echo htmlspecialchars(strtolower($categoria)); ?>">
+                    <i class="<?php echo $icona; ?>"></i> <?php echo htmlspecialchars($categoria); ?>
+                </div>
+            <?php endforeach; ?>
+            <button class="show-all-btn" onclick="openCategorieModal()">
+                <i class="fa-solid fa-grid-2"></i> Mostra tutto
+            </button>
+        </div>
     </div>
-    <div class="category-pill" data-category="messicano">
-        <i class="fa-solid fa-pizza-slice"></i> Messicano
-    </div>
-    <div class="category-pill" data-category="burger">
-        <i class="fa-solid fa-burger"></i> Burger
-    </div>
-    <div class="category-pill" data-category="giapponese">
-        <i class="fa-solid fa-fish"></i> Sushi
-    </div>
-    <div class="category-pill" data-category="kebab">
-        <i class="fa-solid fa-drumstick-bite"></i> Kebab
-    </div>
-    <div class="category-pill" data-category="pasticceria">
-        <i class="fa-solid fa-seedling"></i> Dolci
-    </div>
-</div>
+
+
+    <div id="categorieModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-grid-2"></i> Tutte le categorie</h3>
+                <button class="close-modal" onclick="closeCategorieModal()">
+                    <i class="fa-solid fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="categorie-grid">
+                <?php foreach ($categorie_disponibili as $categoria): 
+
+                    $icona = 'fa-solid fa-tag';
+                    $categoria_lower = strtolower($categoria);
+                    
+                    if (strpos($categoria_lower, 'pizza') !== false) {
+                        $icona = 'fa-solid fa-pizza-slice';
+                    } elseif (strpos($categoria_lower, 'burger') !== false || strpos($categoria_lower, 'panino') !== false) {
+                        $icona = 'fa-solid fa-burger';
+                    } elseif (strpos($categoria_lower, 'giapponese') !== false || strpos($categoria_lower, 'sushi') !== false) {
+                        $icona = 'fa-solid fa-fish';
+                    } elseif (strpos($categoria_lower, 'dolci') !== false || strpos($categoria_lower, 'gelato') !== false) {
+                        $icona = 'fa-solid fa-seedling';
+                    } elseif (strpos($categoria_lower, 'messicano') !== false) {
+                        $icona = 'fa-solid fa-pepper-hot';
+                    } elseif (strpos($categoria_lower, 'kebab') !== false) {
+                        $icona = 'fa-solid fa-drumstick-bite';
+                    } elseif (strpos($categoria_lower, 'cinese') !== false) {
+                        $icona = 'fa-solid fa-egg';
+                    } elseif (strpos($categoria_lower, 'indiano') !== false) {
+                        $icona = 'fa-solid fa-spoon';
+                    } elseif (strpos($categoria_lower, 'pesce') !== false) {
+                        $icona = 'fa-solid fa-fish';
+                    }
+                ?>
+                    <div class="categoria-item" onclick="selezionaCategoria('<?php echo htmlspecialchars(strtolower($categoria)); ?>')">
+                        <i class="<?php echo $icona; ?>"></i>
+                        <span class="categoria-nome"><?php echo htmlspecialchars($categoria); ?></span>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
     </div>
 
     <div class="main-container">
@@ -167,7 +459,7 @@ foreach ($raw_restaurants as $row) {
                 </div>
             <?php else: ?>
                 <?php foreach ($restaurants as $rest): ?>
-                    <a href="menu.php?id=<?php echo $rest['id']; ?>" class="restaurant-card" data-name="<?php echo htmlspecialchars($rest['nome']); ?>" data-keywords="<?php echo htmlspecialchars($rest['category_label']); ?>">
+                    <a href="menu.php?id=<?php echo $rest['id']; ?>" class="restaurant-card" data-name="<?php echo htmlspecialchars($rest['nome']); ?>" data-keywords="<?php echo htmlspecialchars(strtolower($rest['category_label'])); ?>">
                         <img src="<?php echo $rest['image_url']; ?>" alt="Cibo" class="card-img-top" style="object-fit: cover; height: 160px; width: 100%;">
                         <div class="card-body">
                             <div class="badge-cat"><?php echo htmlspecialchars($rest['category_label']); ?></div>
@@ -195,14 +487,25 @@ foreach ($raw_restaurants as $row) {
     const cards = document.querySelectorAll('.restaurant-card');
     const categoryPills = document.querySelectorAll('.category-pill');
     let currentCategory = 'all';
- 
+    
     function filterCards(searchTerm = '') {
         const term = searchTerm.toLowerCase();
         cards.forEach(card => {
             const name = card.dataset.name.toLowerCase();
             const category = card.dataset.keywords.toLowerCase();
             const matchesSearch = term === '' || name.includes(term) || category.includes(term);
-            const matchesCategory = currentCategory === 'all' || category.includes(currentCategory);
+            
+            let matchesCategory = currentCategory === 'all';
+            
+            if (!matchesCategory) {
+                if (category.includes(currentCategory)) {
+                    matchesCategory = true;
+                } else {
+                    const categoryWords = category.split(' ');
+                    matchesCategory = categoryWords.some(word => currentCategory.includes(word) || word.includes(currentCategory));
+                }
+            }
+            
             card.style.display = (matchesSearch && matchesCategory) ? '' : 'none';
         });
     }
@@ -213,6 +516,7 @@ foreach ($raw_restaurants as $row) {
             this.classList.add('active');
             currentCategory = this.dataset.category;
             filterCards(searchInput ? searchInput.value : '');
+            closeCategorieModal(); 
         });
     });
 
@@ -221,6 +525,41 @@ foreach ($raw_restaurants as $row) {
     }
     if (searchInputMobile) {
         searchInputMobile.addEventListener('input', () => filterCards(searchInputMobile.value));
+    }
+
+
+    function openCategorieModal() {
+        document.getElementById('categorieModal').style.display = 'flex';
+    }
+    
+    function closeCategorieModal() {
+        document.getElementById('categorieModal').style.display = 'none';
+    }
+    
+    function selezionaCategoria(categoria) {
+
+        const pill = Array.from(categoryPills).find(p => p.dataset.category === categoria);
+        if (pill) {
+            pill.click();
+        } else {
+
+            currentCategory = categoria;
+            filterCards(searchInput ? searchInput.value : '');
+        }
+        closeCategorieModal();
+    }
+
+
+    window.addEventListener('click', function(e) {
+        const modal = document.getElementById('categorieModal');
+        if (e.target === modal) {
+            closeCategorieModal();
+        }
+    });
+
+
+    if (searchInput && searchInput.value) {
+        filterCards(searchInput.value);
     }
     </script>
 </body>
