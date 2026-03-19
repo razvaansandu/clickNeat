@@ -916,85 +916,8 @@ function getAllergeni()
                 </form>
             </div>
 
-            <div class="card">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
-                    <h3 style="color: #2B3674; margin:0;">Il tuo Menu</h3>
-                    <span style="background:#E6FAF5; color:#05CD99; padding:5px 12px; border-radius:15px; font-weight:600; font-size:12px;">
-                        <?php echo count($menu_items); ?> Piatti
-                    </span>
-                </div>
+            
 
-                <?php if (empty($menu_items)): ?>
-                    <p style="text-align:center; color:#A3AED0; padding: 20px;">Ancora nessun piatto.</p>
-                <?php else: ?>
-                    <div class="menu-list">
-                        <?php foreach ($menu_items as $item):
-                            $allergeni = !empty($item['allergeni']) ? json_decode($item['allergeni'], true) : [];
-                        ?>
-                            <div class="menu-item" style="display: flex; gap: 15px; align-items: flex-start; position: relative; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid #E0E5F2;">
-                                <div class="dish-img" style="width: 60px; height: 60px; border-radius: 10px; overflow: hidden; background: #f4f7fe; flex-shrink: 0;">
-                                    <?php if (!empty($item['image_url'])): ?>
-                                        <img src="/assets/<?php echo htmlspecialchars(ltrim($item['image_url'], '')); ?>" alt="Foto piatto" style="width: 100%; height: 100%; object-fit: cover;">
-                                    <?php else: ?>
-                                        <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #A3AED0;">
-                                            <i class="fa-solid fa-utensils"></i>
-                                        </div>
-                                    <?php endif; ?>
-                                </div>
-
-                                <div class="dish-info" style="flex: 1;">
-                                    <h4 style="margin: 0; font-size: 16px; color: #2B3674;">
-                                        <?php echo htmlspecialchars($item['name']); ?>
-                                        <span style="font-size: 12px; background: #F4F7FE; color: #4318FF; padding: 2px 8px; border-radius: 12px; margin-left: 8px;">
-                                            <?php echo htmlspecialchars($item['categoria']); ?>
-                                        </span>
-                                    </h4>
-                                    <p style="margin: 5px 0 0; font-size: 13px; color: #A3AED0; line-height: 1.4;">
-                                        <?php echo htmlspecialchars($item['description']); ?>
-                                    </p>
-
-                                    <?php if (!empty($allergeni)): ?>
-                                        <div class="allergeni-list">
-                                            <?php foreach ($allergeni as $allergene): ?>
-                                                <span class="allergeni-badge" title="Allergene">
-                                                    <i class="fa-solid fa-triangle-exclamation"></i>
-                                                    <?php echo htmlspecialchars($allergene); ?>
-                                                </span>
-                                            <?php endforeach; ?>
-                                        </div>
-                                    <?php endif; ?>
-                                </div>
-
-                                <div class="dish-actions" style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
-                                    <span class="dish-price" style="font-weight: bold; color: #2B3674;">€ <?php echo number_format($item['price'], 2); ?></span>
-                                    <div style="display: flex; gap: 8px;">
-                                        <button type="button" class="btn-open-edit" data-id="<?php echo $item['id']; ?>"
-                                            data-name="<?php echo htmlspecialchars($item['name']); ?>"
-                                            data-desc="<?php echo htmlspecialchars($item['description']); ?>"
-                                            data-price="<?php echo $item['price']; ?>"
-                                            data-cat="<?php echo htmlspecialchars($item['categoria'] ?? 'altro'); ?>"
-                                            data-img="<?php echo htmlspecialchars($item['image_url'] ?? ''); ?>"
-                                            data-allergeni='<?php echo htmlspecialchars($item['allergeni'] ?? '[]'); ?>'
-                                            style="background: none; border: none; color: #4318FF; cursor: pointer; font-size: 14px;">
-                                            <i class="fa-solid fa-pen"></i>
-                                        </button>
-                                        <form method="POST" style="margin:0;" onsubmit="return confirm('Sei sicuro di voler eliminare questo piatto?');">
-                                            <input type="hidden" name="delete_dish" value="1">
-                                            <input type="hidden" name="dish_id" value="<?php echo $item['id']; ?>">
-                                            <button type="submit" style="background: none; border: none; color: #E31A1A; cursor: pointer; font-size: 14px;">
-                                                <i class="fa-solid fa-trash"></i>
-                                            </button>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-                        <?php endforeach; ?>
-                    </div>
-                <?php endif; ?>
-            </div>
-        </div>
-
-        <!-- SEZIONE MENU GIORNALIERI (ORA SOPRA I TAVOLI) -->
         <div class="full-width-section">
             <div class="card">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
@@ -1131,7 +1054,6 @@ function getAllergeni()
             </div>
         </div>
 
-        <!-- SEZIONE TAVOLI (ORA SOTTO I MENU GIORNALIERI) -->
         <div class="full-width-section">
             <div class="card">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
@@ -1198,7 +1120,6 @@ function getAllergeni()
         </div>
     </div>
 
-    <!-- MODAL AGGIUNGI TAVOLO -->
     <div id="modalAggiungiTavolo" class="modal-overlay" style="display: none;">
         <div class="modal-content" style="max-width: 400px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
@@ -1234,7 +1155,6 @@ function getAllergeni()
         </div>
     </div>
 
-    <!-- MODAL MODIFICA TAVOLO -->
     <div id="modalModificaTavolo" class="modal-overlay" style="display: none;">
         <div class="modal-content" style="max-width: 400px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
@@ -1279,7 +1199,6 @@ function getAllergeni()
         </div>
     </div>
 
-    <!-- MODALE MODIFICA PIATTO -->
     <div id="editModal" class="modal-overlay">
         <div class="modal-content" style="max-width: 500px; max-height: 90vh; overflow-y: auto;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
@@ -1370,7 +1289,6 @@ function getAllergeni()
         </div>
     </div>
 
-    <!-- MODAL MENU GIORNALIERO -->
     <div id="modalMenuGiornaliero" class="modal-overlay" style="display: none;">
         <div class="modal-content large">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
@@ -1451,7 +1369,6 @@ function getAllergeni()
         </div>
     </div>
 
-    <!-- MODAL MENU FALLBACK -->
     <div id="modalMenuFallback" class="modal-overlay" style="display: none;">
         <div class="modal-content large">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">

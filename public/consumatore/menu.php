@@ -31,11 +31,9 @@ $creditoEuro = $walletModel->getBalanceEuro($_SESSION['id']);
 
 if (!$ristorante) {
     die("Ristorante non trovato.");
-}
+} 
+$giorni = [ 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato', 'Domenica'];
 
-$giorni = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
-
-// Query diretta per bypassare eventuali problemi del modello
 $sql_menu = "SELECT * FROM menus 
              WHERE ristorante_id = ? AND type = 'daily' AND weekday = ? AND is_active = 1";
 $menu_giornaliero = $db->selectOne($sql_menu, [$ristorante_id, $giorno_richiesto]);
@@ -45,7 +43,6 @@ $tipo_menu = 'completo';
 $titolo_menu = 'Menu del Giorno';
 
 if ($menu_giornaliero) {
-    // Prendi i piatti di questo menu
     $sql_piatti = "SELECT mi.* FROM menu_entries me
                    JOIN menu_items mi ON me.menu_item_id = mi.id
                    WHERE me.menu_id = ? AND mi.deleted_at IS NULL
@@ -58,7 +55,6 @@ if ($menu_giornaliero) {
     }
 }
 
-// Se non ci sono piatti nel menu giornaliero, prova il fallback
 if (empty($lista_piatti)) {
     $sql_fallback = "SELECT * FROM menus 
                      WHERE ristorante_id = ? AND type = 'fallback' AND is_active = 1";
@@ -78,7 +74,6 @@ if (empty($lista_piatti)) {
     }
 }
 
-// Se ancora non ci sono piatti, mostra tutti i piatti del ristorante
 if (empty($lista_piatti)) {
     $raw_piatti = $menuModel->getByRestaurant($ristorante_id);
     foreach ($raw_piatti as $row) {
@@ -90,7 +85,6 @@ if (empty($lista_piatti)) {
     $titolo_menu = 'Il nostro Menu';
 }
 
-// Gestione immagini
 foreach ($lista_piatti as &$piatto) {
     if (!empty($piatto['image_url'])) {
         $piatto['image_url'] = htmlspecialchars($piatto['image_url']);
@@ -121,7 +115,7 @@ if (isset($_SESSION['cart']) && !empty($_SESSION['cart']['items'])) {
             padding: 80px 60px;
             color: var(--white);
             position: relative;
-            overflow: hidden;
+            overflow: visible;
             margin-bottom: 40px;
             border-radius: 0 0 40px 40px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.15);
@@ -175,25 +169,93 @@ if (isset($_SESSION['cart']) && !empty($_SESSION['cart']['items'])) {
             margin-top: 20px;
             flex-wrap: wrap;
         }
-        
-        .giorno-selector select {
-            padding: 12px 20px;
-            border-radius: 50px;
-            border: 1px solid rgba(255,255,255,0.3);
-            background: rgba(255,255,255,0.15);
-            color: white;
-            font-weight: 500;
+
+        .giorno-selector-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        .giorno-selector-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 16px;
+            background: white;
+            border: 2px solid rgba(255,255,255,0.4);
+            border-radius: 12px;
+            color: #2D2D2D;
+            font-weight: 600;
             font-size: 15px;
-            backdrop-filter: blur(5px);
+            font-family: 'Poppins', sans-serif;
             cursor: pointer;
             min-width: 200px;
+            justify-content: space-between;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.12);
+            transition: all 0.2s ease;
+            user-select: none;
         }
-        
-        .giorno-selector select option {
-            background: #FF9F43;
-            color: white;
+
+        .giorno-selector-btn:hover {
+            background: #f9f9f9;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+        }
+
+        .giorno-selector-btn .chevron {
+            transition: transform 0.2s ease;
+            font-size: 12px;
+            color: #FF9F43;
+        }
+
+        .giorno-selector-btn.open .chevron {
+            transform: rotate(180deg);
+        }
+
+        .giorno-dropdown-list {
+            position: absolute;
+            top: calc(100% + 6px);
+            left: 0;
+            min-width: 100%;
+            background: white;
             border-radius: 12px;
-            
+            box-shadow: 0 8px 28px rgba(0,0,0,0.16);
+            border: 1px solid rgba(0,0,0,0.07);
+            z-index: 9999;
+            overflow-y: auto;
+            max-height: 280px;
+            opacity: 0;
+            transform: translateY(-8px);
+            pointer-events: none;
+            transition: all 0.2s ease;
+        }
+
+        .giorno-dropdown-list.open {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: all;
+        }
+
+        .giorno-dropdown-item {
+            padding: 11px 16px;
+            color: #2D2D2D;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            border-left: 3px solid transparent;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .giorno-dropdown-item:hover {
+            background: #FFF5EC;
+            border-left-color: #FF9F43;
+            color: #E07000;
+        }
+
+        .giorno-dropdown-item.active {
+            background: #FFF5EC;
+            border-left-color: #FF9F43;
+            color: #E07000;
+            font-weight: 700;
         }
         
         .menu-badge {
@@ -547,9 +609,6 @@ if (isset($_SESSION['cart']) && !empty($_SESSION['cart']['items'])) {
             <a href="profile_consumatore.php" class="nav-item">
                 <i class="fa-solid fa-user"></i> <span>Profilo</span>
             </a>
-            <a href="help.php" class="nav-item">
-                <i class="fa-solid fa-circle-question"></i> <span>Aiuto</span>
-            </a>
             <a href="../auth/logout.php" class="btn-logout-nav">
                 <i class="fa-solid fa-right-from-bracket"></i> Esci
             </a>
@@ -566,15 +625,26 @@ if (isset($_SESSION['cart']) && !empty($_SESSION['cart']['items'])) {
             <p><i class="fa-solid fa-location-dot"></i> <?php echo htmlspecialchars($ristorante['indirizzo']); ?></p>
             <p><i class="fa-solid fa-clock"></i> Orari: 12:00 - 23:00</p>
             
-            <!-- Selettore giorno e badge menu -->
             <div class="giorno-selector">
-                <select onchange="cambiaGiorno(this.value)">
-                    <?php for ($i = 0; $i < 7; $i++): ?>
-                        <option value="<?php echo $i; ?>" <?php echo $i == $giorno_richiesto ? 'selected' : ''; ?>>
-                            <?php echo $giorni[$i]; ?>
-                        </option>
-                    <?php endfor; ?>
-                </select>
+                <div class="giorno-selector-wrapper">
+                    <div class="giorno-selector-btn" id="giornoBtn" onclick="toggleGiornoDropdown()" role="combobox" aria-expanded="false" aria-haspopup="listbox" tabindex="0">
+                        <span>
+                            <i class="fa-solid fa-calendar-day" style="color:#FF9F43; margin-right:6px;"></i>
+                            <?php echo $giorni[$giorno_richiesto]; ?>
+                        </span>
+                        <i class="fa-solid fa-chevron-down chevron"></i>
+                    </div>
+                    <div class="giorno-dropdown-list" id="giornoDropdown" role="listbox">
+                        <?php for ($i = 0; $i < 7; $i++): ?>
+                            <div class="giorno-dropdown-item <?php echo $i == $giorno_richiesto ? 'active' : ''; ?>"
+                                 role="option"
+                                 aria-selected="<?php echo $i == $giorno_richiesto ? 'true' : 'false'; ?>"
+                                 onclick="cambiaGiorno(<?php echo $i; ?>)">
+                                <?php echo $giorni[$i]; ?>
+                            </div>
+                        <?php endfor; ?>
+                    </div>
+                </div>
                 
                 <div class="menu-badge">
                     <i class="fa-solid fa-<?php echo $tipo_menu == 'giornaliero' ? 'sun' : ($tipo_menu == 'fallback' ? 'umbrella' : 'utensils'); ?>"></i>
@@ -691,13 +761,37 @@ if (isset($_SESSION['cart']) && !empty($_SESSION['cart']['items'])) {
             <i class="fa-solid fa-user"></i>
             <span>Profilo</span>
         </a>
-        <a href="help.php" class="nav-item-bottom">
-            <i class="fa-solid fa-circle-question"></i>
-            <span>Aiuto</span>
-        </a>
     </div>  
 
     <script>
+        function toggleGiornoDropdown() {
+            var btn = document.getElementById('giornoBtn');
+            var dropdown = document.getElementById('giornoDropdown');
+            var isOpen = btn.classList.toggle('open');
+            dropdown.classList.toggle('open');
+            btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        }
+
+        document.addEventListener('click', function(e) {
+            var wrapper = document.querySelector('.giorno-selector-wrapper');
+            if (wrapper && !wrapper.contains(e.target)) {
+                document.getElementById('giornoBtn').classList.remove('open');
+                document.getElementById('giornoDropdown').classList.remove('open');
+                document.getElementById('giornoBtn').setAttribute('aria-expanded', 'false');
+            }
+        });
+
+        document.getElementById('giornoBtn').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                toggleGiornoDropdown();
+            }
+            if (e.key === 'Escape') {
+                this.classList.remove('open');
+                document.getElementById('giornoDropdown').classList.remove('open');
+            }
+        });
+
         function cambiaGiorno(giorno) {
             window.location.href = window.location.pathname + '?id=<?php echo $ristorante_id; ?>&giorno=' + giorno;
         }
