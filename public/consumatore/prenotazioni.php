@@ -45,7 +45,7 @@ $prenotazioni = $prenotazioneModel->getByCliente($_SESSION['id']);
             align-items: center;
             justify-content: center;
             font-size: 24px;
-            color: #1A4D4E;
+            color: #1A4D4E; 
             flex-shrink: 0;
         }
 

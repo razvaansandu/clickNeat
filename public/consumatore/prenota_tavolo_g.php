@@ -383,7 +383,7 @@
 
             if (!data) {
                 alert('Seleziona una data.');
-                return;
+                return; 
             }
 
             var dataFormatted = new Date(data).toLocaleDateString('it-IT', { day: '2-digit', month: 'long', year: 'numeric' });
@@ -411,7 +411,7 @@
                 if (c.getAttribute('onclick') && c.getAttribute('onclick').includes('(' + id + ',')) {
                     c.classList.add('selected');
                 }
-            });
+            }); 
 
             document.getElementById('selected-name').textContent = nome;
 
@@ -426,9 +426,9 @@
 
             document.getElementById('confirm-box').classList.add('visible');
         }
-
-        function confermaPrenotazione() {
-            if (!selectedTavoloId) return;
+ 
+        function confermaPrenotazione() {                                        
+            if (!selectedTavoloId) return;  
 
             var data = document.getElementById('input-data').value;
             var ora = document.getElementById('input-ora').value;

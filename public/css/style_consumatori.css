@@ -6,12 +6,12 @@
     --accent-orange: #FF9F43;
     --accent-red: #FF6B6B;
     --text-grey: #A3AED0;
-    --bg-light: #F9FAFB;
-    --white: #ffffff;
+    --bg-light: #E8EDF6;
+    --white: #F4F7FD;
     --success: #05CD99;
-    --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.05);
-    --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.08);
-    --shadow-lg: 0 20px 40px rgba(112, 144, 176, 0.15);
+    --shadow-sm: 0 2px 12px rgba(43, 54, 116, 0.07);
+    --shadow-md: 0 6px 22px rgba(43, 54, 116, 0.11);
+    --shadow-lg: 0 16px 36px rgba(43, 54, 116, 0.15);
     --border-radius: 20px;
     --border-radius-sm: 12px;
 }
@@ -276,7 +276,7 @@ a {
     gap: 40px;
 }
 details {
-    background: white;
+    background: var(--white);
     border-radius: 15px;
     margin-bottom: 15px;
     border: 1px solid #eee;
@@ -345,7 +345,7 @@ textarea:focus {
     margin-bottom: 20px;
 }
 .confirmation-box {
-    background: white;
+    background: var(--white);
     border-radius: 20px;
     padding: 50px 30px;
     text-align: center;
@@ -531,7 +531,7 @@ textarea:focus {
     display: flex;
     align-items: center;
     gap: 10px;
-    background: white;
+    background: var(--white);
     padding: 5px 10px;
     border-radius: 8px;
     border: 1px solid #E0E5F2;
@@ -619,6 +619,21 @@ textarea:focus {
     box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 
+
+.card-style {
+    width: 100%;
+    margin-bottom: 16px;
+    border-radius: 20px;
+    overflow: hidden;
+    background: var(--white);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid rgba(43, 54, 116, 0.06);
+    transition: box-shadow 0.25s ease, transform 0.25s ease;
+}
+.card-style:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-3px);
+}
 
 @media (max-width: 991px) { 
 .card-style {
@@ -1041,7 +1056,7 @@ textarea:focus {
         gap: 8px;
         padding: 8px 0;
         position: relative;
-    }
+    } 
     .nav-item::after {
         content: '';
         position: absolute;
@@ -1420,7 +1435,7 @@ textarea:focus {
     position: absolute;
     top: calc(100% + 8px);
     left: 0;
-    background: white;
+    background: var(--white);
     border: 1px solid #E0E5F2;
     border-radius: 16px;
     box-shadow: 0 8px 24px rgba(0,0,0,0.12);
@@ -1432,7 +1447,7 @@ textarea:focus {
     display: block;
 }
 .category-dropdown-btn {
-    background: white;
+    background: var(--white);
     border: 2px solid #E0E5F2;
     border-radius: 50px;
     padding: 14px 28px;
