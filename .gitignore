@@ -13,6 +13,7 @@ Thumbs.db
 
 # IMPORTANTE: Ignora il file con le password vere!
 config/db.php
+config/database.php
 
 # Ignora la cartella dei dati di Docker (se l'hai mappata localmente)
 mysql_data/

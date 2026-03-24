@@ -34,7 +34,6 @@ if (!$ristorante) {
 } 
 $giorni = [ 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato', 'Domenica'];
  
-// Query diretta per bypassare eventuali problemi del modello
 $sql_menu = "SELECT * FROM menus 
              WHERE ristorante_id = ? AND type = 'daily' AND weekday = ? AND is_active = 1";
 $menu_giornaliero = $db->selectOne($sql_menu, [$ristorante_id, $giorno_richiesto]);
